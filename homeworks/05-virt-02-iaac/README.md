@@ -109,3 +109,102 @@
             GitCommit:        de40ad0
             Docker Compose version v2.35.1
  
+# Задача 3: Создание образа виртуальной машины на yandex cloud через Packer с автоматической установкой Docker и Docker compose, проверка на облаке создания вм из этого образа.
+
+- [mydebian.json](src/mydebian.json)
+
+        odv@matebook16s:~/projects/MY/DevOpsCourse/homeworks/05-virt-02-iaac/src$ packer build mydebian.json 
+        yandex: output will be in this color.
+
+        ==> yandex: Creating temporary RSA SSH key for instance...
+        ==> yandex: Using as source image: fd8takdiqledn4t29vuj (name: "debian-11-v20250630", family: "debian-11")
+        ==> yandex: Use provided subnet id e9ba5mmqqj76kb3q4m4e
+        ==> yandex: Creating disk...
+        ==> yandex: Creating instance...
+        ==> yandex: Waiting for instance with id fhm4b02isiesops6gko5 to become active...
+        ==> yandex: Detected instance IP: 46.21.247.16
+        ==> yandex: Using SSH communicator to connect: 46.21.247.16
+        ==> yandex: Waiting for SSH to become available...
+        ==> yandex: Connected to SSH!
+        ==> yandex: Provisioning with shell script: /tmp/packer-shell1575237201
+        ==> yandex: Get:1 http://mirror.yandex.ru/debian bullseye InRelease [116 kB]
+        ==> yandex: Get:2 http://mirror.yandex.ru/debian bullseye-updates InRelease [44.0 kB]
+
+        ....
+
+        ==> yandex: Processing triggers for libc-bin (2.31-13+deb11u13) ...
+        ==> yandex: Stopping instance...
+        ==> yandex: Deleting instance...
+        ==> yandex: Instance has been deleted!
+        ==> yandex: Creating image: debian-11-docker
+        ==> yandex: Waiting for image to complete...
+        ==> yandex: Success image create...
+        ==> yandex: Destroying boot disk...
+        ==> yandex: Disk has been deleted!
+        Build 'yandex' finished after 3 minutes 49 seconds.
+
+        ==> Wait completed after 3 minutes 49 seconds
+
+        ==> Builds finished. The artifacts of successful builds are:
+        --> yandex: A disk image was created: debian-11-docker (id: fd8dee9n0d0ueiis0egh) with family name 
+        odv@matebook16s:~/projects/MY/DevOpsCourse/homeworks/05-virt-02-iaac/src$ yc compute image list
+        +----------------------+------------------+--------+----------------------+--------+
+        |          ID          |       NAME       | FAMILY |     PRODUCT IDS      | STATUS |
+        +----------------------+------------------+--------+----------------------+--------+
+        | fd8dee9n0d0ueiis0egh | debian-11-docker |        | f2eh2keamkps7ekhfjge | READY  |
+        +----------------------+------------------+--------+----------------------+--------+
+
+
+
+        odv@matebook16s:~/projects/MY/DevOpsCourse/homeworks/05-virt-02-iaac/src$ ssh debian@158.160.56.168
+        The authenticity of host '158.160.56.168 (158.160.56.168)' can't be established.
+        ED25519 key fingerprint is SHA256:+IfEueX6q2IwIuYuXOQoi+2M3mHRwzEyHm2R7SHh3Cw.
+        This key is not known by any other names.
+        Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+        Warning: Permanently added '158.160.56.168' (ED25519) to the list of known hosts.
+        Linux netology-iaac 5.10.0-19-amd64 #1 SMP Debian 5.10.149-2 (2022-10-21) x86_64
+
+        The programs included with the Debian GNU/Linux system are free software;
+        the exact distribution terms for each program are described in the
+        individual files in /usr/share/doc/*/copyright.
+
+        Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+        permitted by applicable law.
+
+
+        debian@netology-iaac:~$ docker version && docker compose version
+        Client: Docker Engine - Community
+        Version:           28.3.1
+        API version:       1.51
+        Go version:        go1.24.4
+        Git commit:        38b7060
+        Built:             Wed Jul  2 20:56:41 2025
+        OS/Arch:           linux/amd64
+        Context:           default
+
+        Server: Docker Engine - Community
+        Engine:
+        Version:          28.3.1
+        API version:      1.51 (minimum version 1.24)
+        Go version:       go1.24.4
+        Git commit:       5beb93d
+        Built:            Wed Jul  2 20:56:41 2025
+        OS/Arch:          linux/amd64
+        Experimental:     false
+        containerd:
+        Version:          1.7.27
+        GitCommit:        05044ec0a9a75232cad458027ca83437aae3f4da
+        runc:
+        Version:          1.2.5
+        GitCommit:        v1.2.5-0-g59923ef
+        docker-init:
+        Version:          0.19.0
+        GitCommit:        de40ad0
+        Docker Compose version v2.38.1
+
+        debian@netology-iaac:~$ htop --version 
+        htop 3.0.5
+
+        debian@netology-iaac:~$ tmux --version
+        usage: tmux [-2CluvV] [-c shell-command] [-f file] [-L socket-name]
+                    [-S socket-path] [command [flags]]

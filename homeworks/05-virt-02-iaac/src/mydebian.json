@@ -1,0 +1,38 @@
+{
+    "builders": [
+        {
+            "type": "yandex",
+            "token": "xxxxxxxxxxxxxxxxxxxxxxx",
+            "folder_id": "b1gg3ad99mhgfm5qo1tt",
+            "zone": "ru-central1-a",
+            "image_name": "debian-11-docker",
+            "image_description": "my custom debian with docker",
+            "source_image_family": "debian-11",
+            "subnet_id": "e9ba5mmqqj76kb3q4m4e",
+            "use_ipv4_nat": true,
+            "disk_type": "network-hdd",
+            "ssh_username": "debian"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "environment_vars": [
+                "DEBIAN_FRONTEND=noninteractive",
+                "DEBCONF_NONINTERACTIVE_SEEN=true"
+              ],            
+            "inline": [
+                "sudo apt-get update",
+                "sudo apt-get install -y --no-install-recommends ca-certificates curl",
+                "sudo install -m 0755 -d /etc/apt/keyrings",
+                "sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc",
+                "sudo chmod a+r /etc/apt/keyrings/docker.asc",
+                "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo \"$VERSION_CODENAME\") stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
+                "sudo apt-get update",
+                "sudo apt-get install -y --no-install-recommends docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
+                "sudo usermod -aG docker debian",
+                "sudo apt-get install -y htop tmux"
+            ]
+        }
+    ]
+}
