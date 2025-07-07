@@ -208,3 +208,11 @@
         debian@netology-iaac:~$ tmux --version
         usage: tmux [-2CluvV] [-c shell-command] [-f file] [-L socket-name]
                     [-S socket-path] [command [flags]]
+
+## Замечания:
+
+- Обнаружил на почте сообщения от gihub о наличии секретов (ключей) в репозитории. Действительно, нашел через "git log -p" в .vagrant файлик с ключом доступа к вм по ssh - почистил из истории, и добавил в .gitignore весь каталог :
+
+        git filter-branch --tree-filter "rm -fR homeworks/05-virt-02-iaac/src/.vagrant/" HEAD
+        git push --all --force
+
