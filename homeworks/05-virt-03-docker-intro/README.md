@@ -210,7 +210,35 @@
 - **12. Чтобы удалить запущенный контейнер без его остановки**, используем команду удаления с ключем -f (force): 
 
     ![FORCE](img/dockerhub-custom-nginx-t3-9.png)  
+---
+# Задача 4
 
+- Запустим первый контейнер из образа centos c любым тегом в фоновом режиме, подключив папку текущий рабочий каталог $(pwd) на хостовой машине в /data контейнера, используя ключ -v.  
 
+    На [DockerHub - centos/tags](https://hub.docker.com/_/centos/tags) вариант centos:centos8 меня устраивает, загрузим его:
+
+    ![PROXY](img/dockerhub-custom-nginx-t4-1.png)
+
+    Запустим контейнер с рабочей папкой в /data контейнера :  
+        
+        $ docker run -d -it -v $(pwd):/data --name centos centos:centos8 /bin/bash
+
+    ![PROXY](img/dockerhub-custom-nginx-t4-2.png)
+
+- Запустим второй контейнер из образа debian в фоновом режиме, подключив текущий рабочий каталог $(pwd) в /data контейнера, по аналогии:
+
+    ![PROXY](img/dockerhub-custom-nginx-t4-3.png)
+
+- Подключимся к первому контейнеру с помощью docker exec и создайте текстовый файл любого содержания в /data.
+
+    ![PROXY](img/dockerhub-custom-nginx-t4-4.png)
+
+- Добавим ещё один файл в текущий каталог $(pwd) на хостовой машине.
+
+        odv@matebook16s:~/projects/MY/DevOpsCourse/homeworks/05-virt-03-docker-intro$ echo "Local Hello" > LocalHello.txt
+
+- Подключимся во второй контейнер и отобразим листинг и содержание файлов в /data контейнера.
+
+    ![PROXY](img/dockerhub-custom-nginx-t4-5.png)
 
 
