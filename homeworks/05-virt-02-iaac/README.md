@@ -64,11 +64,10 @@
         virsh -c qemu:///system list --all
         #Или
         sudo virsh list --all
----
----
 ##  LINKS 
 - [Vagrant-libvirt Documentation](https://vagrant-libvirt.github.io/vagrant-libvirt/configuration.html#private-network-options)
 - [Vagrant - Documentation](https://developer.hashicorp.com/vagrant/docs)
+---
 
 # Задача 2: Создание виртуальной машины с помощью Vagrant, с автоматической установкой Docker и Docker compose
 
@@ -108,6 +107,7 @@
             Version:          0.19.0
             GitCommit:        de40ad0
             Docker Compose version v2.35.1
+---
  
 # Задача 3: Создание образа виртуальной машины на yandex cloud через Packer с автоматической установкой Docker и Docker compose, проверка на облаке создания вм из этого образа.
 

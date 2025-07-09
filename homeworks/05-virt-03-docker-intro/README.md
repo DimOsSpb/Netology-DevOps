@@ -112,7 +112,6 @@
 
     ![custom-nginx](img/dockerhub-custom-nginx.png)
 ---
----
 
 # Задача 2
 
@@ -132,5 +131,86 @@
 
     Соберите и отправьте созданный образ в свой dockerhub-репозитории c tag 1.0.0 (ТОЛЬКО ЕСЛИ ЕСТЬ ДОСТУП).
     Предоставьте ответ в виде ссылки на https://hub.docker.com/<username_repo>/custom-nginx/general .
+---
+
+# Задача 3
+
+- **1. Подключение к стандартному потоку ввода/вывода/ошибок контейнера "custom-nginx-t2"**
+
+    - Docker attach -  обеспечивает подключение к стандартным потокам ввода (stdin), вывода (stdout) и ошибок (stderr) основного процесса контейнера.
+
+    ![STDOUT/STDERR](img/dockerhub-custom-nginx-t3-0.png)
+
+    - Docker логирует все что выводит контейнер в STDOUT/STDERR и этот вывод доступен через docker log (-f непрерывная передача логов)
+
+    ![LOG](img/dockerhub-custom-nginx-t3-1.png)
+
+- **2,3. Подключимся к контейнеру и нажмем комбинацию Ctrl-C. Выполним docker ps -a - почему контейнер остановился?**
+
+    ![CtrlC](img/dockerhub-custom-nginx-t3-3.png)
+
+    --
+
+    ![Stop?](img/dockerhub-custom-nginx-t3-4.png)
+
+    >**При нажатии Ctrl+C в основном процессе контейнера, к которому пы подсоединились по docker attach, процесс получает сигнал прерывания - это приводик к завершению основного процесса котнейнера и соответственно останавливается и сам контейнер.**
+
+- **4. Перезапуститим контейнер (docker restart...)**
+
+    ![Stop?](img/dockerhub-custom-nginx-t3-5.png)
+
+- **5,6. Зайдем в интерактивный терминал контейнера "custom-nginx-t2" с оболочкой bash.**  
+ Для этого выполним "docker exec -it custom-nginx-t2 /bin/bash", где -i (--interactive) -t - псевдотерминал. **Установим nano**: 
+
+    ![Interactive](img/dockerhub-custom-nginx-t3-6.png)
+
+- **7-10. Отредактируем файл "/etc/nginx/conf.d/default.conf", заменив порт "listen 80" на "listen 81". Далее по заданию выполним ряд команд и видим что curl не выдает ожидаемое содержание.**
+
+    ![P80->81](img/dockerhub-custom-nginx-t3-7.png)
+
+    >**Причина в том, что внутри контейнера, сервис nginx, после изменения конфигурации, где мы изменили порт прослушивания сервисом с 80 на 81 и применили изменения, перешел на прослушивание порта 81. Но с точки зрения docker порт остался тот, который был установлен при создании контейнера т.е. 80. По этому проброс 8080->80 не достигает цели.**
+
+- **11. ДОПОЛНИТЕЛЬНО**
+
+     Самостоятельно исправим конфигурацию контейнера, используя доступные источники в интернете. Не изменяем конфигурацию nginx и не удаляем контейнер.
+
+    **ВАРИАНТ 1** - По [ссылке](https://www.baeldung.com/ops/assign-port-docker-container#1-stop-docker-container-and-docker-service) из задания (3-й вариант - без удаления контейнера), предлагается остановить контейнер, остановить сервис docker, и подправить конфигурационные файлы нашего контейнера в каталоге  /var/lib/docker/containers/1d88e0cc5dedb0ffac02ed1b29e386d332a4461c450edd7640f148c3875260c3/ где 1d88e0cc5dedb0ffac02ed1b29e386d332a4461c450edd7640f148c3875260c3 - полный ID нашего custom-nginx-t2 контейнера
+
+        root@matebook16s:/var/lib/docker/containers/1d88e0cc5dedb0ffac02ed1b29e386d332a4461c450edd7640f148c3875260c3# nano hostconfig.json 
+        root@matebook16s:/var/lib/docker/containers/1d88e0cc5dedb0ffac02ed1b29e386d332a4461c450edd7640f148c3875260c3# nano config.v2.json 
+
+    >оменяем в этих файлах соответственно PortBindings для hostconfig.json и ExposedPorts для config.v2.json значение 80/tcp на 81/tcp. Стартанем docker сервис и наш custom-nginx-t2 контейнер и проверим - **Все работает**:
+
+    ![DR-CONFIG](img/dockerhub-custom-nginx-t3-9m.png)
+
+
+
+    **ВАРИАНТ 2** - Нужно создать новый nginx контейнер который будет использовать сеть нашего контейнера и проксировать локальный трафик с порта 80 на порт 81 нашего контейнера (ID - 8671b149b142):
+
+        docker run -d --network container:8671b149b142 --name nginx-reverse-proxy  nginx  
+
+        ## Поменяем в прокси контейнере конфигурацию nginx, где поменяем соотв-е строки на: 
+
+            server {
+                listen 80;
+                location / {
+                    proxy_pass http://8671b149b142:81;
+                }
+            } 
+
+        ## Затем
+
+            nginx -s reload
+            Ctrl+D
+
+    Проверим - **Ok**:  
+
+    ![PROXY](img/dockerhub-custom-nginx-t3-8.png)
+   
+- **12. Чтобы удалить запущенный контейнер без его остановки**, используем команду удаления с ключем -f (force): 
+
+    ![FORCE](img/dockerhub-custom-nginx-t3-9.png)  
+
+
 
 
