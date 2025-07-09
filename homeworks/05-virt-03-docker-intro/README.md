@@ -80,18 +80,18 @@
 
     1. Получим оригинальный /usr/share/nginx/html/index.html из контейнера nginx в локальный каталог урока.
 
-            $ docker cp nginx-custom:/usr/share/nginx/html/index.html ./src
-            Successfully copied 2.56kB to /home/odv/projects/MY/DevOpsCourse/homeworks/05-virt-03-docker-intro/src
+            $ docker cp nginx-custom:/usr/share/nginx/html/index.html ./docker
+            Successfully copied 2.56kB to /home/odv/projects/MY/DevOpsCourse/homeworks/05-virt-03-docker-intro/docker
     
     2. Изменим index.html согласно заданию.
 
-        [Модифицированный .src/index.html](src/index.html)
+        [Модифицированный .docker/index.html](docker/index.html)
     
-    3. [Создадим .src/Dockerfile](src/dockerfile)
+    3. [Создадим .docker/Dockerfile](docker/dockerfile)
 
     4. Соберем новый образ
 
-            $ docker build -f src/dockerfile -t dimosspb/custom-nginx:0.0.1 .
+            $ docker build -f docker/dockerfile -t dimosspb/custom-nginx:0.0.1 .
     
     5. Отправим на DoskerHub
 
@@ -179,7 +179,7 @@
         root@matebook16s:/var/lib/docker/containers/1d88e0cc5dedb0ffac02ed1b29e386d332a4461c450edd7640f148c3875260c3# nano hostconfig.json 
         root@matebook16s:/var/lib/docker/containers/1d88e0cc5dedb0ffac02ed1b29e386d332a4461c450edd7640f148c3875260c3# nano config.v2.json 
 
-    >оменяем в этих файлах соответственно PortBindings для hostconfig.json и ExposedPorts для config.v2.json значение 80/tcp на 81/tcp. Стартанем docker сервис и наш custom-nginx-t2 контейнер и проверим - **Все работает**:
+    >меняем в этих файлах соответственно PortBindings для hostconfig.json и ExposedPorts для config.v2.json значение 80/tcp на 81/tcp. Стартанем docker сервис и наш custom-nginx-t2 контейнер и проверим - **Все работает**:
 
     ![DR-CONFIG](img/dockerhub-custom-nginx-t3-9m.png)
 
@@ -241,4 +241,48 @@
 
     ![PROXY](img/dockerhub-custom-nginx-t4-5.png)
 
+---
 
+# Задача 5
+
+- **1. Создадим отдельную директорию [compose](compose) и 2 файла внутри него. [compose.yaml](compose/compose.yaml) и [docker-compose.yaml](compose/docker-compose.yaml) с содержимым из задания.**
+    - Выполним команду "docker compose up -d". Какой из файлов был запущен и почему? (подсказка: https://docs.docker.com/compose/compose-application-model/#the-compose-file )  
+    
+        По ссылке сказано - "... If both files exist, Compose prefers the canonical compose.yaml.". Т.е. запустится предпочитаемый - compose.yaml. Вывод docker compose ps это подтверждает:
+
+        ![PROXY](img/dockerhub-custom-nginx-t5-1.png)
+
+- **2. Отредактируем файл compose.yaml так, чтобы были запущенны оба файла.**
+
+    В [compose.yaml](compose/compose.yaml) добавим include и depends_on ссылаясь на docker-compose.yaml и имя сервиса в нем соответственно, и сново запустим - docker compose up -d:
+
+    ![PROXY](img/dockerhub-custom-nginx-t5-2.png)
+
+
+
+- **3. Выполним в консоли хостовой ОС необходимые команды чтобы залить образ custom-nginx как custom-nginx:latest в запущенное вами, локальное registry. Дополнительная документация: https://distribution.github.io/distribution/about/deploying/**
+
+    ![LOAD-IN-LREPO](img/dockerhub-custom-nginx-t5-3.png)
+
+- **4. Откроем страницу "https://127.0.0.1:9000" и выполним начальную настройку portainer.**
+
+    ![Portainer](img/dockerhub-custom-nginx-t5-4.png)
+
+- **5. Откроем страницу "http://127.0.0.1:9000/#!/home" + local окружение. Задеплоим компоуз 127.0.0.1:5000/custom-nginx из задания:**
+
+    ![Portainer-deploy](img/dockerhub-custom-nginx-t5-5.png)
+
+- **6. Cкриншот от поля "AppArmorProfile" до "Driver".**
+
+    ![Inspect](img/dockerhub-custom-nginx-t5-6.png)
+
+- **7. Удалим любой compose.yaml. Выполним команду "docker compose up -d". Прочитайте warning, объясните суть предупреждения и выполните предложенное действие. Затем погасим compose-проект ОДНОЙ командой - "docker compose down"
+
+    ![W](img/dockerhub-custom-nginx-t5-7.png)  
+
+    ![Down](img/dockerhub-custom-nginx-t5-8.png)
+
+## LINKS
+- [Assigning a Port Mapping to an Existing Docker Container](https://www.baeldung.com/ops/assign-port-docker-container)
+- [Docker Documentation - Compose](https://docs.docker.com/reference/compose-file/include/)
+- [Deploy a registry server](https://distribution.github.io/distribution/about/deploying/)

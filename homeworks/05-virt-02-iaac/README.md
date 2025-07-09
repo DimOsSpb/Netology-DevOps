@@ -71,7 +71,7 @@
 
 # Задача 2: Создание виртуальной машины с помощью Vagrant, с автоматической установкой Docker и Docker compose
 
-- В каталоге с [Vagrantfilе из задания](https://github.com/netology-code/virtd-homeworks/blob/shvirtd-1/05-virt-02-iaac/src/Vagrantfile) который мы [модифицировали под libvirt](src/vagrantfile), запустим "vagrant up". После создания вм, зайдем в нее - "vagrant ssh".
+- В каталоге с [Vagrantfilе из задания](https://github.com/netology-code/virtd-homeworks/blob/shvirtd-1/05-virt-02-iaac/docker/Vagrantfile) который мы [модифицировали под libvirt](docker/vagrantfile), запустим "vagrant up". После создания вм, зайдем в нее - "vagrant ssh".
     - Внесем пользователя в группу docker
         sudo usermod -aG docker $USER
         newgrp docker
@@ -111,9 +111,9 @@
  
 # Задача 3: Создание образа виртуальной машины на yandex cloud через Packer с автоматической установкой Docker и Docker compose, проверка на облаке создания вм из этого образа.
 
-- [mydebian.json](src/mydebian.json)
+- [mydebian.json](docker/mydebian.json)
 
-        odv@matebook16s:~/projects/MY/DevOpsCourse/homeworks/05-virt-02-iaac/src$ packer build mydebian.json 
+        odv@matebook16s:~/projects/MY/DevOpsCourse/homeworks/05-virt-02-iaac/docker$ packer build mydebian.json 
         yandex: output will be in this color.
 
         ==> yandex: Creating temporary RSA SSH key for instance...
@@ -147,7 +147,7 @@
 
         ==> Builds finished. The artifacts of successful builds are:
         --> yandex: A disk image was created: debian-11-docker (id: fd8dee9n0d0ueiis0egh) with family name 
-        odv@matebook16s:~/projects/MY/DevOpsCourse/homeworks/05-virt-02-iaac/src$ yc compute image list
+        odv@matebook16s:~/projects/MY/DevOpsCourse/homeworks/05-virt-02-iaac/docker$ yc compute image list
         +----------------------+------------------+--------+----------------------+--------+
         |          ID          |       NAME       | FAMILY |     PRODUCT IDS      | STATUS |
         +----------------------+------------------+--------+----------------------+--------+
@@ -156,7 +156,7 @@
 
 
 
-        odv@matebook16s:~/projects/MY/DevOpsCourse/homeworks/05-virt-02-iaac/src$ ssh debian@158.160.56.168
+        odv@matebook16s:~/projects/MY/DevOpsCourse/homeworks/05-virt-02-iaac/docker$ ssh debian@158.160.56.168
         The authenticity of host '158.160.56.168 (158.160.56.168)' can't be established.
         ED25519 key fingerprint is SHA256:+IfEueX6q2IwIuYuXOQoi+2M3mHRwzEyHm2R7SHh3Cw.
         This key is not known by any other names.
@@ -213,6 +213,6 @@
 
 - Обнаружил на почте сообщения от gihub о наличии секретов (ключей) в репозитории. Действительно, нашел через "git log -p" в .vagrant файлик с ключом доступа к вм по ssh - почистил из истории, и добавил в .gitignore весь каталог :
 
-        git filter-branch --tree-filter "rm -fR homeworks/05-virt-02-iaac/src/.vagrant/" HEAD
+        git filter-branch --tree-filter "rm -fR homeworks/05-virt-02-iaac/docker/.vagrant/" HEAD
         git push --all --force
 
