@@ -276,7 +276,7 @@
 
     ![Inspect](img/dockerhub-custom-nginx-t5-6.png)
 
-- **7. Удалим любой compose.yaml. Выполним команду "docker compose up -d". Прочитайте warning, объясните суть предупреждения и выполните предложенное действие. Затем погасим compose-проект ОДНОЙ командой - "docker compose down"
+- **7. Удалим compose.yaml. Выполним команду "docker compose up -d". Cуть предупреждения - от контейнера манифеста compose.yaml остались "осиротевшие ресурсы", которые очистим повтором команды с ключем --remove-orphans. Затем погасим compose-проект ОДНОЙ командой - "docker compose down"
 
     ![W](img/dockerhub-custom-nginx-t5-7.png)  
 
