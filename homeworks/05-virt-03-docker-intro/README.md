@@ -128,9 +128,6 @@
     ![t2-2](img/dockerhub-custom-nginx-t2-2.png)
     ![Hello](img/dockerhub-custom-nginx-hello.png) 
 
-
-    Соберите и отправьте созданный образ в свой dockerhub-репозитории c tag 1.0.0 (ТОЛЬКО ЕСЛИ ЕСТЬ ДОСТУП).
-    Предоставьте ответ в виде ссылки на https://hub.docker.com/<username_repo>/custom-nginx/general .
 ---
 
 # Задача 3
@@ -246,11 +243,11 @@
 # Задача 5
 
 - **1. Создадим отдельную директорию [compose](compose) и 2 файла внутри него. [compose.yaml](compose/compose.yaml) и [docker-compose.yaml](compose/docker-compose.yaml) с содержимым из задания.**
-    - Выполним команду "docker compose up -d". Какой из файлов был запущен и почему? (подсказка: https://docs.docker.com/compose/compose-application-model/#the-compose-file )  
+    - Выполним команду "docker compose up -d". Какой из файлов был запущен и почему?   
     
-        По ссылке сказано - "... If both files exist, Compose prefers the canonical compose.yaml.". Т.е. запустится предпочитаемый - compose.yaml. Вывод docker compose ps это подтверждает:
+    По ссылке сказано - "... If both files exist, Compose prefers the canonical compose.yaml.". Т.е. запустится предпочитаемый - compose.yaml. Вывод docker compose ps это подтверждает:
 
-        ![PROXY](img/dockerhub-custom-nginx-t5-1.png)
+    ![PROXY](img/dockerhub-custom-nginx-t5-1.png)
 
 - **2. Отредактируем файл compose.yaml так, чтобы были запущенны оба файла.**
 
@@ -260,7 +257,7 @@
 
 
 
-- **3. Выполним в консоли хостовой ОС необходимые команды чтобы залить образ custom-nginx как custom-nginx:latest в запущенное вами, локальное registry. Дополнительная документация: https://distribution.github.io/distribution/about/deploying/**
+- **3. Выполним в консоли хостовой ОС необходимые команды чтобы залить образ custom-nginx как custom-nginx:latest в запущенное вами, локальное registry.**
 
     ![LOAD-IN-LREPO](img/dockerhub-custom-nginx-t5-3.png)
 
