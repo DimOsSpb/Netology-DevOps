@@ -1,3 +1,4 @@
 # Данный репозиторий — это моя работа по курсу нетологии "DevOps-инженер"
 ## Разделы
-[Задания](homeworks/README.md)
+- [Задания](homeworks/README.md)
+- [Вопросы и комментарии по курсу](Questions&Comments/README.md)
