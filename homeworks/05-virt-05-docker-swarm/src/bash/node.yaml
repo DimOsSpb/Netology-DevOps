@@ -1,0 +1,45 @@
+#cloud-config
+datasource:
+  Ec2:
+    strict_id: false
+#debug: True
+#output: {all: '| tee -a /var/log/cloud-init-output.log'}
+ssh_pwauth: no
+hostname: $INSTANCE_NAME
+manage_etc_hosts: true
+preserve_hostname: false
+users:
+- name: $USER
+  sudo: 'ALL=(ALL) NOPASSWD:ALL'
+  shell: /bin/bash
+  ssh_authorized_keys:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDffPBZFrnDjeZInRI4J5VIP0WoiJOMx1vfGkSRwVcjy dimosspb@vk.ru
+package_update: true
+package_upgrade: true
+packages:
+  - ca-certificates
+  - curl
+  - gnupg
+  - software-properties-common
+
+runcmd:
+  # Установка GPG-ключа Docker
+  - install -m 0755 -d /etc/apt/keyrings
+  - curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  - chmod a+r /etc/apt/keyrings/docker.gpg
+
+  # Добавление репозитория Docker
+
+  # Здесь важно две $$ в $$VERSION_CODENAME - особенности yandex cloud cloud-init. 
+  # Две $$ перенесет из yaml в Метаданные vm одну $ для этой переменной в команде. 
+  # А одна $ - считает переменную из env запуска CLI "yc" т.е. из моей сессии bash.  
+  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$$VERSION_CODENAME") stable" > /etc/apt/sources.list.d/docker.list
+
+  # Обновление пакетов и установка Docker
+  - apt-get update
+  - apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+  # Добавление пользователя в группу docker
+  - usermod -aG docker $USER
+
+

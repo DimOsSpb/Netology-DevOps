@@ -1,8 +1,5 @@
 # [Домашнее задание к занятию 4 «Оркестрация группой Docker контейнеров на примере Docker Compose»](https://github.com/netology-code/virtd-homeworks/tree/shvirtd-1/05-virt-03-docker-intro)
 
-# Решения:
----
-
 # Задача 1: 
 
 - Установим docker и docker compose plugin на свою linux рабочую станцию или ВМ. Выполнив ряд комманд, внесем себя в группу docker и проверим, что все установилось успешно:
