@@ -12,14 +12,16 @@
 
 
 ## Задача 1
-1. Сделаем в своем GitHub пространстве fork [репозитория](https://github.com/netology-code/shvirtd-example-python).
+1. Сделаем в своем GitHub пространстве fork [репозитория](https://github.com/netology-code/shvirtd-example-python).  
 
-![Fork](img/fork.png)
+   [DimOsSpb/shvirtd-example-python](https://github.com/DimOsSpb/shvirtd-example-python)  
 
-Добавлю этот форк как git submodule в основной проект.
-```console         
-git submodule add https://github.com/DimOsSpb/shvirtd-example-python.git submodules/shvirtd-example-python
-```
+   ![Fork](img/fork.png)
+
+   Добавлю этот форк как git submodule в основной проект.
+   ```console         
+   git submodule add https://github.com/DimOsSpb/shvirtd-example-python.git submodules/shvirtd-example-python
+   ```
 
 2. Сборка и проверка проекта, согласно заданию:
 
@@ -74,15 +76,126 @@ git submodule add https://github.com/DimOsSpb/shvirtd-example-python.git submodu
       >- Сборка работает правильно, .dockerignore отработал (см. вывод ls).  
       >- Сервис контейнера отвечает на нужном порту, ошибка вызване отсутствием sql сервера - это правильно. Здесь мы его не ставили.
 
-3. (Необязательная часть, *) Изучите инструкцию в проекте и запустите web-приложение без использования docker, с помощью venv. (Mysql БД можно запустить в docker run).
-4. (Необязательная часть, *) Изучите код приложения и добавьте управление названием таблицы через ENV переменную.
+3. Запустим web-приложение без использования docker, с помощью venv. (Mysql БД в docker run).
+
+   ```console
+   (venv) odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker run --name mysql -p 127.0.0.1:3306:3306 -e MYSQL_ROOT_PASSWORD=very_strong -e MYSQL_USER=app -e MYSQL_PASSWORD=very_strong -d mysql:latest
+   c163761e576eeda00aa8992de4de39db049c8573f53c785621d4510b8304b8c7
+   (venv) odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker exec -it mysql mysql -u root -p
+   Enter password: 
+   Welcome to the MySQL monitor.  Commands end with ; or \g.
+   Your MySQL connection id is 9
+   Server version: 9.3.0 MySQL Community Server - GPL
+
+   Copyright (c) 2000, 2025, Oracle and/or its affiliates.
+
+   Oracle is a registered trademark of Oracle Corporation and/or its
+   affiliates. Other names may be trademarks of their respective
+   owners.
+
+   Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+   mysql> SELECT User, Host FROM mysql.user WHERE User = 'app';
+   +------+------+
+   | User | Host |
+   +------+------+
+   | app  | %    |
+   +------+------+
+   1 row in set (0.002 sec)
+
+   mysql> CREATE DATABASE example;
+   Query OK, 1 row affected (0.010 sec)
+
+   mysql> GRANT ALL PRIVILEGES ON example.* TO 'app'@'%';
+   Query OK, 0 rows affected (0.009 sec)
+
+   mysql> FLUSH PRIVILEGES;
+   Query OK, 0 rows affected, 1 warning (0.008 sec)
+
+   mysql> exit
+   Bye
+   (venv) odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ uvicorn main:app --host 0.0.0.0 --port 5000 --reload
+   INFO:     Will watch for changes in these directories: ['/home/odv/projects/MY/DevOpsCourse/submodules/shvirtd-example-python']
+   INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
+   INFO:     Started reloader process [406376] using WatchFiles
+   INFO:     Started server process [406378]
+   INFO:     Waiting for application startup.
+   Приложение запускается...
+   Соединение с БД установлено и таблица 'requests' готова к работе.
+   INFO:     Application startup complete.
+   INFO:     127.0.0.1:37262 - "GET / HTTP/1.1" 200 OK
+   ```
+
+   В другой консоли:
+
+   ```console
+   odv@matebook16s:~$ curl http://localhost:5000
+   "TIME: 2025-07-18 18:51:35, IP: похоже, что вы направляете запрос в неверный порт(например curl http://127.0.0.1:5000). Правильное выполнение задания - отправить запрос в порт 8090."odv@matebook16s:~$
+   ```
+
+4. Добавим управление названием таблицы через ENV переменную.
+
+   ```console
+   (venv) odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ export DB_NAME='my_table_name'
+   (venv) odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker exec -it mysql mysql -u root -p
+   Enter password: 
+   Welcome to the MySQL monitor.  Commands end with ; or \g.
+   Your MySQL connection id is 12
+   Server version: 9.3.0 MySQL Community Server - GPL
+
+   Copyright (c) 2000, 2025, Oracle and/or its affiliates.
+
+   Oracle is a registered trademark of Oracle Corporation and/or its
+   affiliates. Other names may be trademarks of their respective
+   owners.
+
+   Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+   mysql> DROP TABLE example;
+   Query OK, 1 row affected (0.024 sec)
+
+   mysql> CREATE DATABASE my_table_name;
+   Query OK, 1 row affected (0.012 sec)
+
+   mysql> GRANT ALL PRIVILEGES ON my_table_name.* TO 'app'@'%';
+   Query OK, 0 rows affected (0.067 sec)
+
+   mysql> FLUSH PRIVILEGES;
+   Query OK, 0 rows affected, 1 warning (0.009 sec)
+
+   mysql> exit
+   Bye
+   (venv) odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ uvicorn main:app --host 0.0.0.0 --port 5000 --reload
+   INFO:     Will watch for changes in these directories: ['/home/odv/projects/MY/DevOpsCourse/submodules/shvirtd-example-python']
+   INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
+   INFO:     Started reloader process [407316] using WatchFiles
+   INFO:     Started server process [407318]
+   INFO:     Waiting for application startup.
+   Приложение запускается...
+   Соединение с БД установлено и таблица 'requests' готова к работе.
+   INFO:     Application startup complete.
+   INFO:     127.0.0.1:38348 - "GET / HTTP/1.1" 200 OK
+
+   ```
+
 ---
 ### ВНИМАНИЕ!
 !!! В процессе последующего выполнения ДЗ НЕ изменяйте содержимое файлов в fork-репозитории! Ваша задача ДОБАВИТЬ 5 файлов: ```Dockerfile.python```, ```compose.yaml```, ```.gitignore```, ```.dockerignore```,```bash-скрипт```. Если вам понадобилось внести иные изменения в проект - вы что-то делаете неверно!
 ---
 
 ## Задача 2 (*)
-1. Создайте в yandex cloud container registry с именем "test" с помощью "yc tool" . [Инструкция](https://cloud.yandex.ru/ru/docs/container-registry/quickstart/?from=int-console-help)
+1. Создайм в yandex cloud container registry с именем "test":
+
+   ```console
+   odv@matebook16s:~/projects/MY/DevOpsCourse$ yc container registry create --name test
+   done (1s)
+   id: crp7qgp61fajvdodm5hk
+   folder_id: b1gg3ad99mhgfm5qo1tt
+   name: test
+   status: ACTIVE
+   created_at: "2025-07-18T14:58:48.753Z"
+   ```
+
 2. Настройте аутентификацию вашего локального docker в yandex container registry.
 3. Соберите и залейте в него образ с python приложением из задания №1.
 4. Просканируйте образ на уязвимости.
