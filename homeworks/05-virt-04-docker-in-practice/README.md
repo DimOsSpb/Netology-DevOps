@@ -4,7 +4,6 @@
 ### Схема виртуального стенда [по ссылке](https://github.com/netology-code/shvirtd-example-python/blob/main/schema.pdf)
 
 
-
 ## Задача 0
       odv@matebook16s:~/projects/MY/DevOpsCourse/homeworks/05-virt-04-docker-in-practice$ docker-compose --version
       bash: docker-compose: command not found
@@ -15,18 +14,43 @@
 ## Задача 1
 1. Сделаем в своем GitHub пространстве fork [репозитория](https://github.com/netology-code/shvirtd-example-python).
 
+![Fork](img/fork.png)
 
+Добавлю этот форк как git submodule в основной проект.
+```console         
+git submodule add https://github.com/DimOsSpb/shvirtd-example-python.git submodules/shvirtd-example-python
+```
 
+2. Сборка и проверка проекта, согласно заданию:
 
+   - [Dockerfile.python](../../submodules/shvirtd-example-python/Dockerfile.python)
+   - [.dockerignore](../../submodules/shvirtd-example-python/.dockerignore)
 
+   - Соберем образ:
 
+      ![build](img/build.png)
 
-2. Создайте файл ```Dockerfile.python``` на основе существующего `Dockerfile`:
-   - Используйте базовый образ ```python:3.12-slim```
-   - Обязательно используйте конструкцию ```COPY . .``` в Dockerfile
-   - Создайте `.dockerignore` файл для исключения ненужных файлов
-   - Используйте ```CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]``` для запуска
-   - Протестируйте корректность сборки 
+   - Протестируем корректность сборки
+      ```console
+      odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker run -d --name my-app -p 127.0.0.1:8080:5000 my-app-image:latest 
+      cbec18873dc987b5493ea732e3d326be04dcb09b278d0009be0bcdcc8cd04e3a
+
+      odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker ps
+      CONTAINER ID   IMAGE                 COMMAND                  CREATED         STATUS         PORTS                      NAMES
+      cbec18873dc9   my-app-image:latest   "uvicorn main:app --…"   5 seconds ago   Up 4 seconds   127.0.0.1:8080->5000/tcp   my-app
+
+      odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker exec -it my-app /bin/bash
+      root@cbec18873dc9:/app# ls
+      LICENSE  __pycache__  haproxy  main.py  nginx  proxy.yaml  requirements.txt 
+      exit
+
+      odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ curl http://localhost:8080
+      {"error":"Ошибка при работе с базой данных: 2003 (HY000): Can't connect to MySQL server on '127.0.0.1:3306' (111)"}
+      ```
+        
+      >- Сборка работает правильно, .dockerignore отработал (см. вывод ls).  
+      >- Сервис контейнера отвечает на нужном порту, ошибка вызване отсутствием sql сервера - это правильно. Мы его не ставили.
+
 3. (Необязательная часть, *) Изучите инструкцию в проекте и запустите web-приложение без использования docker, с помощью venv. (Mysql БД можно запустить в docker run).
 4. (Необязательная часть, *) Изучите код приложения и добавьте управление названием таблицы через ENV переменную.
 ---
