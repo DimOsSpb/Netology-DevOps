@@ -79,6 +79,12 @@
 3. Запустим web-приложение без использования docker, с помощью venv. (Mysql БД в docker run).
 
    ```console
+   odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ python3 -m venv venv
+   odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ source venv/bin/activate  # в Windows: venv\Scripts\activate
+   (venv) odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ pip install -r requirements.txt
+   .....
+   .....
+   
    (venv) odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker run --name mysql -p 127.0.0.1:3306:3306 -e MYSQL_ROOT_PASSWORD=very_strong -e MYSQL_USER=app -e MYSQL_PASSWORD=very_strong -d mysql:latest
    c163761e576eeda00aa8992de4de39db049c8573f53c785621d4510b8304b8c7
    (venv) odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker exec -it mysql mysql -u root -p
