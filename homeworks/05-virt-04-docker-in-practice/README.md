@@ -23,8 +23,31 @@ git submodule add https://github.com/DimOsSpb/shvirtd-example-python.git submodu
 
 2. Сборка и проверка проекта, согласно заданию:
 
-   - [Dockerfile.python](../../submodules/shvirtd-example-python/Dockerfile.python)
-   - [.dockerignore](../../submodules/shvirtd-example-python/.dockerignore)
+   - Dockerfile.python:
+      ```console
+      FROM python:3.12-slim
+
+      # Укажем рабочий каталог
+      WORKDIR /app
+      # Скопируем нужные (отфильтруем через .dockerignore лишнее) файлы проекта в /app контейнера
+      COPY . .
+      # Установим в контейнер зависимости для этого проекта (fastapi,uvicorn,mysql-connector-python)
+      RUN pip install --no-cache-dir -r requirements.txt
+
+      # Запускаем приложение с помощью uvicorn, делая его доступным по сети
+      CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"] 
+      ```
+   - .dockerignore
+      ```console
+      *.pdf
+      .env
+      Dockerfile*
+      README*
+      venv/
+      build/
+      *.log
+
+      ```
 
    - Соберем образ:
 
@@ -49,7 +72,7 @@ git submodule add https://github.com/DimOsSpb/shvirtd-example-python.git submodu
       ```
         
       >- Сборка работает правильно, .dockerignore отработал (см. вывод ls).  
-      >- Сервис контейнера отвечает на нужном порту, ошибка вызване отсутствием sql сервера - это правильно. Мы его не ставили.
+      >- Сервис контейнера отвечает на нужном порту, ошибка вызване отсутствием sql сервера - это правильно. Здесь мы его не ставили.
 
 3. (Необязательная часть, *) Изучите инструкцию в проекте и запустите web-приложение без использования docker, с помощью venv. (Mysql БД можно запустить в docker run).
 4. (Необязательная часть, *) Изучите код приложения и добавьте управление названием таблицы через ENV переменную.
