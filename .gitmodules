@@ -1,1 +1,4 @@
 
+[submodule "submodules/shvirtd-example-python"]
+	path = submodules/shvirtd-example-python
+	url = https://github.com/DimOsSpb/shvirtd-example-python.git
