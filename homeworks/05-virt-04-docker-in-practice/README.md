@@ -84,7 +84,7 @@
    (venv) odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ pip install -r requirements.txt
    .....
    .....
-   
+
    (venv) odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker run --name mysql -p 127.0.0.1:3306:3306 -e MYSQL_ROOT_PASSWORD=very_strong -e MYSQL_USER=app -e MYSQL_PASSWORD=very_strong -d mysql:latest
    c163761e576eeda00aa8992de4de39db049c8573f53c785621d4510b8304b8c7
    (venv) odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker exec -it mysql mysql -u root -p
@@ -184,13 +184,14 @@
 
    ```
 
----
-### ВНИМАНИЕ!
-!!! В процессе последующего выполнения ДЗ НЕ изменяйте содержимое файлов в fork-репозитории! Ваша задача ДОБАВИТЬ 5 файлов: ```Dockerfile.python```, ```compose.yaml```, ```.gitignore```, ```.dockerignore```,```bash-скрипт```. Если вам понадобилось внести иные изменения в проект - вы что-то делаете неверно!
----
+   Код main.py менять не стал:
 
+   ```code
+   Соединение с БД установлено и таблица 'requests' готова к работе.
+   ```
+---
 ## Задача 2 (*)
-1. Создайм в yandex cloud container registry с именем "test":
+1. Создадим в yandex cloud container registry с именем "test":
 
    ```console
    odv@matebook16s:~/projects/MY/DevOpsCourse$ yc container registry create --name test
@@ -202,10 +203,53 @@
    created_at: "2025-07-18T14:58:48.753Z"
    ```
 
-2. Настройте аутентификацию вашего локального docker в yandex container registry.
-3. Соберите и залейте в него образ с python приложением из задания №1.
-4. Просканируйте образ на уязвимости.
-5. В качестве ответа приложите отчет сканирования.
+2. Настроим аутентификацию локального docker в yandex container registry.
+
+   Получить OAuth-токен для работы с Yandex Cloud можно с помощью запроса к сервису Яндекс OAuth [Из  документации](https://yandex.cloud/ru/docs/iam/concepts/authorization/oauth-token). И добавим его для cr.yandex
+   ```console
+   docker login cr.yandex --username oauth --password-stdin
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Ctrl+D
+   Login Succeeded
+   ```
+3. Соберем и зальем в него образ с python приложением из задания №1.
+   ![APP-IMAGE](img/app-image.png)  
+
+   Переименуем образ, добавив путь к registry Yandex Cloud и отправим его docker push ...:  
+
+   ```console
+   odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker tag shvirtd-example-python:v1 cr.yandex/crp7qgp61fajvdodm5hk/shvirtd-example-python:v1
+   odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker images
+   REPOSITORY                                              TAG       IMAGE ID       CREATED         SIZE
+   cr.yandex/crp7qgp61fajvdodm5hk/shvirtd-example-python   v1        fe55abb5e3d7   9 minutes ago   281MB
+   shvirtd-example-python                                  v1        fe55abb5e3d7   9 minutes ago   281MB
+   my-app-image                                            latest    20d732e24d4e   25 hours ago    281MB
+   127.0.0.1:5000/custom-nginx                             latest    f725a3599251   11 days ago     133MB
+   dimosspb/custom-nginx                                   0.0.1     f725a3599251   11 days ago     133MB
+   localhost:5000/custom-nginx                             latest    f725a3599251   11 days ago     133MB
+   portainer/portainer-ce                                  latest    71de3839351a   2 weeks ago     268MB
+   debian                                                  latest    b3a422523a11   2 weeks ago     117MB
+   mysql                                                   latest    850100bac3be   3 months ago    859MB
+   registry                                                2         26b2eb03618e   21 months ago   25.4MB
+   centos                                                  centos8   5d0da3dc9764   3 years ago     231MB
+   odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker push cr.yandex/crp7qgp61fajvdodm5hk/shvirtd-example-python:v1
+   The push refers to repository [cr.yandex/crp7qgp61fajvdodm5hk/shvirtd-example-python]
+   23bb8c6ee488: Pushed 
+   846379fd3334: Pushed 
+   662d9e6a90ef: Pushed 
+   f3821a5f6014: Pushed 
+   02d89fea34bd: Pushed 
+   095c688b01c2: Pushed 
+   1bb35e8b4de1: Pushed 
+   v1: digest: sha256:4d38d35ba5f2869b957cf826a1a0a5df078f2254cb84b3bef460573ce708a06d size: 1785
+
+   ```
+   ![YR-IMAGE](img/yr-image.png)
+
+4. Просканируем образ на уязвимости.
+
+   ![YR-IMAGE](img/scan1.png)
+
+5. [Отчет сканирования](doc/vulnerabilities.csv)
 
 ## Задача 3
 1. Изучите файл "proxy.yaml"
