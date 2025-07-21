@@ -258,7 +258,7 @@
       ```yaml
       version: "3.8"
       include:
-      - proxy.yaml
+         - proxy.yaml
       services:
       web:
          image: cr.yandex/crp7qgp61fajvdodm5hk/shvirtd-example-python:v1
@@ -329,13 +329,194 @@
 ---
 
 ## Задача 4
-1. Запустите в Yandex Cloud ВМ (вам хватит 2 Гб Ram).
-2. Подключитесь к Вм по ssh и установите docker.
-3. Напишите bash-скрипт, который скачает ваш fork-репозиторий в каталог /opt и запустит проект целиком.
-4. Зайдите на сайт проверки http подключений, например(или аналогичный): ```https://check-host.net/check-http``` и запустите проверку вашего сервиса ```http://<внешний_IP-адрес_вашей_ВМ>:8090```. Таким образом трафик будет направлен в ingress-proxy. Трафик должен пройти через цепочки: Пользователь → Internet → Nginx → HAProxy → FastAPI(запись в БД) → HAProxy → Nginx → Internet → Пользователь
-5. (Необязательная часть) Дополнительно настройте remote ssh context к вашему серверу. Отобразите список контекстов и результат удаленного выполнения ```docker ps -a```
-6. Повторите SQL-запрос на сервере и приложите скриншот и ссылку на fork.
+   - 1-2. Запустим в Yandex Cloud ВМ, по ssh установим docker:
 
+      ![TASK4_1](img/task4-1.png)
+      ```console
+      odv@example-python:~$ docker version && docker compose version
+      Client: Docker Engine - Community
+      Version:           28.3.2
+      API version:       1.51
+      Go version:        go1.24.5
+      Git commit:        578ccf6
+      Built:             Wed Jul  9 16:13:55 2025
+      OS/Arch:           linux/amd64
+      Context:           default
+
+      Server: Docker Engine - Community
+      Engine:
+      Version:          28.3.2
+      API version:      1.51 (minimum version 1.24)
+      Go version:       go1.24.5
+      Git commit:       e77ff99
+      Built:            Wed Jul  9 16:13:55 2025
+      OS/Arch:          linux/amd64
+      Experimental:     false
+      containerd:
+      Version:          1.7.27
+      GitCommit:        05044ec0a9a75232cad458027ca83437aae3f4da
+      runc:
+      Version:          1.2.5
+      GitCommit:        v1.2.5-0-g59923ef
+      docker-init:
+      Version:          0.19.0
+      GitCommit:        de40ad0
+      Docker Compose version v2.38.2
+      ```
+   - 3. Напишим bash-скрипт [./make_yc_app.sh](https://github.com/DimOsSpb/shvirtd-example-python/blob/main/make_yc_app.sh), который скачает fork-репозиторий в каталог вм /opt и запустит проект целиком:
+      ```bash
+      #!/bin/bash
+
+      VM_IP=158.160.114.0
+      VM_USER=odv
+      REPO_URL=https://github.com/DimOsSpb/shvirtd-example-python.git
+      APP_DIR=/opt/app_example
+
+      ssh -i ~/.ssh/netology -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 $USER@$VM_IP \
+         "sudo mkdir -p $APP_DIR && \
+         sudo chown \$USER:\$USER $APP_DIR && \
+         cd $APP_DIR && \
+         git clone $REPO_URL .
+         docker compose up -d"
+      ```
+      - 
+      ```console
+      odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ ./make_yc_app.sh
+      Cloning into '.'...
+      time="2025-07-21T09:46:23Z" level=warning msg="/opt/app_example/proxy.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+      time="2025-07-21T09:46:23Z" level=warning msg="/opt/app_example/compose.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+      Container app_example-db-1  Creating
+      Container app_example-ingress-proxy-1  Creating
+      Container app_example-reverse-proxy-1  Creating
+      Container app_example-db-1  Created
+      Container app_example-web-1  Creating
+      Container app_example-ingress-proxy-1  Created
+      Container app_example-reverse-proxy-1  Created
+      Container app_example-web-1  Created
+      Container app_example-ingress-proxy-1  Starting
+      Container app_example-db-1  Starting
+      Container app_example-reverse-proxy-1  Starting
+      Container app_example-ingress-proxy-1  Started
+      Container app_example-reverse-proxy-1  Started
+      Container app_example-db-1  Started
+      Container app_example-db-1  Waiting
+      Container app_example-db-1  Healthy
+      Container app_example-web-1  Starting
+      Container app_example-web-1  Started
+      odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker context list
+      NAME      DESCRIPTION                               DOCKER ENDPOINT               ERROR
+      default   Current DOCKER_HOST based configuration   unix:///var/run/docker.sock   
+      yc-vm *                                             ssh://158.160.114.0           
+      odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker context use yc-vm
+      yc-vm
+      Current context is now "yc-vm"
+      odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker ps
+      CONTAINER ID   IMAGE             COMMAND                  CREATED              STATUS                        PORTS                      NAMES
+      02eea3d0cf99   app_example-web   "uvicorn main:app --…"   About a minute ago   Up About a minute                                        app_example-web-1
+      2a0748c6462c   haproxy:2.4       "docker-entrypoint.s…"   About a minute ago   Up About a minute             127.0.0.1:8080->8080/tcp   app_example-reverse-proxy-1
+      adecf8b3f31d   mysql:8           "docker-entrypoint.s…"   About a minute ago   Up About a minute (healthy)   3306/tcp, 33060/tcp        app_example-db-1
+      4726e7c7d6de   nginx:1.21.1      "/docker-entrypoint.…"   About a minute ago   Up About a minute                                        app_example-ingress-proxy-1
+      odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ curl -L http://158.160.114.0:8090
+      "TIME: 2025-07-21 09:48:29, IP: 45.136.247.248"odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ 
+      odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ curl -L http://158.160.114.0:8090
+      "TIME: 2025-07-21 09:48:39, IP: 45.136.247.248"   
+      ```
+   - 4. Проверка сервиса:
+
+      ![TASK4-4](img/task4-4.png)
+
+   - 5. Дополнительно настроим remote ssh context к этому серверу. И отобразим список контекстов и результат удаленного выполнения ```docker ps -a```  
+
+      - Docker CLI не позволяет явно передать SSH-ключ в docker context create, поэтому добавим Публичный IPv4 этой ВМ в ~/.shh/config на машине разработки
+         ```yaml
+         ...
+         ########################################
+         Host  158.160.114.0 # NGY_APP
+            HostName 158.160.114.0
+            Port 22
+            User odv
+            IdentityFile /home/odv/.ssh/netology
+         ...
+         ```
+      - Работа с контекстом docker:
+         ```console
+         odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker context create yc-vm --docker "host=ssh://158.160.114.0"
+         yc-vm
+         Successfully created context "yc-vm"
+
+         odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker context use yc-vm
+         yc-vm
+         Current context is now "yc-vm"
+         
+         odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker ps -a
+         CONTAINER ID   IMAGE             COMMAND                  CREATED          STATUS                    PORTS                      NAMES
+         df3c20128da1   app_example-web   "uvicorn main:app --…"   30 minutes ago   Up 30 minutes                                        app_example-web-1
+         99bc206963b6   nginx:1.21.1      "/docker-entrypoint.…"   32 minutes ago   Up 30 minutes                                        app_example-ingress-proxy-1
+         761d68da2cb9   haproxy:2.4       "docker-entrypoint.s…"   32 minutes ago   Up 30 minutes             127.0.0.1:8080->8080/tcp   app_example-reverse-proxy-1
+         740b55061134   mysql:8           "docker-entrypoint.s…"   32 minutes ago   Up 30 minutes (healthy)   3306/tcp, 33060/tcp        app_example-db-1
+
+         odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker context list
+         NAME      DESCRIPTION                               DOCKER ENDPOINT               ERROR
+         default   Current DOCKER_HOST based configuration   unix:///var/run/docker.sock   
+         yc-vm *                                             ssh://158.160.114.0
+         ```
+
+   - 6. Повторим SQL-запрос на сервере и [ссылка на fork](https://github.com/DimOsSpb/shvirtd-example-python)  
+
+      ```console
+      odv@example-python:~$ docker exec -it adecf8b3f31d mysql -uroot -pYtReWq4321
+      mysql: [Warning] Using a password on the command line interface can be insecure.
+      Welcome to the MySQL monitor.  Commands end with ; or \g.
+      Your MySQL connection id is 201
+      Server version: 8.4.5 MySQL Community Server - GPL
+
+      Copyright (c) 2000, 2025, Oracle and/or its affiliates.
+
+      Oracle is a registered trademark of Oracle Corporation and/or its
+      affiliates. Other names may be trademarks of their respective
+      owners.
+
+      Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+      mysql> show databases; use example; show tables; SELECT * from requests LIMIT 10;
+      +--------------------+
+      | Database           |
+      +--------------------+
+      | example            |
+      | information_schema |
+      | mysql              |
+      | performance_schema |
+      | sys                |
+      +--------------------+
+      5 rows in set (0.01 sec)
+
+      Reading table information for completion of table and column names
+      You can turn off this feature to get a quicker startup with -A
+
+      Database changed
+      +-------------------+
+      | Tables_in_example |
+      +-------------------+
+      | requests          |
+      +-------------------+
+      1 row in set (0.00 sec)
+
+      +----+---------------------+-----------------+
+      | id | request_date        | request_ip      |
+      +----+---------------------+-----------------+
+      |  1 | 2025-07-21 09:48:29 | 45.136.247.248  |
+      |  2 | 2025-07-21 09:48:39 | 45.136.247.248  |
+      |  3 | 2025-07-21 09:54:32 | 195.211.27.85   |
+      |  4 | 2025-07-21 09:54:32 | 185.37.147.117  |
+      |  5 | 2025-07-21 09:54:32 | 185.19.33.131   |
+      |  6 | 2025-07-21 09:54:32 | 167.235.135.184 |
+      |  7 | 2025-07-21 09:54:32 | 195.154.114.92  |
+      |  8 | 2025-07-21 09:54:32 | 185.224.3.111   |
+      |  9 | 2025-07-21 09:54:32 | 185.209.161.145 |
+      | 10 | 2025-07-21 09:54:32 | 88.119.179.10   |
+      +----+---------------------+-----------------+
+      10 rows in set (0.00 sec)
+      ```
 ## Задача 5 (*)
 1. Напишите и задеплойте на вашу облачную ВМ bash скрипт, который произведет резервное копирование БД mysql в директорию "/opt/backup" с помощью запуска в сети "backend" контейнера из образа ```schnitzler/mysqldump``` при помощи ```docker run ...``` команды. Подсказка: "документация образа."
 2. Протестируйте ручной запуск
