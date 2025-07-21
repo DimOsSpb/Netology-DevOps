@@ -87,7 +87,7 @@
 
    (venv) odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker run --name mysql -p 127.0.0.1:3306:3306 -e MYSQL_ROOT_PASSWORD=very_strong -e MYSQL_USER=app -e MYSQL_PASSWORD=very_strong -d mysql:latest
    c163761e576eeda00aa8992de4de39db049c8573f53c785621d4510b8304b8c7
-   (venv) odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker exec -it mysql mysql -u root -p
+   (venv) odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker exec -it mysql mysql -uroot -p
    Enter password: 
    Welcome to the MySQL monitor.  Commands end with ; or \g.
    Your MySQL connection id is 9
@@ -252,20 +252,81 @@
 5. [Отчет сканирования](doc/vulnerabilities.csv)
 
 ## Задача 3
-1. Изучите файл "proxy.yaml"
-2. Создайте в репозитории с проектом файл ```compose.yaml```. С помощью директивы "include" подключите к нему файл "proxy.yaml".
-3. Опишите в файле ```compose.yaml``` следующие сервисы: 
 
-- ```web```. Образ приложения должен ИЛИ собираться при запуске compose из файла ```Dockerfile.python``` ИЛИ скачиваться из yandex cloud container registry(из задание №2 со *). Контейнер должен работать в bridge-сети с названием ```backend``` и иметь фиксированный ipv4-адрес ```172.20.0.5```. Сервис должен всегда перезапускаться в случае ошибок.
-Передайте необходимые ENV-переменные для подключения к Mysql базе данных по сетевому имени сервиса ```web``` 
+   - Запустим проект локально с помощью docker compose, создав ```compose.yaml``` где выполним все условия задачи (решив проблему готовности db принимать запросы от web через healthcheck):
 
-- ```db```. image=mysql:8. Контейнер должен работать в bridge-сети с названием ```backend``` и иметь фиксированный ipv4-адрес ```172.20.0.10```. Явно перезапуск сервиса в случае ошибок. Передайте необходимые ENV-переменные для создания: пароля root пользователя, создания базы данных, пользователя и пароля для web-приложения.Обязательно используйте уже существующий .env file для назначения секретных ENV-переменных!
+      ```yaml
+      version: "3.8"
+      include:
+      - proxy.yaml
+      services:
+      web:
+         image: cr.yandex/crp7qgp61fajvdodm5hk/shvirtd-example-python:v1
+         networks:
+            backend:
+            ipv4_address: 172.20.0.5
+         restart: always
+         environment:
+            DB_HOST: db
+            DB_USER: ${MYSQL_USER}
+            DB_PASSWORD: ${MYSQL_PASSWORD}
+            DB_NAME: example
 
-2. Запустите проект локально с помощью docker compose , добейтесь его стабильной работы: команда ```curl -L http://127.0.0.1:8090``` должна возвращать в качестве ответа время и локальный IP-адрес. Если сервисы не стартуют воспользуйтесь командами: ```docker ps -a ``` и ```docker logs <container_name>``` . Если вместо IP-адреса вы получаете информационную ошибку --убедитесь, что вы шлете запрос на порт ```8090```, а не 5000.
+         depends_on:
+            db:
+            condition: service_healthy
+      db:
+         image: mysql:8
+         networks:
+            backend:
+            ipv4_address: 172.20.0.10
+         restart: always
+         env_file:
+            - .env
+         environment:
+            MYSQL_DATABASE: example
+         healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 30s
+      ```
 
-5. Подключитесь к БД mysql с помощью команды ```docker exec -ti <имя_контейнера> mysql -uroot -p<пароль root-пользователя>```(обратите внимание что между ключем -u и логином root нет пробела. это важно!!! тоже самое с паролем) . Введите последовательно команды (не забываем в конце символ ; ): ```show databases; use <имя вашей базы данных(по-умолчанию example)>; show tables; SELECT * from requests LIMIT 10;```.
+      ```console
+      odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker compose up -d
+      WARN[0000] /home/odv/projects/MY/DevOpsCourse/submodules/shvirtd-example-python/proxy.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+      WARN[0000] /home/odv/projects/MY/DevOpsCourse/submodules/shvirtd-example-python/compose.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+      [+] Running 5/5
+      ✔ Network shvirtd-example-python_backend            Created                                                                                                                                                           0.1s 
+      ✔ Container shvirtd-example-python-reverse-proxy-1  Started                                                                                                                                                           0.5s 
+      ✔ Container shvirtd-example-python-ingress-proxy-1  Started                                                                                                                                                           0.4s 
+      ✔ Container shvirtd-example-python-db-1             Healthy                                                                                                                                                          16.0s 
+      ✔ Container shvirtd-example-python-web-1            Started                                                                                                                                                          16.0s 
+      odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ curl -L http://127.0.0.1:8090
+      "TIME: 2025-07-21 06:20:17, IP: 127.0.0.1"
+      
+      odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker ps
+      CONTAINER ID   IMAGE                                                      COMMAND                  CREATED          STATUS                    PORTS                      NAMES
+      70a6d176f906   cr.yandex/crp7qgp61fajvdodm5hk/shvirtd-example-python:v1   "uvicorn main:app --…"   45 seconds ago   Up 29 seconds                                        shvirtd-example-python-web-1
+      1adf98c11b00   haproxy:2.4                                                "docker-entrypoint.s…"   46 seconds ago   Up 45 seconds             127.0.0.1:8080->8080/tcp   shvirtd-example-python-reverse-proxy-1
+      a48d35aaf0af   mysql:8                                                    "docker-entrypoint.s…"   46 seconds ago   Up 45 seconds (healthy)   3306/tcp, 33060/tcp        shvirtd-example-python-db-1
+      fb723848a973   nginx:1.21.1                                               "/docker-entrypoint.…"   46 seconds ago   Up 45 seconds                                        shvirtd-example-python-ingress-proxy-1
+      odv@matebook16s:~/projects/MY/DevOpsCourse/submodules/shvirtd-example-python$ docker logs 70a6d176f906
+      INFO:     Started server process [1]
+      INFO:     Waiting for application startup.
+      INFO:     Application startup complete.
+      INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
+      Приложение запускается...
+      Соединение с БД установлено и таблица 'requests' готова к работе.
+      INFO:     172.20.0.2:37870 - "GET / HTTP/1.0" 200 OK
+      ```
 
-6. Остановите проект. В качестве ответа приложите скриншот sql-запроса.
+      - Подключимся к БД mysql и введем команды из задания...  
+      В конце остановим проект
+      
+      ![TASK3_1](img/task3-1.png)
+---
 
 ## Задача 4
 1. Запустите в Yandex Cloud ВМ (вам хватит 2 Гб Ram).
