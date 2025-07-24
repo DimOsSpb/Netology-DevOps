@@ -725,9 +725,12 @@
       Для каждого сервиса (app, db, nginx, haproxy) создадим свой каталог в котором создадим каталог rootfs и конфиг для контейнера с OCI-совместимым описанием (config.json).
       Для этого создаем временный контейнер и экспортируем из него суммарную фс в наш rootfs:
       ```console
-      docker create --name tmp-$DB $CONT_DB_ID && \
-      docker export tmp-$DB  | sudo tar -C rootfs -xf - && \
-      docker rm tmp-$DB
+      docker create --name "tmp-$serv" "$c_id"
+      docker export "tmp-$serv" | sudo tar -C rootfs -xf -
+      docker rm "tmp-$serv" > /dev/null
+      sudo chown $USER:$USER rootfs
+      runc spec
+
       ``` 
    3. Внесем модификации в config.json для каждого сервиса в соответствии из compose.yaml
 
