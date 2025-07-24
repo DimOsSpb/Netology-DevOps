@@ -1,0 +1,202 @@
+{
+	"ociVersion": "1.2.0",
+	"process": {
+		"terminal": true,	
+		"user": {
+			"uid": 0,
+			"gid": 0
+		},
+		"args": [
+		    "/docker-entrypoint.sh",
+	            "nginx",
+	            "-g",
+	            "daemon off;"
+		],
+		"env": [
+	                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+	                "NGINX_VERSION=1.21.1",
+	                "NJS_VERSION=0.6.1",
+	                "PKG_RELEASE=1~buster"
+            	],
+		"cwd": "/",
+		"capabilities": {
+			"bounding": [
+				"CAP_CHOWN",
+				"CAP_SETUID",
+				"CAP_SETGID",
+				"CAP_DAC_OVERRIDE",
+    			"CAP_FOWNER",
+				"CAP_AUDIT_WRITE",
+				"CAP_KILL",
+				"CAP_NET_BIND_SERVICE"
+			],
+			"effective": [
+				"CAP_CHOWN",
+				"CAP_SETUID",
+				"CAP_SETGID",
+				"CAP_DAC_OVERRIDE",
+    			"CAP_FOWNER",
+				"CAP_AUDIT_WRITE",
+				"CAP_KILL",
+				"CAP_NET_BIND_SERVICE"
+			],
+			"permitted": [
+				"CAP_CHOWN",
+				"CAP_SETUID",
+				"CAP_SETGID",
+				"CAP_DAC_OVERRIDE",
+    			"CAP_FOWNER",
+				"CAP_AUDIT_WRITE",
+				"CAP_KILL",
+				"CAP_NET_BIND_SERVICE"
+			]
+		},
+		"rlimits": [
+			{
+				"type": "RLIMIT_NOFILE",
+				"hard": 1024,
+				"soft": 1024
+			}
+		],
+		"noNewPrivileges": false
+	},
+	"root": {
+		"path": "rootfs",
+		"readonly": false
+	},
+	"hostname": "ingress-proxy",
+	"mounts": [
+		{
+			"destination": "/proc",
+			"type": "proc",
+			"source": "proc"
+		},
+		{
+			"destination": "/dev",
+			"type": "tmpfs",
+			"source": "tmpfs",
+			"options": [
+				"nosuid",
+				"strictatime",
+				"mode=755",
+				"size=65536k"
+			]
+		},
+		{
+			"destination": "/dev/pts",
+			"type": "devpts",
+			"source": "devpts",
+			"options": [
+				"nosuid",
+				"noexec",
+				"newinstance",
+				"ptmxmode=0666",
+				"mode=0620",
+				"gid=5"
+			]
+		},
+		{
+			"destination": "/dev/shm",
+			"type": "tmpfs",
+			"source": "shm",
+			"options": [
+				"nosuid",
+				"noexec",
+				"nodev",
+				"mode=1777",
+				"size=65536k"
+			]
+		},
+		{
+			"destination": "/dev/mqueue",
+			"type": "mqueue",
+			"source": "mqueue",
+			"options": [
+				"nosuid",
+				"noexec",
+				"nodev"
+			]
+		},
+		{
+			"destination": "/sys",
+			"type": "sysfs",
+			"source": "sysfs",
+			"options": [
+				"nosuid",
+				"noexec",
+				"nodev",
+				"ro"
+			]
+		},
+		{
+			"destination": "/sys/fs/cgroup",
+			"type": "cgroup",
+			"source": "cgroup",
+			"options": [
+				"nosuid",
+				"noexec",
+				"nodev",
+				"relatime",
+				"ro"
+			]
+		},
+		{
+			"destination": "/etc/nginx/conf.d/default.conf",
+			"type": "bind",
+			"source": "/home/odv/projects/MY/DevOpsCourse/homeworks/05-virt-04-docker-in-practice/runc/nginx/ingress/default.conf",
+			"options": ["rbind", "rw"]
+		},
+		{
+			"destination": "/etc/nginx/nginx.conf",
+			"type": "bind",
+			"source": "/home/odv/projects/MY/DevOpsCourse/homeworks/05-virt-04-docker-in-practice/runc/nginx/ingress/nginx.conf",
+			"options": ["rbind", "rw"]
+		}
+	],
+	"linux": {
+		"resources": {
+			"devices": [
+				{
+					"allow": false,
+					"access": "rwm"
+				}
+			]
+		},
+		"namespaces": [
+			{
+				"type": "pid"
+			},
+			{
+				"type": "ipc"
+			},
+			{
+				"type": "uts"
+			},
+			{
+				"type": "mount"
+			},
+			{
+				"type": "cgroup"
+			}
+		],
+		"maskedPaths": [
+			"/proc/acpi",
+			"/proc/asound",
+			"/proc/kcore",
+			"/proc/keys",
+			"/proc/latency_stats",
+			"/proc/timer_list",
+			"/proc/timer_stats",
+			"/proc/sched_debug",
+			"/sys/firmware",
+			"/proc/scsi"
+		],
+		"readonlyPaths": [
+			"/proc/bus",
+			"/proc/fs",
+			"/proc/irq",
+			"/proc/sys",
+			"/proc/sysrq-trigger"
+		]
+	}
+}

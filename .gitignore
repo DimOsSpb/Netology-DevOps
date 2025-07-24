@@ -1,4 +1,4 @@
 **/.vagrant/
 **/lecture_demonstration/
-
+*.env
 

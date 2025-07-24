@@ -1,0 +1,40 @@
+version: "3.8"
+include:
+  - proxy.yaml
+services:
+  web:
+    # image: cr.yandex/crp7qgp61fajvdodm5hk/shvirtd-example-python:v1
+    build: Dockerfile.python
+    networks:
+      backend:
+        ipv4_address: 172.20.0.5
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: example
+
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: mysql:8.0
+    volumes:
+      - ./my.cnf:/etc/my.cnf
+    networks:
+      backend:
+        ipv4_address: 172.20.0.10
+    restart: always
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: example
+    healthcheck:
+      test: 
+        - "CMD-SHELL"
+        - "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD} 2>/dev/null | grep 'mysqld is alive' || exit 1"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 30s
