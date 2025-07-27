@@ -31,9 +31,9 @@
     ...
     ```
 5. Инициализируйте проект, выполните код. Исправьте намеренно допущенные синтаксические ошибки. Ищите внимательно, посимвольно. Ответьте, в чём заключается их суть.
-  1. Добавить значения в variables.tf через поля default id облака и каталога (по аналогии с др. переменными, можно еще через variables.auto.tfvars, env или командную строку)
-  2. Исправить адрес файла с ключем сервисного каталога  в providers.tf, у меня так   ```service_account_key_file = file("~/.secret/key.json"```
-  3. Исправить ошибку в типе платформы ```platform_id = "standart-v3"``` -> ```standard-v3``` и согласно - [Допустимые конфигурации vCPU и RAM](https://yandex.cloud/ru/docs/compute/concepts/performance-levels) приведем в соответствие значения:
+  - . Добавить значения в variables.tf через поля default id облака и каталога (по аналогии с др. переменными, можно еще через variables.auto.tfvars, env или командную строку)
+  - Исправить адрес файла с ключем сервисного каталога  в providers.tf, у меня так   ```service_account_key_file = file("~/.secret/key.json"```
+  - Исправить ошибку в типе платформы ```platform_id = "standart-v3"``` -> ```standard-v3``` и согласно - [Допустимые конфигурации vCPU и RAM](https://yandex.cloud/ru/docs/compute/concepts/performance-levels) приведем в соответствие значения:
       ```c
         platform_id = "standard-v3"   # Исправим ..art -> ard
       resources {
