@@ -62,11 +62,9 @@
 6. Замените имя docker-контейнера в блоке кода на ```hello_world```. Не перепутайте имя контейнера и имя образа. Мы всё ещё продолжаем использовать name = "nginx:latest". Выполните команду ```terraform apply -auto-approve```.
 Объясните своими словами, в чём может быть опасность применения ключа  ```-auto-approve```. Догадайтесь или нагуглите зачем может пригодиться данный ключ? В качестве ответа дополнительно приложите вывод команды ```docker ps```.
 
-    ```
-    -auto-approve - отменяет интерактивное подтверждение, которое terraform выдает перед применением изменений, что дает избежать случайного применения и позволяет оценить план изменения перед применением.
-  
+    - -auto-approve - отменяет интерактивное подтверждение, которое terraform выдает перед применением изменений, что дает избежать случайного применения и позволяет оценить план изменения перед применением.  
     Польза от ключа в возможности его использования для автоматизации различных сценариев в скриптах, циклах CI/CD и т.п.
-    ```
+
     ```bash
     ...
     Plan: 1 to add, 0 to change, 1 to destroy.
@@ -112,14 +110,13 @@
 
 9. Объясните, почему при этом не был удалён docker-образ **nginx:latest**. Ответ **ОБЯЗАТЕЛЬНО НАЙДИТЕ В ПРЕДОСТАВЛЕННОМ КОДЕ**, а затем **ОБЯЗАТЕЛЬНО ПОДКРЕПИТЕ** строчкой из документации [**terraform провайдера docker**](https://docs.comcloud.xyz/providers/kreuzwerker/docker/latest/docs).  (ищите в классификаторе resource docker_image )
 
-    ```
-    Образ не удален из хранилища контейнера, т.к. в настройках ресурса образа прописано keep_locally = true, вот из документации:
+    - Образ не удален из хранилища контейнера, т.к. в настройках ресурса образа прописано keep_locally = true, вот из документации:
 
-    keep_locally (Boolean) If true, then the Docker image won't be deleted on destroy operation. If this is false, it will delete the image from the docker local storage on destroy operation.
-    ```
-    ```
+    
+    _keep_locally (Boolean) If true, then the Docker image won't be deleted on destroy operation. If this is false, it will delete the image from the docker local storage on destroy operation._
+
     Но в выводе самого тераформа типо удалю и удалил)), проверим - nginx:latest на месте:
-    ```
+
     ```bash
     odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/01/src$ docker images
     REPOSITORY                                              TAG       IMAGE ID       CREATED         SIZE
@@ -242,7 +239,7 @@
 
     Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
     ```
-  ## Как пожелание - как-то отражать работаюшие у нас в Росии варианты замещения. Как с этими проблемами борются (или нет), что думают.. 
+  ## Как пожелание - как-то отражать работаюшие у нас в Росии варианты замещения. Как с этими проблемами борются (или нет), что  думают..
 
 
 
