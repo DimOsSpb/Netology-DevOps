@@ -1,0 +1,5 @@
+network_id = "e9ba5mmqqj76kb3q4m4e"
+folder_id = "b1gg3ad99mhgfm5qo1tt"
+image_id_debian12 = "fd8tsuesv8lqis70bmrq"
+admin_name = "odv"
+mysql_host_ip = "158.160.113.197"
