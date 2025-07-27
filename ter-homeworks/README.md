@@ -1,6 +1,6 @@
 # Решения домашних заданий по модулю «Облачная инфраструктура. Terraform»
 
-1. [Ввдение в Terraform](01/hw-01.md)
+1. [Ввдение в Terraform](01/README.md)
 
 2. [Основы Terraform. Yandex Cloud](02/hw-02.md)
 
