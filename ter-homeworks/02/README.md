@@ -46,7 +46,7 @@
 
   - Это вопрос ценообразования. Прерываемая вм дешевле, меньше ресурсов потребляет вм - дешевле...
 
-В качестве решения приложите:
+В качестве решения:
   
   ![CKVM](img/cl-vm.png)
   ![CKVM](img/curl-1.png)
@@ -56,8 +56,24 @@
 
 1. Замените все хардкод-**значения** для ресурсов **yandex_compute_image** и **yandex_compute_instance** на **отдельные** переменные. К названиям переменных ВМ добавьте в начало префикс **vm_web_** .  Пример: **vm_web_name**.
 2. Объявите нужные переменные в файле variables.tf, обязательно указывайте тип переменной. Заполните их **default** прежними значениями из main.tf. 
-3. Проверьте terraform plan. Изменений быть не должно. 
+3. Проверьте terraform plan. Изменений быть не должно.
 
+    [variables.tf](src/variables.tf), [main.tf](src/main.tf)
+    
+    ```shell
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/02/src$ terraform apply
+    data.yandex_compute_image.ubuntu: Reading...
+    yandex_vpc_network.develop: Refreshing state... [id=enpeb6s2laa6a8fjnb36]
+    data.yandex_compute_image.ubuntu: Read complete after 0s [id=fd87o7enmgb6d3qrs2lg]
+    yandex_vpc_subnet.develop: Refreshing state... [id=e9bqqua2vdgcdnrcjs9b]
+    yandex_compute_instance.platform: Refreshing state... [id=fhmvi91uaitn6obvgu7q]
+
+    No changes. Your infrastructure matches the configuration.
+
+    Terraform has compared your real infrastructure against your configuration and found no differences, so no changes are needed.
+
+    Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+    ```
 
 ### Задание 3
 
@@ -65,57 +81,68 @@
 2. Скопируйте блок ресурса и создайте с его помощью вторую ВМ в файле main.tf: **"netology-develop-platform-db"** ,  ```cores  = 2, memory = 2, core_fraction = 20```. Объявите её переменные с префиксом **vm_db_** в том же файле ('vms_platform.tf').  ВМ должна работать в зоне "ru-central1-b"
 3. Примените изменения.
 
+  - Для db в зоне b добавил подсеть "10.0.2.0/24". Соответственно ввел новые и изменил переменные, поднастроил ресурсы.
+
+    ![2Z](img/2Z.png) 
+
 
 ### Задание 4
 
 1. Объявите в файле outputs.tf **один** output , содержащий: instance_name, external_ip, fqdn для каждой из ВМ в удобном лично для вас формате.(без хардкода!!!)
 2. Примените изменения.
 
-В качестве решения приложите вывод значений ip-адресов команды ```terraform output```.
+- [outputs.tf](src/outputs.tf)
+
+    ```json
+    Outputs:
+
+    instances_info = [
+      {
+        "external_ip" = "158.160.109.114"
+        "fqdn" = "fhmoj03ovprqqqvco0di.auto.internal"
+        "instance_name" = "netology-develop-platform-web"
+      },
+      {
+        "external_ip" = "89.169.183.88"
+        "fqdn" = "epd3nnj92ann8cpg0kn9.auto.internal"
+        "instance_name" = "netology-develop-platform-db"
+      },
+    ]
+    ```
+
+  - [Terraform for Expressions](https://developer.hashicorp.com/terraform/language/expressions/for#result-types)
+  - [Examples](https://stackoverflow.com/questions/71668905/terraform-building-an-output-map)
 
 
 ### Задание 5
 
-1. В файле locals.tf опишите в **одном** local-блоке имя каждой ВМ, используйте интерполяцию ${..} с НЕСКОЛЬКИМИ переменными по примеру из лекции.
-2. Замените переменные внутри ресурса ВМ на созданные вами local-переменные.
-3. Примените изменения.
+  - [locals.tf](src/locals.tf)
 
 
 ### Задание 6
 
 1. Вместо использования трёх переменных  ".._cores",".._memory",".._core_fraction" в блоке  resources {...}, объедините их в единую map-переменную **vms_resources** и  внутри неё конфиги обеих ВМ в виде вложенного map(object).  
-   ```
-   пример из terraform.tfvars:
-   vms_resources = {
-     web={
-       cores=2
-       memory=2
-       core_fraction=5
-       hdd_size=10
-       hdd_type="network-hdd"
-       ...
-     },
-     db= {
-       cores=2
-       memory=4
-       core_fraction=20
-       hdd_size=10
-       hdd_type="network-ssd"
-       ...
-     }
-   }
-   ```
 3. Создайте и используйте отдельную map(object) переменную для блока metadata, она должна быть общая для всех ваших ВМ.
-   ```
-   пример из terraform.tfvars:
-   metadata = {
-     serial-port-enable = 1
-     ssh-keys           = "ubuntu:ssh-ed25519 AAAAC..."
-   }
-   ```  
+
+- [vms_platform.tf](src/vms_platform.tf), [locals.tf](src/locals.tf), [main.tf](src/main.tf) 
   
 5. Найдите и закоментируйте все, более не используемые переменные проекта.
 6. Проверьте terraform plan. Изменений быть не должно.
+
+    ```shell
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/02/src$ terraform plan
+    data.yandex_compute_image.ubuntu: Reading...
+    yandex_vpc_network.develop: Refreshing state... [id=enpeb6s2laa6a8fjnb36]
+    data.yandex_compute_image.ubuntu: Read complete after 0s [id=fd8t5r9buvoj23vl655i]
+    yandex_vpc_subnet.develop_b: Refreshing state... [id=e2l9rptml7ql0tlpp9tk]
+    yandex_vpc_subnet.develop: Refreshing state... [id=e9bqqua2vdgcdnrcjs9b]
+    yandex_compute_instance.platform: Refreshing state... [id=fhmhnof2s0pa8neqc9dr]
+    yandex_compute_instance.platform_db: Refreshing state... [id=epd42h95d8pregpb4fho]
+
+    No changes. Your infrastructure matches the configuration.
+
+    Terraform has compared your real infrastructure against your configuration and found no differences, so no changes are needed.
+    ```
 
 ------
 
@@ -179,18 +206,4 @@ test = [
 
 **Важно. Удалите все созданные ресурсы**.
 
-
-### Критерии оценки
-
-Зачёт ставится, если:
-
-* выполнены все задания,
-* ответы даны в развёрнутой форме,
-* приложены соответствующие скриншоты и файлы проекта,
-* в выполненных заданиях нет противоречий и нарушения логики.
-
-На доработку работу отправят, если:
-
-* задание выполнено частично или не выполнено вообще,
-* в логике выполнения заданий есть противоречия и существенные недостатки. 
 
