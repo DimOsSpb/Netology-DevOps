@@ -27,7 +27,8 @@ variable "vms_resources" {
             memory=1,
             core_fraction=20,
             preemptible=true,
-            nat_enabled=true
+            #nat_enabled=true   # Для задания 9* убрали
+            nat_enabled=false   # Для задания 9* установили
         },
         db = {
             platform_id="standard-v3",            
@@ -35,7 +36,8 @@ variable "vms_resources" {
             memory=2,
             core_fraction=20,
             preemptible=true,
-            nat_enabled=true
+            #nat_enabled=true   # Для задания 9* убрали
+            nat_enabled=false   # Для задания 9* установили
         }
     }
 }

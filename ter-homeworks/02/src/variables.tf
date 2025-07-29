@@ -56,6 +56,8 @@ variable "subnet_name_b" {
   default     = "develop_b"
   description = "VPC network & subnet name"
 }
+
+
 ###ssh vars
 
 variable "vms_ssh_root_key" {
@@ -63,4 +65,5 @@ variable "vms_ssh_root_key" {
   default     = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDffPBZFrnDjeZInRI4J5VIP0WoiJOMx1vfGkSRwVcjy dimosspb@vk.ru"
   description = "ssh-keygen -t ed25519"
 }
+
 

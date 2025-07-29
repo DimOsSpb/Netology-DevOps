@@ -148,52 +148,73 @@
 
 ## Дополнительное задание (со звёздочкой*)
 
-**Настоятельно рекомендуем выполнять все задания со звёздочкой.**   
-Они помогут глубже разобраться в материале. Задания со звёздочкой дополнительные, не обязательные к выполнению и никак не повлияют на получение вами зачёта по этому домашнему заданию. 
-
-
 ------
 ### Задание 7*
 
 Изучите содержимое файла console.tf. Откройте terraform console, выполните следующие задания: 
 
 1. Напишите, какой командой можно отобразить **второй** элемент списка test_list.
+    ```shell
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/02/src$ terraform console
+    > local.test_list[1]
+    "staging"
+    ```
 2. Найдите длину списка test_list с помощью функции length(<имя переменной>).
+    ```cpp
+    > length(local.test_list)
+    3
+    ```
 3. Напишите, какой командой можно отобразить значение ключа admin из map test_map.
+    ```cpp
+    > local.test_map.admin
+    "John"
+    ```
 4. Напишите interpolation-выражение, результатом которого будет: "John is admin for production server based on OS ubuntu-20-04 with X vcpu, Y ram and Z virtual disks", используйте данные из переменных test_list, test_map, servers и функцию length() для подстановки значений.
-
-**Примечание**: если не догадаетесь как вычленить слово "admin", погуглите: "terraform get keys of map"
-
-В качестве решения предоставьте необходимые команды и их вывод.
-
+    ```cpp
+    > "${local.test_map.admin} is admin for ${local.test_list[2]} server based on OS ${local.servers.stage.image} with ${local.servers.stage.cpu} vcpu, ${local.servers.stage.ram} ram and ${length(local.servers.stage.disks)} virtual disks"
+    "John is admin for production server based on OS ubuntu-20-04 with 4 vcpu, 8 ram and 2 virtual disks"
+    ```
 ------
 
 ### Задание 8*
 1. Напишите и проверьте переменную test и полное описание ее type в соответствии со значением из terraform.tfvars:
-```
-test = [
-  {
-    "dev1" = [
-      "ssh -o 'StrictHostKeyChecking=no' ubuntu@62.84.124.117",
-      "10.0.1.7",
-    ]
-  },
-  {
-    "dev2" = [
-      "ssh -o 'StrictHostKeyChecking=no' ubuntu@84.252.140.88",
-      "10.0.2.29",
-    ]
-  },
-  {
-    "prod1" = [
-      "ssh -o 'StrictHostKeyChecking=no' ubuntu@51.250.2.101",
-      "10.0.1.30",
-    ]
-  },
-]
-```
+
+    - [terraform.tf](src/terraform.tf), [terraform.tfvars](src/terraform.tfvars)
+
+    ```shell
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/02/src$ terraform validate
+    Success! The configuration is valid.
+
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/02/src$ terraform console
+    > var.test
+    tolist([
+      tomap({
+        "dev1" = tolist([
+          "ssh -o 'StrictHostKeyChecking=no' ubuntu@62.84.124.117",
+          "10.0.1.7",
+        ])
+      }),
+      tomap({
+        "dev2" = tolist([
+          "ssh -o 'StrictHostKeyChecking=no' ubuntu@84.252.140.88",
+          "10.0.2.29",
+        ])
+      }),
+      tomap({
+        "prod1" = tolist([
+          "ssh -o 'StrictHostKeyChecking=no' ubuntu@51.250.2.101",
+          "10.0.1.30",
+        ])
+      }),
+    ])
+    >  
+    ```    
 2. Напишите выражение в terraform console, которое позволит вычленить строку "ssh -o 'StrictHostKeyChecking=no' ubuntu@62.84.124.117" из этой переменной.
-------
+
+    ```shell
+    > var.test[0].dev1[0]
+    "ssh -o 'StrictHostKeyChecking=no' ubuntu@62.84.124.117"
+    ```
 
 ------
 
@@ -201,9 +222,13 @@ test = [
 
 Используя инструкцию https://cloud.yandex.ru/ru/docs/vpc/operations/create-nat-gateway#tf_1, настройте для ваших ВМ nat_gateway. Для проверки уберите внешний IP адрес (nat=false) у ваших ВМ и проверьте доступ в интернет с ВМ, подключившись к ней через serial console. Для подключения предварительно через ssh измените пароль пользователя: ```sudo passwd ubuntu```
 
-### Правила приёма работыДля подключения предварительно через ssh измените пароль пользователя: sudo passwd ubuntu
-В качестве результата прикрепите ссылку на MD файл с описанием выполненой работы в вашем репозитории. Так же в репозитории должен присутсвовать ваш финальный код проекта.
+  - В конце [main.tf](src/main.tf), и для подсетей gw присвоил + убрал nat в [vms_platform.tf](src/vms_platform.tf)
 
-**Важно. Удалите все созданные ресурсы**.
+  ![GW](img/gw.png)
+
+  ![GW](img/sc1.png)
+
+  ![GW](img/sc2.png)
+
 
 
