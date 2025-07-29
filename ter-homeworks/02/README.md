@@ -93,7 +93,7 @@
 
 - [outputs.tf](src/outputs.tf)
 
-    ```json
+    ```shell
     Outputs:
 
     instances_info = [
