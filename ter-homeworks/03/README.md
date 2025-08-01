@@ -27,15 +27,148 @@ variable "each_vm" {
 ```  
 При желании внесите в переменную все возможные параметры.
 4. ВМ из пункта 2.1 должны создаваться после создания ВМ из пункта 2.2.
+
+  - Используем depens_on для web.
+
 5. Используйте функцию file в local-переменной для считывания ключа ~/.ssh/id_rsa.pub и его последующего использования в блоке metadata, взятому из ДЗ 2.
+
+  - [В конце variables.tf](variables.tf)
+
 6. Инициализируйте проект, выполните код.
+
+    ```shell
+    Plan: 7 to add, 0 to change, 0 to destroy.
+
+    Do you want to perform these actions?
+      Terraform will perform the actions described above.
+      Only 'yes' will be accepted to approve.
+
+      Enter a value: yes
+
+    yandex_vpc_network.develop: Creating...
+    yandex_vpc_network.develop: Creation complete after 4s [id=enp1151fh0updii5msk2]
+    yandex_vpc_subnet.develop: Creating...
+    yandex_vpc_security_group.example: Creating...
+    yandex_vpc_subnet.develop: Creation complete after 0s [id=e9b7sv14s3dofietmohs]
+    yandex_vpc_security_group.example: Creation complete after 2s [id=enpto75rhsqulf317ifd]
+    yandex_compute_instance.db["replica"]: Creating...
+    yandex_compute_instance.db["main"]: Creating...
+    yandex_compute_instance.db["replica"]: Still creating... [10s elapsed]
+    yandex_compute_instance.db["main"]: Still creating... [10s elapsed]
+    yandex_compute_instance.db["main"]: Still creating... [20s elapsed]
+    yandex_compute_instance.db["replica"]: Still creating... [20s elapsed]
+    yandex_compute_instance.db["replica"]: Still creating... [30s elapsed]
+    yandex_compute_instance.db["main"]: Still creating... [30s elapsed]
+    yandex_compute_instance.db["replica"]: Still creating... [40s elapsed]
+    yandex_compute_instance.db["main"]: Still creating... [40s elapsed]
+    yandex_compute_instance.db["main"]: Creation complete after 42s [id=fhmeaqeu209o189c198h]
+    yandex_compute_instance.db["replica"]: Still creating... [50s elapsed]
+    yandex_compute_instance.db["replica"]: Creation complete after 59s [id=fhmc9aqpb7befpgfv24n]
+    yandex_compute_instance.web[0]: Creating...
+    yandex_compute_instance.web[1]: Creating...
+    yandex_compute_instance.web[1]: Still creating... [10s elapsed]
+    yandex_compute_instance.web[0]: Still creating... [10s elapsed]
+    yandex_compute_instance.web[1]: Still creating... [20s elapsed]
+    yandex_compute_instance.web[0]: Still creating... [20s elapsed]
+    yandex_compute_instance.web[0]: Still creating... [30s elapsed]
+    yandex_compute_instance.web[1]: Still creating... [30s elapsed]
+    yandex_compute_instance.web[0]: Still creating... [40s elapsed]
+    yandex_compute_instance.web[1]: Still creating... [40s elapsed]
+    yandex_compute_instance.web[1]: Creation complete after 40s [id=fhm4ors4j1e5cpsp68so]
+    yandex_compute_instance.web[0]: Creation complete after 43s [id=fhmh1aaunl2qlvdqbanj]
+
+    Apply complete! Resources: 7 added, 0 changed, 0 destroyed.
+    ```
+    ![LOOP](img/loop.png)
+
+    ```shell
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/03/src$ terraform destroy
+    ...
+    ```
 
 ------
 
+
+
+
+===========================================
 ### Задание 3
 
 1. Создайте 3 одинаковых виртуальных диска размером 1 Гб с помощью ресурса yandex_compute_disk и мета-аргумента count в файле **disk_vm.tf** .
+
+  - [Создать пустой диск](https://yandex.cloud/ru/docs/compute/operations/disk-create/empty)
+
 2. Создайте в том же файле **одиночную**(использовать count или for_each запрещено из-за задания №4) ВМ c именем "storage"  . Используйте блок **dynamic secondary_disk{..}** и мета-аргумент for_each для подключения созданных вами дополнительных дисков.
+
+  - [Dynamic Blocks](https://developer.hashicorp.com/terraform/language/expressions/dynamic-blocks)
+
+    ```shell
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/03/src$ terraform apply
+
+    ...
+    ...
+
+    Plan: 11 to add, 0 to change, 0 to destroy.
+
+    Do you want to perform these actions?
+      Terraform will perform the actions described above.
+      Only 'yes' will be accepted to approve.
+
+      Enter a value: yes
+
+    yandex_vpc_network.develop: Creating...
+    yandex_compute_disk.disks[0]: Creating...
+    yandex_compute_disk.disks[1]: Creating...
+    yandex_compute_disk.disks[2]: Creating...
+    yandex_vpc_network.develop: Creation complete after 3s [id=enp4sl5qbodl0m6otns0]
+    yandex_vpc_subnet.develop: Creating...
+    yandex_vpc_security_group.example: Creating...
+    yandex_vpc_subnet.develop: Creation complete after 0s [id=e9bvidlq4e1q4gd7l7ns]
+    yandex_vpc_security_group.example: Creation complete after 2s [id=enpic26qv2uh07trji0i]
+    yandex_compute_instance.db["replica"]: Creating...
+    yandex_compute_instance.db["main"]: Creating...
+    yandex_compute_disk.disks[0]: Still creating... [10s elapsed]
+    yandex_compute_disk.disks[1]: Still creating... [10s elapsed]
+    yandex_compute_disk.disks[2]: Still creating... [10s elapsed]
+    yandex_compute_disk.disks[2]: Creation complete after 10s [id=fhm2fjiopjmtb5rsvkm1]
+    yandex_compute_disk.disks[0]: Creation complete after 12s [id=fhmfjsr99hcaoc349s7g]
+    yandex_compute_instance.db["replica"]: Still creating... [10s elapsed]
+    yandex_compute_instance.db["main"]: Still creating... [10s elapsed]
+    yandex_compute_disk.disks[1]: Creation complete after 15s [id=fhmkmnrse5lssdbo3b4p]
+    yandex_compute_instance.storage: Creating...
+    yandex_compute_instance.db["replica"]: Still creating... [20s elapsed]
+    yandex_compute_instance.db["main"]: Still creating... [20s elapsed]
+    yandex_compute_instance.storage: Still creating... [10s elapsed]
+    yandex_compute_instance.db["main"]: Still creating... [30s elapsed]
+    yandex_compute_instance.db["replica"]: Still creating... [30s elapsed]
+    yandex_compute_instance.storage: Still creating... [20s elapsed]
+    yandex_compute_instance.db["main"]: Still creating... [40s elapsed]
+    yandex_compute_instance.db["replica"]: Still creating... [40s elapsed]
+    yandex_compute_instance.storage: Still creating... [30s elapsed]
+    yandex_compute_instance.db["replica"]: Still creating... [50s elapsed]
+    yandex_compute_instance.db["main"]: Still creating... [50s elapsed]
+    yandex_compute_instance.storage: Still creating... [40s elapsed]
+    yandex_compute_instance.db["main"]: Creation complete after 53s [id=fhmf66j7tsdhbr76of29]
+    yandex_compute_instance.db["replica"]: Creation complete after 58s [id=fhmkhura12grfl7i68ae]
+    yandex_compute_instance.web[1]: Creating...
+    yandex_compute_instance.web[0]: Creating...
+    yandex_compute_instance.storage: Creation complete after 50s [id=fhme9vj65iifcm68hu02]
+    yandex_compute_instance.web[0]: Still creating... [10s elapsed]
+    yandex_compute_instance.web[1]: Still creating... [10s elapsed]
+    yandex_compute_instance.web[0]: Still creating... [20s elapsed]
+    yandex_compute_instance.web[1]: Still creating... [20s elapsed]
+    yandex_compute_instance.web[0]: Still creating... [30s elapsed]
+    yandex_compute_instance.web[1]: Still creating... [30s elapsed]
+    yandex_compute_instance.web[0]: Still creating... [40s elapsed]
+    yandex_compute_instance.web[1]: Still creating... [40s elapsed]
+    yandex_compute_instance.web[1]: Creation complete after 49s [id=fhmd195q6msn79qdeaj3]
+    yandex_compute_instance.web[0]: Still creating... [50s elapsed]
+    yandex_compute_instance.web[0]: Creation complete after 54s [id=fhmdmorpb5hqdkqn6gfa]
+
+    Apply complete! Resources: 11 added, 0 changed, 0 destroyed
+    ```
+
+    ![DISKS](img/disk.png)
 
 ------
 
@@ -45,23 +178,62 @@ variable "each_vm" {
 Используйте функцию tepmplatefile и файл-шаблон для создания ansible inventory-файла из лекции.
 Готовый код возьмите из демонстрации к лекции [**demonstration2**](https://github.com/netology-code/ter-homeworks/tree/main/03/demo).
 Передайте в него в качестве переменных группы виртуальных машин из задания 2.1, 2.2 и 3.2, т. е. 5 ВМ.
+
+  - [ansible.tf](src/ansible.tf) 
+    - _[Ansible docs (inventory)](https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html)_
+
 2. Инвентарь должен содержать 3 группы и быть динамическим, т. е. обработать как группу из 2-х ВМ, так и 999 ВМ.
+
+  - Здесь есть проблема в том, что ресурс созданый:
+    - for_each = {...}	- это **map**
+    - count =  - это **tuple**
+    - без loop оператора - это **object**
+
+    По этому способ передачи в template разный. К сожалению terraform не умеет пользовательские функции и плохо (я не нашел) умеет определять, что у нас на входе map, tuple или object
+
+    Данный код перестанет работать правильно, если для  ресурсов db, web или storage поменять способ создания (loop или без). Если существует код, который определит что на входе 100% map, то можно убрать эту потенциальную проблему.
+
+
 3. Добавьте в инвентарь переменную  [**fqdn**](https://cloud.yandex.ru/docs/compute/concepts/network#hostname).
-``` 
-[webservers]
-web-1 ansible_host=<внешний ip-адрес> fqdn=<полное доменное имя виртуальной машины>
-web-2 ansible_host=<внешний ip-адрес> fqdn=<полное доменное имя виртуальной машины>
-
-[databases]
-main ansible_host=<внешний ip-адрес> fqdn=<полное доменное имя виртуальной машины>
-replica ansible_host<внешний ip-адрес> fqdn=<полное доменное имя виртуальной машины>
-
-[storage]
-storage ansible_host=<внешний ip-адрес> fqdn=<полное доменное имя виртуальной машины>
-```
-Пример fqdn: ```web1.ru-central1.internal```(в случае указания переменной hostname(не путать с переменной name)); ```fhm8k1oojmm5lie8i22a.auto.internal```(в случае отсутвия перменной hostname - автоматическая генерация имени,  зона изменяется на auto). нужную вам переменную найдите в документации провайдера или terraform console.
 4. Выполните код. Приложите скриншот получившегося файла. 
 
+      ```shell
+      odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/03/src$ terraform apply
+      data.yandex_compute_image.ubuntu: Reading...
+      yandex_vpc_network.develop: Refreshing state... [id=enp4sl5qbodl0m6otns0]
+      yandex_compute_disk.disks[2]: Refreshing state... [id=fhm2fjiopjmtb5rsvkm1]
+      yandex_compute_disk.disks[1]: Refreshing state... [id=fhmkmnrse5lssdbo3b4p]
+      yandex_compute_disk.disks[0]: Refreshing state... [id=fhmfjsr99hcaoc349s7g]
+      data.yandex_compute_image.ubuntu: Read complete after 0s [id=fd8t5r9buvoj23vl655i]
+      yandex_vpc_subnet.develop: Refreshing state... [id=e9bvidlq4e1q4gd7l7ns]
+      yandex_vpc_security_group.example: Refreshing state... [id=enpic26qv2uh07trji0i]
+      yandex_compute_instance.db["replica"]: Refreshing state... [id=fhmkhura12grfl7i68ae]
+      yandex_compute_instance.db["main"]: Refreshing state... [id=fhmf66j7tsdhbr76of29]
+      yandex_compute_instance.storage: Refreshing state... [id=fhme9vj65iifcm68hu02]
+      yandex_compute_instance.web[0]: Refreshing state... [id=fhmdmorpb5hqdkqn6gfa]
+      yandex_compute_instance.web[1]: Refreshing state... [id=fhmd195q6msn79qdeaj3]
+      local_file.hosts_templatefile: Refreshing state... [id=37e41500400c163776d77fb341b53c1d79b217eb]
+
+      No changes. Your infrastructure matches the configuration.
+
+      Terraform has compared your real infrastructure against your configuration and found no differences, so no changes are needed.
+
+      Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+      ```
+      **[hosts.ini](src/hosts.ini)**
+
+      ```ini
+      [webservers]
+      netology-develop-platform-web0   ansible_host=158.160.104.107    fqdn=fhmdmorpb5hqdkqn6gfa.auto.internal
+      netology-develop-platform-web1   ansible_host=158.160.108.151    fqdn=fhmd195q6msn79qdeaj3.auto.internal
+
+      [databases]
+      netology-develop-platform-db-main   ansible_host=158.160.118.93    fqdn=fhmf66j7tsdhbr76of29.auto.internal
+      netology-develop-platform-db-replica   ansible_host=130.193.38.67    fqdn=fhmkhura12grfl7i68ae.auto.internal
+
+      [storages]
+      netology-develop-platform-storage   ansible_host=158.160.116.29    fqdn=fhme9vj65iifcm68hu02.auto.internal
+      ```
 Для общего зачёта создайте в вашем GitHub-репозитории новую ветку terraform-03. Закоммитьте в эту ветку свой финальный код проекта, пришлите ссылку на коммит.   
 **Удалите все созданные ресурсы**.
 

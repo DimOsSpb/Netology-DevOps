@@ -30,3 +30,70 @@ variable "vpc_name" {
   default     = "develop"
   description = "VPC network&subnet name"
 }
+
+###
+
+variable "course_name" {
+  type        = string
+  default     = "netology-develop-platform"
+  description = "Course name"
+}
+
+### vms platform vars
+
+variable "vms_platform_data" {
+  type = map(object({
+    image       = string,
+    user        = string,
+    platform_id = string, 
+    ssh_key_path = string,   
+    }))
+  default = {
+    default   = {
+      image   = "ubuntu-2004-lts",
+      user    = "ubuntu",
+      platform_id = "standard-v3",
+      ssh_key_path = "~/.secret/key.json"
+    }
+  }
+  description = "Compute Image spec"
+}
+variable "vms_ssh_key" {
+  type        = string
+  default     = ""
+  description = "ssh-keygen -t ed25519"
+}
+
+variable "vm_web_platform_name" {
+  type        = string
+  default     = "web"
+  description = "Platforms ance"
+}
+
+variable "vm_db_platform_name" {
+  type        = string
+  default     = "db"
+  description = "Base Id of db platform"
+}
+
+variable "vms_metadata"  {
+  type  = object({
+      serial-port-enable = number,
+      ssh-keys = string
+  })
+  default = {
+    serial-port-enable = 1
+    ssh-keys           = ""   
+  }
+}
+
+data "yandex_compute_image" "ubuntu" {
+    family = var.vms_platform_data.default.image
+}
+
+locals {
+  vms_metadata = {
+      serial-port-enable = 1
+      ssh-keys           = "${var.vms_platform_data.default.user}:${file(var.vms_platform_data.default.ssh_key_path)}"   
+  }
+}
