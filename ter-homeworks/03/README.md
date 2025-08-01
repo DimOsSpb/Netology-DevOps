@@ -88,19 +88,17 @@ variable "each_vm" {
 
 ------
 
-
-
-
-===========================================
 ### Задание 3
 
 1. Создайте 3 одинаковых виртуальных диска размером 1 Гб с помощью ресурса yandex_compute_disk и мета-аргумента count в файле **disk_vm.tf** .
 
-  - [Создать пустой диск](https://yandex.cloud/ru/docs/compute/operations/disk-create/empty)
+  - [disk_vm.tf](src/disk_vm.tf)
+    - _[Создать пустой диск](https://yandex.cloud/ru/docs/compute/operations/disk-create/empty)_
 
 2. Создайте в том же файле **одиночную**(использовать count или for_each запрещено из-за задания №4) ВМ c именем "storage"  . Используйте блок **dynamic secondary_disk{..}** и мета-аргумент for_each для подключения созданных вами дополнительных дисков.
 
-  - [Dynamic Blocks](https://developer.hashicorp.com/terraform/language/expressions/dynamic-blocks)
+  - [disk_vm.tf](src/disk_vm.tf)
+    - _[Dynamic Blocks](https://developer.hashicorp.com/terraform/language/expressions/dynamic-blocks)_
 
     ```shell
     odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/03/src$ terraform apply
@@ -195,6 +193,9 @@ variable "each_vm" {
 
 
 3. Добавьте в инвентарь переменную  [**fqdn**](https://cloud.yandex.ru/docs/compute/concepts/network#hostname).
+
+  - [hosts.tftpl](src/hosts.tftpl)
+
 4. Выполните код. Приложите скриншот получившегося файла. 
 
       ```shell
@@ -234,8 +235,7 @@ variable "each_vm" {
       [storages]
       netology-develop-platform-storage   ansible_host=158.160.116.29    fqdn=fhme9vj65iifcm68hu02.auto.internal
       ```
-Для общего зачёта создайте в вашем GitHub-репозитории новую ветку terraform-03. Закоммитьте в эту ветку свой финальный код проекта, пришлите ссылку на коммит.   
-**Удалите все созданные ресурсы**.
+
 
 ------
 
@@ -335,6 +335,10 @@ ${i["name"]} ansible_host=${i["network_interface"][0]["nat_ip_address"] platform
 2. ["rc01","rc02","rc03","rc04",rc05","rc06","rc11","rc12","rc13","rc14",rc15","rc16","rc19"....."rc96"] те список от "rc01" до "rc96", пропуская все номера, заканчивающиеся на "0","7", "8", "9", за исключением "rc19"
 
 ### Критерии оценки
+
+Для общего зачёта создайте в вашем GitHub-репозитории новую ветку terraform-03. Закоммитьте в эту ветку свой финальный код проекта, пришлите ссылку на коммит.   
+**Удалите все созданные ресурсы**.
+
 
 Зачёт ставится, если:
 
