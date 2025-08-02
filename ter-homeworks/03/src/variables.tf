@@ -46,14 +46,17 @@ variable "vms_platform_data" {
     image       = string,
     user        = string,
     platform_id = string, 
-    ssh_key_path = string,   
+    ssh_key_path = string,
+    ssh_priv_key_path = string,   
     }))
   default = {
     default   = {
       image   = "ubuntu-2004-lts",
       user    = "ubuntu",
       platform_id = "standard-v3",
-      ssh_key_path = "~/.secret/key.json"
+      #ssh_key_path = "~/.secret/key.json",
+      ssh_key_path = "/home/odv/.ssh/netology.pub"
+      ssh_priv_key_path = "/home/odv/.ssh/netology"
     }
   }
   description = "Compute Image spec"
@@ -93,7 +96,23 @@ data "yandex_compute_image" "ubuntu" {
 
 locals {
   vms_metadata = {
-      serial-port-enable = 1
-      ssh-keys           = "${var.vms_platform_data.default.user}:${file(var.vms_platform_data.default.ssh_key_path)}"   
+    serial-port-enable = 1
+    ssh-keys = "${var.vms_platform_data.default.user}:${file(var.vms_platform_data.default.ssh_key_path)}"
+  }
+  
+  vpc = {
+    network_id = "enp7i560tb28nageq0cc"
+    subnet_ids = [
+      "e9b0le401619ngf4h68n",
+      "e2lbar6u8b2ftd7f5hia",
+      "b0ca48coorjjq93u36pl",
+      "fl8ner8rjsio6rcpcf0h",
+    ]
+    subnet_zones = [
+      "ru-central1-a",
+      "ru-central1-b",
+      "ru-central1-c",
+      "ru-central1-d",
+    ]
   }
 }

@@ -177,6 +177,8 @@ variable "each_vm" {
 Готовый код возьмите из демонстрации к лекции [**demonstration2**](https://github.com/netology-code/ter-homeworks/tree/main/03/demo).
 Передайте в него в качестве переменных группы виртуальных машин из задания 2.1, 2.2 и 3.2, т. е. 5 ВМ.
 
+  - НЕ НАШЕЛ, может случайно удален - [**demonstration2**](https://github.com/netology-code/ter-homeworks/tree/main/03/demo), есть **demonstration1**
+
   - [ansible.tf](src/ansible.tf) 
     - _[Ansible docs (inventory)](https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html)_
 
@@ -239,51 +241,154 @@ variable "each_vm" {
 
 ------
 
-## Дополнительные задания (со звездочкой*)
-
-**Настоятельно рекомендуем выполнять все задания со звёздочкой.** Они помогут глубже разобраться в материале.   
-Задания со звёздочкой дополнительные, не обязательные к выполнению и никак не повлияют на получение вами зачёта по этому домашнему заданию. 
-
-### Задание 5* (необязательное)
+### Задание 5* 
 1. Напишите output, который отобразит ВМ из ваших ресурсов count и for_each в виде списка словарей :
-``` 
-[
- {
-  "name" = 'имя ВМ1'
-  "id"   = 'идентификатор ВМ1'
-  "fqdn" = 'Внутренний FQDN ВМ1'
- },
- {
-  "name" = 'имя ВМ2'
-  "id"   = 'идентификатор ВМ2'
-  "fqdn" = 'Внутренний FQDN ВМ2'
- },
- ....
-...итд любое количество ВМ в ресурсе(те требуется итерация по ресурсам, а не хардкод) !!!!!!!!!!!!!!!!!!!!!
-]
-```
-Приложите скриншот вывода команды ```terrafrom output```.
+
+    - [outputs.tf](src/outputs.tf)
+    ```shell
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/03/src$ terraform output
+    instances_info = [
+      {
+        "fqdn" = "fhmdmorpb5hqdkqn6gfa.auto.internal"
+        "id" = "fhmdmorpb5hqdkqn6gfa"
+        "name" = "netology-develop-platform-web0"
+      },
+      {
+        "fqdn" = "fhmd195q6msn79qdeaj3.auto.internal"
+        "id" = "fhmd195q6msn79qdeaj3"
+        "name" = "netology-develop-platform-web1"
+      },
+      {
+        "fqdn" = "fhmf66j7tsdhbr76of29.auto.internal"
+        "id" = "fhmf66j7tsdhbr76of29"
+        "name" = "netology-develop-platform-db-main"
+      },
+      {
+        "fqdn" = "fhmkhura12grfl7i68ae.auto.internal"
+        "id" = "fhmkhura12grfl7i68ae"
+        "name" = "netology-develop-platform-db-replica"
+      },
+    ]
+    ```
 
 ------
 
-### Задание 6* (необязательное)
+### Задание 6* 
 
 1. Используя null_resource и local-exec, примените ansible-playbook к ВМ из ansible inventory-файла.
 Готовый код возьмите из демонстрации к лекции [**demonstration2**](https://github.com/netology-code/ter-homeworks/tree/main/03/demo).
+
+  - НЕ НАШЕЛ, может случайно удален - [**demonstration2**](https://github.com/netology-code/ter-homeworks/tree/main/03/demo), есть **ter-homeworks/03/demo/ansible.tf** где похоже смысл задания)
+      
+      вот пару источников от куда еще пичитал:
+    - [Terraform Null Resource – What It is & How to Use](https://spacelift.io/blog/terraform-null-resource)
+    - [Terraform Provisioners – Why You Should Avoid Them](https://spacelift.io/blog/terraform-provisioners)
+
 3. Модифицируйте файл-шаблон hosts.tftpl. Необходимо отредактировать переменную ```ansible_host="<внешний IP-address или внутренний IP-address если у ВМ отсутвует внешний адрес>```.
 
+  - **Только на этом этапе понял, что требуется использовать весь базовый код terraform c bastion-сервер из демо (не однозначно определен смысл задания). Не буду изменять в этом каталоге, а переделаю в [отдельный каталог src_bastion](src_bastion) из примера с bastion-сервер.**
+
+    - Вот часть вывода terraform aply с работой ansible - **без bastion**
+
+    ```shell
+    .....
+
+    null_resource.web_hosts_provision[0] (local-exec): PLAY [test] ********************************************************************
+
+    null_resource.web_hosts_provision[0] (local-exec): TASK [Validating the ssh port is open and] *************************************
+    null_resource.web_hosts_provision[0]: Still creating... [10s elapsed]
+    null_resource.web_hosts_provision[0] (local-exec): ok: [netology-develop-platform-web-0]
+    null_resource.web_hosts_provision[0] (local-exec): ok: [netology-develop-platform-web-1]
+
+    null_resource.web_hosts_provision[0] (local-exec): TASK [debug host identity] *****************************************************
+    null_resource.web_hosts_provision[0] (local-exec): ok: [netology-develop-platform-web-0] => {
+    null_resource.web_hosts_provision[0] (local-exec):     "msg": "inventory_hostname: netology-develop-platform-web-0\nansible_host: 89.169.158.190\nsecrets keys: ['netology-develop-platform-web-0', 'netology-develop-platform-web-1']\n"
+    null_resource.web_hosts_provision[0] (local-exec): }
+    null_resource.web_hosts_provision[0] (local-exec): ok: [netology-develop-platform-web-1] => {
+    null_resource.web_hosts_provision[0] (local-exec):     "msg": "inventory_hostname: netology-develop-platform-web-1\nansible_host: 84.201.133.101\nsecrets keys: ['netology-develop-platform-web-0', 'netology-develop-platform-web-1']\n"
+    null_resource.web_hosts_provision[0] (local-exec): }
+
+    null_resource.web_hosts_provision[0] (local-exec): TASK [save own secret] *********************************************************
+    null_resource.web_hosts_provision[0]: Still creating... [20s elapsed]
+    null_resource.web_hosts_provision[0] (local-exec): changed: [netology-develop-platform-web-0]
+    null_resource.web_hosts_provision[0] (local-exec): changed: [netology-develop-platform-web-1]
+
+    null_resource.web_hosts_provision[0] (local-exec): TASK [save all secrets] ********************************************************
+    null_resource.web_hosts_provision[0]: Still creating... [30s elapsed]
+    null_resource.web_hosts_provision[0] (local-exec): changed: [netology-develop-platform-web-1]
+    null_resource.web_hosts_provision[0] (local-exec): changed: [netology-develop-platform-web-0]
+
+    null_resource.web_hosts_provision[0] (local-exec): PLAY RECAP *********************************************************************
+    null_resource.web_hosts_provision[0] (local-exec): netology-develop-platform-web-0 : ok=4    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+    null_resource.web_hosts_provision[0] (local-exec): netology-develop-platform-web-1 : ok=4    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+    null_resource.web_hosts_provision[0]: Creation complete after 31s [id=3285233462125165969]
+
+    Apply complete! Resources: 1 added, 0 changed, 1 destroyed.
+
+    Outputs:
+
+    vms = {
+      "bastion" = null
+    }
+    ```
+
 Для проверки работы уберите у ВМ внешние адреса(nat=false). Этот вариант используется при работе через bastion-сервер.
-Для зачёта предоставьте код вместе с основной частью задания.
 
-### Правила приёма работы
+  - Исходный код в [src_bastion/](src_bastion/)
+  - В коде из примера уже все прописано- при установке бастиона nat=false устанавливается автоматом. Вот вывод работы ansible через ssh тунель бастиона
 
-В своём git-репозитории создайте новую ветку terraform-03, закоммитьте в эту ветку свой финальный код проекта. Ответы на задания и необходимые скриншоты оформите в md-файле в ветке terraform-03.
 
-В качестве результата прикрепите ссылку на ветку terraform-03 в вашем репозитории.
+    ```shell
+    ....
 
-Важно. Удалите все созданные ресурсы.
+    null_resource.web_hosts_provision[0] (local-exec): PLAY [test] ********************************************************************
 
-### Задание 7* (необязательное)
+    null_resource.web_hosts_provision[0] (local-exec): TASK [Validating the ssh port is open and] *************************************
+    null_resource.web_hosts_provision[0] (local-exec): ok: [netology-develop-platform-web-0]
+    null_resource.web_hosts_provision[0] (local-exec): ok: [bastion]
+    null_resource.web_hosts_provision[0] (local-exec): ok: [netology-develop-platform-web-1]
+
+    null_resource.web_hosts_provision[0] (local-exec): TASK [debug host identity] *****************************************************
+    null_resource.web_hosts_provision[0] (local-exec): ok: [netology-develop-platform-web-0] => {
+    null_resource.web_hosts_provision[0] (local-exec):     "msg": "inventory_hostname: netology-develop-platform-web-0\nansible_host: 10.0.1.18\nsecrets keys: ['netology-develop-platform-web-0', 'netology-develop-platform-web-1', 'bastion']\n"
+    null_resource.web_hosts_provision[0] (local-exec): }
+    null_resource.web_hosts_provision[0] (local-exec): ok: [netology-develop-platform-web-1] => {
+    null_resource.web_hosts_provision[0] (local-exec):     "msg": "inventory_hostname: netology-develop-platform-web-1\nansible_host: 10.0.1.7\nsecrets keys: ['netology-develop-platform-web-0', 'netology-develop-platform-web-1', 'bastion']\n"
+    null_resource.web_hosts_provision[0] (local-exec): }
+    null_resource.web_hosts_provision[0] (local-exec): ok: [bastion] => {
+    null_resource.web_hosts_provision[0] (local-exec):     "msg": "inventory_hostname: bastion\nansible_host: 84.201.172.67\nsecrets keys: ['netology-develop-platform-web-0', 'netology-develop-platform-web-1', 'bastion']\n"
+    null_resource.web_hosts_provision[0] (local-exec): }
+
+    null_resource.web_hosts_provision[0] (local-exec): TASK [save own secret] *********************************************************
+    null_resource.web_hosts_provision[0]: Still creating... [10s elapsed]
+    null_resource.web_hosts_provision[0] (local-exec): ok: [netology-develop-platform-web-0]
+    null_resource.web_hosts_provision[0] (local-exec): ok: [netology-develop-platform-web-1]
+    null_resource.web_hosts_provision[0] (local-exec): changed: [bastion]
+
+    null_resource.web_hosts_provision[0] (local-exec): TASK [save all secrets] ********************************************************
+    null_resource.web_hosts_provision[0] (local-exec): changed: [netology-develop-platform-web-0]
+    null_resource.web_hosts_provision[0] (local-exec): changed: [netology-develop-platform-web-1]
+    null_resource.web_hosts_provision[0] (local-exec): changed: [bastion]
+
+    null_resource.web_hosts_provision[0] (local-exec): PLAY RECAP *********************************************************************
+    null_resource.web_hosts_provision[0] (local-exec): bastion                    : ok=4    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+    null_resource.web_hosts_provision[0] (local-exec): netology-develop-platform-web-0 : ok=4    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+    null_resource.web_hosts_provision[0] (local-exec): netology-develop-platform-web-1 : ok=4    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+    null_resource.web_hosts_provision[0]: Creation complete after 13s [id=304499516821563154]
+
+    Apply complete! Resources: 2 added, 0 changed, 1 destroyed.
+
+    Outputs:
+
+    vms = {
+      "bastion" = "84.201.172.67"
+    }
+    ```
+
+
+### Задание 7* 
 Ваш код возвращает вам следущий набор данных: 
 ```
 > local.vpc
@@ -304,52 +409,54 @@ variable "each_vm" {
 }
 ```
 Предложите выражение в terraform console, которое удалит из данной переменной 3 элемент из: subnet_ids и subnet_zones.(значения могут быть любыми) Образец конечного результата:
-```
-> <некое выражение>
-{
-  "network_id" = "enp7i560tb28nageq0cc"
-  "subnet_ids" = [
-    "e9b0le401619ngf4h68n",
-    "e2lbar6u8b2ftd7f5hia",
-    "fl8ner8rjsio6rcpcf0h",
-  ]
-  "subnet_zones" = [
-    "ru-central1-a",
-    "ru-central1-b",
-    "ru-central1-d",
-  ]
-}
-```
-### Задание 8* (необязательное)
+
+  ```go
+  > {network_id = local.vpc.network_id, subnet_ids = [for i, x in local.vpc.subnet_ids : x if i != 2], subnet_zones = [for i, x in local.vpc.subnet_zones : x if i != 2]}
+  {
+    "network_id" = "enp7i560tb28nageq0cc"
+    "subnet_ids" = [
+      "e9b0le401619ngf4h68n",
+      "e2lbar6u8b2ftd7f5hia",
+      "fl8ner8rjsio6rcpcf0h",
+    ]
+    "subnet_zones" = [
+      "ru-central1-a",
+      "ru-central1-b",
+      "ru-central1-d",
+    ]
+  }
+  >  
+  ```
+### Задание 8* 
 Идентифицируйте и устраните намеренно допущенную в tpl-шаблоне ошибку. Обратите внимание, что terraform сам сообщит на какой строке и в какой позиции ошибка!
 ```
 [webservers]
 %{~ for i in webservers ~}
 ${i["name"]} ansible_host=${i["network_interface"][0]["nat_ip_address"] platform_id=${i["platform_id "]}}
+                                                                      ^нет}                         ^пробел
 %{~ endfor ~}
 ```
 
-### Задание 9* (необязательное)
+- Исправлено:
+
+```ini
+[webservers]
+%{~ for i in webservers ~}
+${i["name"]} ansible_host=${i["network_interface"][0]["nat_ip_address"]} platform_id=${i["platform_id"]}
+%{~ endfor ~}
+```
+### Задание 9* 
 Напишите  terraform выражения, которые сформируют списки:
 1. ["rc01","rc02","rc03","rc04",rc05","rc06",rc07","rc08","rc09","rc10....."rc99"] те список от "rc01" до "rc99"
+
+  > [for i in range(1, 100) : format("rc%02d", i)]
+
 2. ["rc01","rc02","rc03","rc04",rc05","rc06","rc11","rc12","rc13","rc14",rc15","rc16","rc19"....."rc96"] те список от "rc01" до "rc96", пропуская все номера, заканчивающиеся на "0","7", "8", "9", за исключением "rc19"
 
-### Критерии оценки
-
-Для общего зачёта создайте в вашем GitHub-репозитории новую ветку terraform-03. Закоммитьте в эту ветку свой финальный код проекта, пришлите ссылку на коммит.   
-**Удалите все созданные ресурсы**.
+  > [for i in range(1, 100) : format("rc%02d", i) if  !(i%10==0) && !contains([7,8,9], i%10)]
 
 
-Зачёт ставится, если:
 
-* выполнены все задания,
-* ответы даны в развёрнутой форме,
-* приложены соответствующие скриншоты и файлы проекта,
-* в выполненных заданиях нет противоречий и нарушения логики.
 
-На доработку работу отправят, если:
-
-* задание выполнено частично или не выполнено вообще,
-* в логике выполнения заданий есть противоречия и существенные недостатки. 
 
 
