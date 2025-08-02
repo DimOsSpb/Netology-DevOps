@@ -449,12 +449,15 @@ ${i["name"]} ansible_host=${i["network_interface"][0]["nat_ip_address"]} platfor
 Напишите  terraform выражения, которые сформируют списки:
 1. ["rc01","rc02","rc03","rc04",rc05","rc06",rc07","rc08","rc09","rc10....."rc99"] те список от "rc01" до "rc99"
 
-  > [for i in range(1, 100) : format("rc%02d", i)]
+    ```c
+    [for i in range(1, 100) : format("rc%02d", i)]
+    ```
 
 2. ["rc01","rc02","rc03","rc04",rc05","rc06","rc11","rc12","rc13","rc14",rc15","rc16","rc19"....."rc96"] те список от "rc01" до "rc96", пропуская все номера, заканчивающиеся на "0","7", "8", "9", за исключением "rc19"
 
-  > [for i in range(1, 100) : format("rc%02d", i) if  !(i%10==0) && !contains([7,8,9], i%10)]
-
+    ```c
+    [for i in range(1, 100) : format("rc%02d", i) if  !(i%10==0) && !contains([7,8,9], i%10)]
+    ```
 
 
 
