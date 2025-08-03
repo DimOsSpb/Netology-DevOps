@@ -1,0 +1,12 @@
+all:
+  hosts:
+    netology-develop-platform-web-0:
+        ansible_host: 
+        ansible_user: ubuntu
+    netology-develop-platform-web-1:
+        ansible_host: 
+        ansible_user: ubuntu
+    bastion:
+        ansible_host: 84.201.172.67
+        ansible_user: ubuntu
+  
