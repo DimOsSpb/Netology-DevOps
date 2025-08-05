@@ -12,8 +12,55 @@
 Воспользуйтесь [**примером**](https://grantorchard.com/dynamic-cloudinit-content-with-terraform-file-templates/). Обратите внимание, что ssh-authorized-keys принимает в себя список, а не строку.
 3. Добавьте в файл cloud-init.yml установку nginx.
 4. Предоставьте скриншот подключения к консоли и вывод команды ```sudo nginx -t```, скриншот консоли ВМ yandex cloud с их метками. Откройте terraform console и предоставьте скриншот содержимого модуля. Пример: > module.marketing_vm
-------
-В случае использования MacOS вы получите ошибку "Incompatible provider version" . В этом случае скачайте remote модуль локально и поправьте в нем версию template провайдера на более старую.
+
+    ![T1](img/task1-1.png)
+
+    ```shell
+    ubuntu@marketing-0:~$ sudo nginx -t
+    nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+    nginx: configuration file /etc/nginx/nginx.conf test is successful
+    ```
+    ```json
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform console
+    > module.vm-marketing
+    {
+      "external_ip_address" = [
+        "51.250.9.14",
+      ]
+      "fqdn" = [
+        "marketing-0.ru-central1.internal",
+      ]
+      "internal_ip_address" = [
+        "10.0.1.9",
+      ]
+      "labels" = [
+        tomap({
+          "project" = "marketing"
+        }),
+      ]
+      "network_interface" = [
+        tolist([
+          {
+            "dns_record" = tolist([])
+            "index" = 0
+            "ip_address" = "10.0.1.9"
+            "ipv4" = true
+            "ipv6" = false
+            "ipv6_address" = ""
+            "ipv6_dns_record" = tolist([])
+            "mac_address" = "d0:0d:1c:e9:29:b1"
+            "nat" = true
+            "nat_dns_record" = tolist([])
+            "nat_ip_address" = "51.250.9.14"
+            "nat_ip_version" = "IPV4"
+            "security_group_ids" = toset([])
+            "subnet_id" = "e9bdbudoi1pvih5g22r1"
+          },
+        ]),
+      ]
+    }
+    >  
+    ```
 ------
 
 ### Задание 2

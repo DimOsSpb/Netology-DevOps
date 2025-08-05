@@ -31,27 +31,66 @@ variable "vpc_name" {
   description = "VPC network&subnet name"
 }
 
-###common vars
+### 
 
-variable "vms_ssh_root_key" {
-  type        = string
-  default     = "your_ssh_ed25519_key"
-  description = "ssh-keygen -t ed25519"
+variable "vms_platform_data" {
+  type = object({
+    user    = string,
+    platform_id = string,
+    ssh_key_path = string,
+    ssh_priv_key_path = string,
+    packages = list(string),
+  })
+  default = {
+    user    = "ubuntu",
+    platform_id = "standard-v3",
+    ssh_key_path = "/home/odv/.ssh/netology.pub",
+    ssh_priv_key_path = "/home/odv/.ssh/netology",
+    packages = ["nginx"],
+
+  }
 }
 
-###example vm_web var
-variable "vm_web_name" {
-  type        = string
-  default     = "netology-develop-platform-web"
-  description = "example vm_web_ prefix"
+variable "projects_data" {
+  type = object({
+    prefix = string,
+    name_db = string,
+    name_web = string,
+    projects = list(string),  
+  
+  })
+  default = {
+    prefix  = "netology-develop-platform",
+    name_db = "db",
+    name_web  = "web",
+    projects = ["marketing","analytics"]
+  }
 }
 
-###example vm_db var
-variable "vm_db_name" {
-  type        = string
-  default     = "netology-develop-platform-db"
-  description = "example vm_db_ prefix"
+   
+data "yandex_compute_image" "ubuntu" {
+    family = "ubuntu-2404-lts"
 }
+
+data template_file "metadata" {
+  template = file("${path.module}/cloud-config.yaml")
+
+  vars = {
+    username           = var.vms_platform_data.user
+    ssh_public_key     = file(var.vms_platform_data.ssh_key_path)
+    packages           = jsonencode(var.vms_platform_data.packages)
+  }
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
