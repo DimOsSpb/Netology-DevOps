@@ -72,7 +72,7 @@
 3. Модуль должен возвращать в root module с помощью output информацию о yandex_vpc_subnet. Пришлите скриншот информации из terraform console о своем модуле. Пример: > module.vpc_dev  
 4. Замените ресурсы yandex_vpc_network и yandex_vpc_subnet созданным модулем. Не забудьте передать необходимые параметры сети из модуля vpc в модуль с виртуальной машиной.
 
-  - Исходный код данного задания будет в ветке [ter-04-task2]()
+  - Исходный код данного задания будет сохранен в ветке [ter-04-task2](https://github.com/DimOsSpb/Netology-DevOps/tree/terr-04-task2/ter-homeworks/04/src)
 
     ```cpp
     odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform console
@@ -87,19 +87,10 @@
       "zone" = "ru-central1-a"
     }
     >  
-    ```
+
 5. Сгенерируйте документацию к модулю с помощью terraform-docs.
  
-Пример вызова
-
-```
-module "vpc_dev" {
-  source       = "./vpc"
-  env_name     = "develop"
-  zone = "ru-central1-a"
-  cidr = "10.0.1.0/24"
-}
-```
+  - [vpc-doc.md](src/modules/vpc/vpc-doc.md)
 
 ### Задание 3
 1. Выведите список ресурсов в стейте.
