@@ -17,6 +17,7 @@ terraform.tfvars
 tfplan
 
 # Временно
+demonstration*.*
 **/demonstration*/*
 O2/demo/
 03/demo/

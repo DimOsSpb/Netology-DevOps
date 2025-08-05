@@ -20,7 +20,7 @@
     nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
     nginx: configuration file /etc/nginx/nginx.conf test is successful
     ```
-    ```json
+    ```с
     odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform console
     > module.vm-marketing
     {
