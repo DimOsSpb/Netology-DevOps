@@ -94,16 +94,144 @@
 
 ### Задание 3
 1. Выведите список ресурсов в стейте.
+
+    ```bash
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform state list
+    data.template_file.metadata
+    data.yandex_compute_image.ubuntu
+    module.vm-analytics.data.yandex_compute_image.my_image
+    module.vm-analytics.yandex_compute_instance.vm[0]
+    module.vm-marketing.data.yandex_compute_image.my_image
+    module.vm-marketing.yandex_compute_instance.vm[0]
+    module.vpc.yandex_vpc_network.this
+    module.vpc.yandex_vpc_subnet.this
+    ```
 2. Полностью удалите из стейта модуль vpc.
 3. Полностью удалите из стейта модуль vm.
+
+    ```bash
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform state rm module.vpc.yandex_vpc_network.this
+    Removed module.vpc.yandex_vpc_network.this
+    Successfully removed 1 resource instance(s).
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform state rm module.vpc.yandex_vpc_subnet.this
+    Removed module.vpc.yandex_vpc_subnet.this
+    Successfully removed 1 resource instance(s).
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform state rm module.vm-marketing.yandex_compute_instance.vm[0]
+    Removed module.vm-marketing.yandex_compute_instance.vm[0]
+    Successfully removed 1 resource instance(s).
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform state rm module.vm-marketing.data.yandex_compute_image.my_image
+    Removed module.vm-marketing.data.yandex_compute_image.my_image
+    Successfully removed 1 resource instance(s).
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform state rm module.vm-analytics.yandex_compute_instance.vm[0]
+    Removed module.vm-analytics.yandex_compute_instance.vm[0]
+    Successfully removed 1 resource instance(s).
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform state rm module.vm-analytics.data.yandex_compute_image.my_image
+    Removed module.vm-analytics.data.yandex_compute_image.my_image
+    Successfully removed 1 resource instance(s).
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform state list
+    data.template_file.metadata
+    data.yandex_compute_image.ubuntu
+    ```
 4. Импортируйте всё обратно. Проверьте terraform plan. Значимых(!!) изменений быть не должно.
 Приложите список выполненных команд и скриншоты процессы.
 
-## Дополнительные задания (со звёздочкой*)
 
-**Настоятельно рекомендуем выполнять все задания со звёздочкой.**   Они помогут глубже разобраться в материале.   
-Задания со звёздочкой дополнительные, не обязательные к выполнению и никак не повлияют на получение вами зачёта по этому домашнему заданию. 
+    ```bash
+    cat terraform.tfstate.1754397696.backup | jq -r '
+    .resources[]
+    | select(.module != null and (.module | test("^module\\.")))
+    | "\(.module).\(.type).\(.name) \(.instances[0].attributes.id)"'
+    module.vm-analytics.yandex_compute_image.my_image fd8383qtki9fpldbhtmd
+    module.vm-analytics.yandex_compute_instance.vm fhmvih6kv91e9f06pgt2
+    module.vm-marketing.yandex_compute_image.my_image fd8383qtki9fpldbhtmd
+    module.vm-marketing.yandex_compute_instance.vm fhmhestqe88va8llcv2t
+    module.vpc.yandex_vpc_network.this enplukq57f419hophos3
+    module.vpc.yandex_vpc_subnet.this e9bhhs7b3ta66joc11b5
+    ```
+    - Здесь ввод весь, вывод последней команды импорта (так короче). Не сразу понял, что для loop ресурсов нужен индекс [0].
 
+    ```bash
+    terraform import module.vpc.yandex_vpc_network.this enplukq57f419hophos3
+    terraform import module.vpc.yandex_vpc_subnet.this e9bhhs7b3ta66joc11b5
+    terraform import module.vm-analytics.yandex_compute_image.my_image fd8383qtki9fpldbhtmd    
+    terraform import module.vm-analytics.yandex_compute_instance.vm[0] fhmvih6kv91e9f06pgt2
+    terraform import module.vm-marketing.yandex_compute_image.my_image fd8383qtki9fpldbhtmd
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform import module.vm-marketing.yandex_compute_instance.vm[0] fhmhestqe88va8llcv2t
+    data.template_file.metadata: Reading...
+    data.template_file.metadata: Read complete after 0s [id=e29077f3afdfd9a900a80f4434d788a45af29af8406df4ff2dd5da66999f5971]
+    data.yandex_compute_image.ubuntu: Reading...
+    data.yandex_compute_image.ubuntu: Read complete after 0s [id=fd8383qtki9fpldbhtmd]
+    module.vm-marketing.data.yandex_compute_image.my_image: Reading...
+    module.vm-analytics.data.yandex_compute_image.my_image: Reading...
+    module.vm-marketing.data.yandex_compute_image.my_image: Read complete after 0s [id=fd8383qtki9fpldbhtmd]
+    module.vm-marketing.yandex_compute_instance.vm[0]: Importing from ID "fhmhestqe88va8llcv2t"...
+    module.vm-marketing.yandex_compute_instance.vm[0]: Import prepared!
+      Prepared yandex_compute_instance for import
+    module.vm-marketing.yandex_compute_instance.vm[0]: Refreshing state... [id=fhmhestqe88va8llcv2t]
+    module.vm-analytics.data.yandex_compute_image.my_image: Read complete after 0s [id=fd8383qtki9fpldbhtmd]
+
+    Import successful!
+
+    The resources that were imported are shown above. These resources are now in
+    your Terraform state and will henceforth be managed by Terraform.
+
+    ```
+
+    ```bash
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform state list
+    data.template_file.metadata
+    data.yandex_compute_image.ubuntu
+    module.vm-analytics.data.yandex_compute_image.my_image
+    module.vm-analytics.yandex_compute_instance.vm[0]
+    module.vm-marketing.data.yandex_compute_image.my_image
+    module.vm-marketing.yandex_compute_instance.vm[0]
+    module.vpc.yandex_vpc_network.this
+    module.vpc.yandex_vpc_subnet.this
+
+
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform plan
+    data.template_file.metadata: Reading...
+    data.template_file.metadata: Read complete after 0s [id=e29077f3afdfd9a900a80f4434d788a45af29af8406df4ff2dd5da66999f5971]
+    data.yandex_compute_image.ubuntu: Reading...
+    module.vpc.yandex_vpc_network.this: Refreshing state... [id=enplukq57f419hophos3]
+    data.yandex_compute_image.ubuntu: Read complete after 0s [id=fd8383qtki9fpldbhtmd]
+    module.vm-analytics.data.yandex_compute_image.my_image: Reading...
+    module.vm-marketing.data.yandex_compute_image.my_image: Reading...
+    module.vm-analytics.data.yandex_compute_image.my_image: Read complete after 0s [id=fd8383qtki9fpldbhtmd]
+    module.vm-marketing.data.yandex_compute_image.my_image: Read complete after 0s [id=fd8383qtki9fpldbhtmd]
+    module.vpc.yandex_vpc_subnet.this: Refreshing state... [id=e9bhhs7b3ta66joc11b5]
+    module.vm-analytics.yandex_compute_instance.vm[0]: Refreshing state... [id=fhmvih6kv91e9f06pgt2]
+    module.vm-marketing.yandex_compute_instance.vm[0]: Refreshing state... [id=fhmhestqe88va8llcv2t]
+
+    Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+      ~ update in-place
+
+    Terraform will perform the following actions:
+
+      # module.vm-analytics.yandex_compute_instance.vm[0] will be updated in-place
+      ~ resource "yandex_compute_instance" "vm" {
+          + allow_stopping_for_update = true
+            id                        = "fhmvih6kv91e9f06pgt2"
+            name                      = "analytics-0"
+            # (15 unchanged attributes hidden)
+
+            # (6 unchanged blocks hidden)
+        }
+
+      # module.vm-marketing.yandex_compute_instance.vm[0] will be updated in-place
+      ~ resource "yandex_compute_instance" "vm" {
+          + allow_stopping_for_update = true
+            id                        = "fhmhestqe88va8llcv2t"
+            name                      = "marketing-0"
+            # (15 unchanged attributes hidden)
+
+            # (6 unchanged blocks hidden)
+        }
+
+    Plan: 0 to add, 2 to change, 0 to destroy.
+    ```
+
+---
 
 ### Задание 4*
 
