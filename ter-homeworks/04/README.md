@@ -263,6 +263,8 @@ module "vpc_dev" {
 
 Предоставьте код, план выполнения, результат из консоли YC.
 
+---
+
   - Исходный код данного задания будет сохранен в ветке [ter-04-task4](https://github.com/DimOsSpb/Netology-DevOps/tree/terr-04-task4/ter-homeworks/04/src)
 
   - [Вывод terraform plan](src/task-4.plan)
