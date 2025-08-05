@@ -156,6 +156,9 @@
     terraform import module.vm-analytics.yandex_compute_image.my_image fd8383qtki9fpldbhtmd    
     terraform import module.vm-analytics.yandex_compute_instance.vm[0] fhmvih6kv91e9f06pgt2
     terraform import module.vm-marketing.yandex_compute_image.my_image fd8383qtki9fpldbhtmd
+
+    ...
+
     odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform import module.vm-marketing.yandex_compute_instance.vm[0] fhmhestqe88va8llcv2t
     data.template_file.metadata: Reading...
     data.template_file.metadata: Read complete after 0s [id=e29077f3afdfd9a900a80f4434d788a45af29af8406df4ff2dd5da66999f5971]
