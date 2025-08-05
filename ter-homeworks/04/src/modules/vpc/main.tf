@@ -12,9 +12,14 @@ resource "yandex_vpc_network" "this" {
 }
 
 resource "yandex_vpc_subnet" "this" {
-  name           = var.name
-  zone           = var.zone
+  for_each = {
+    for i, subnet in var.subnets : "${yandex_vpc_network.this.name}-${i}" => subnet
+  }
+  name           = each.key
+  zone           = each.value.zone
+  v4_cidr_blocks = [each.value.cidr]
   network_id     = yandex_vpc_network.this.id
-  v4_cidr_blocks = var.cidr
+
+  depends_on = [ yandex_vpc_network.this ]
 }
 

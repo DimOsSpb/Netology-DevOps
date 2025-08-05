@@ -263,6 +263,16 @@ module "vpc_dev" {
 
 Предоставьте код, план выполнения, результат из консоли YC.
 
+  - Исходный код данного задания будет сохранен в ветке [ter-04-task4](https://github.com/DimOsSpb/Netology-DevOps/tree/terr-04-task4/ter-homeworks/04/src)
+
+  - [Вывод terraform plan](src/task-4.plan)
+
+  - Далее подвох в лимите vpc, пришлось ручками удалить default сеть. Второе это zone = "ru-central1-c" которой нет у яндекс, есть ru-central1-d
+
+    ![T4-1](img/t4-1.png)
+    ![T4-1](img/t4-2.png)
+    ![T4-1](img/t4-3.png)
+    
 ### Задание 5*
 
 1. Напишите модуль для создания кластера managed БД Mysql в Yandex Cloud с одним или несколькими(2 по умолчанию) хостами в зависимости от переменной HA=true или HA=false. Используйте ресурс yandex_mdb_mysql_cluster: передайте имя кластера и id сети.

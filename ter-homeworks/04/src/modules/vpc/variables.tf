@@ -3,17 +3,15 @@ variable "name" {
   default     = ""
   description = "Input variable - vpc name"
 }
-variable "zone" {
-  type        = string
-  default     = ""
-  description = "Input variable - cloud zone"
+
+variable "subnets" {
+  type = list(object({
+    zone = string,
+    cidr = string
+  })) 
+  description = "Input variable - subnets"
 }
 
-variable "cidr" {
-  type = list(string)
-  default = []
-  description = "Input variable - cidr"
-}
 
 
 
