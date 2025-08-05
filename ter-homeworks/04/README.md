@@ -13,6 +13,8 @@
 3. Добавьте в файл cloud-init.yml установку nginx.
 4. Предоставьте скриншот подключения к консоли и вывод команды ```sudo nginx -t```, скриншот консоли ВМ yandex cloud с их метками. Откройте terraform console и предоставьте скриншот содержимого модуля. Пример: > module.marketing_vm
 
+  - Решение:
+
     ![T1](img/task1-1.png)
 
     ```shell
@@ -69,6 +71,23 @@
 2. Вы должны передать в модуль переменные с названием сети, zone и v4_cidr_blocks.
 3. Модуль должен возвращать в root module с помощью output информацию о yandex_vpc_subnet. Пришлите скриншот информации из terraform console о своем модуле. Пример: > module.vpc_dev  
 4. Замените ресурсы yandex_vpc_network и yandex_vpc_subnet созданным модулем. Не забудьте передать необходимые параметры сети из модуля vpc в модуль с виртуальной машиной.
+
+  - Исходный код данного задания будет в ветке [ter-04-task2]()
+
+    ```cpp
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform console
+    > module.vpc
+    {
+      "cidr" = tolist([
+        "10.0.1.0/24",
+      ])
+      "name" = "develop"
+      "subnet_id" = "e9bhhs7b3ta66joc11b5"
+      "vpc_id" = "enplukq57f419hophos3"
+      "zone" = "ru-central1-a"
+    }
+    >  
+    ```
 5. Сгенерируйте документацию к модулю с помощью terraform-docs.
  
 Пример вызова
