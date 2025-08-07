@@ -265,7 +265,7 @@ module "vpc_dev" {
 
 ---
 
-  - Исходный код данного задания будет сохранен в ветке [ter-04-task4](https://github.com/DimOsSpb/Netology-DevOps/tree/terr-04-task4/ter-homeworks/04/src)
+  - **Исходный код данного задания сохранен в ветке [ter-04-task4](https://github.com/DimOsSpb/Netology-DevOps/tree/terr-04-task4/ter-homeworks/04#%D0%B7%D0%B0%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5-4)**
 
   - [Вывод terraform plan](src/task-4.plan)
 
