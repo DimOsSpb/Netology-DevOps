@@ -352,7 +352,7 @@ secret data value: congrats!
     }
     ```
 
-    [V2](img/Vault2.png)
+    ![V2](img/Vault2.png)
 
 
 
