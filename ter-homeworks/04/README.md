@@ -286,11 +286,17 @@ module "vpc_dev" {
 ### Задание 7*
 
 1. Разверните у себя локально vault, используя docker-compose.yml в проекте.
+
+  - [hashicorp/vault](https://hub.docker.com/r/hashicorp/vault)
+
 2. Для входа в web-интерфейс и авторизации terraform в vault используйте токен "education".
 3. Создайте новый секрет по пути http://127.0.0.1:8200/ui/vault/secrets/secret/create
 Path: example  
 secret data key: test 
-secret data value: congrats!  
+secret data value: congrats!
+
+  ![V1](img/Vault1.png)
+  
 4. Считайте этот секрет с помощью terraform и выведите его в output по примеру:
 ```
 provider "vault" {
@@ -311,7 +317,7 @@ terraform console: >nonsensitive(data.vault_generic_secret.vault_example.data.<�
 ```
 5. Попробуйте самостоятельно разобраться в документации и записать новый секрет в vault с помощью terraform. 
 
-
+  - [Terraform Vault provider](https://developer.hashicorp.com/vault/tutorials/get-started/learn-terraform#auth-method-resource)
 
 
 
