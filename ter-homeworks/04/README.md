@@ -280,6 +280,7 @@ module "vpc_dev" {
   - **[Код выполненного задания в ветке terr-04-task5](https://github.com/DimOsSpb/Netology-DevOps/tree/terr-04-task5/ter-homeworks/04#%D0%B7%D0%B0%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5-5)**
 
 ### Задание 6*
+
 1. Используя готовый yandex cloud terraform module и пример его вызова(examples/simple-bucket): https://github.com/terraform-yc-modules/terraform-yc-s3 .
 Создайте и не удаляйте для себя s3 бакет размером 1 ГБ(это бесплатно), он пригодится вам в ДЗ к 5 лекции.
 
