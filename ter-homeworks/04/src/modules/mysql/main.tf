@@ -8,28 +8,44 @@ terraform {
 }
 
 resource "yandex_mdb_mysql_cluster" "this" {
-  name        = "test"
-  environment = "PRESTABLE"
-  network_id  = yandex_vpc_network.foo.id
-  version     = "8.0"
+  name        = var.name
+  environment = var.environment
+  network_id  = var.network_id
+  version     = var.ver
 
   resources {
-    resource_preset_id = "s2.micro"
-    disk_type_id       = "network-ssd"
-    disk_size          = 16
+    resource_preset_id = var.resource_preset_id
+    disk_type_id       = var.disk_type
+    disk_size          = var.disk_size
   }
 
-  mysql_config = {
-    sql_mode                      = "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
-    max_connections               = 100
-    default_authentication_plugin = "MYSQL_NATIVE_PASSWORD"
-    innodb_print_all_deadlocks    = true
-
+  dynamic "host" {
+    for_each = toset([for i in range(local.hosts_count) : i])
+    
+    content {
+      zone      = local.available_subnets[host.key % length(local.available_subnets)].zone
+      subnet_id = local.available_subnets[host.key % length(local.available_subnets)].id
+      name      = "mysql-${tostring(host.key)}"  
+    }
   }
+}
 
-  host {
-    zone      = "ru-central1-d"
-    subnet_id = yandex_vpc_subnet.foo.id
-  }
+locals {
+  hosts_count = var.HA ? 2 : 1
+  
+  available_subnets = [
+    for s in data.yandex_vpc_network.this.subnet_ids : {
+      id   = s
+      zone = data.yandex_vpc_subnet.subnets[s].zone
+    }
+  ]
+}
+
+data "yandex_vpc_network" "this" {
+  network_id = var.network_id
+}
+data "yandex_vpc_subnet" "subnets" {
+  for_each  = toset(data.yandex_vpc_network.this.subnet_ids)
+  subnet_id = each.key
 }
 
