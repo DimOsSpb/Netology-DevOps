@@ -342,15 +342,17 @@ secret data value: congrats!
 
     ```shell
     resource "vault_generic_secret" "my_example" {
-    path = "secret/my_example"
+      path = "secret/my_example"
 
-    data_json = <<EOT
-      {
-          "new":   "secret"
-      }
-      EOT
+      data_json = <<EOT
+        {
+            "new":   "secret"
+        }
+        EOT
     }
     ```
+
+    [V2](img/Vault2.png)
 
 
 
