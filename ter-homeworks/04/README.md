@@ -298,26 +298,59 @@ secret data value: congrats!
   ![V1](img/Vault1.png)
   
 4. Считайте этот секрет с помощью terraform и выведите его в output по примеру:
-```
-provider "vault" {
- address = "http://<IP_ADDRESS>:<PORT_NUMBER>"
- skip_tls_verify = true
- token = "education"
-}
-data "vault_generic_secret" "vault_example"{
- path = "secret/example"
-}
 
-output "vault_example" {
- value = "${nonsensitive(data.vault_generic_secret.vault_example.data)}"
-} 
+    ```bash
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform apply
+    data.vault_generic_secret.vault_example: Reading...
+    data.vault_generic_secret.vault_example: Read complete after 0s [id=secret/example]
 
+    Changes to Outputs:
+      + vault_example = {
+          + test = "congrats!"
+        }
+
+    You can apply this plan to save these new output values to the Terraform state, without changing any real infrastructure.
+
+    Do you want to perform these actions?
+      Terraform will perform the actions described above.
+      Only 'yes' will be accepted to approve.
+
+      Enter a value: yes
+
+
+    Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+
+    Outputs:
+
+    vault_example = tomap({
+      "test" = "congrats!"
+    })
+    ```
 Можно обратиться не к словарю, а конкретному ключу:
-terraform console: >nonsensitive(data.vault_generic_secret.vault_example.data.<имя ключа в секрете>)
-```
+
+    ```bash
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform console
+    > nonsensitive(data.vault_generic_secret.vault_example.data.test)
+    "congrats!"
+    >  
+    ```
+
+
 5. Попробуйте самостоятельно разобраться в документации и записать новый секрет в vault с помощью terraform. 
 
-  - [Terraform Vault provider](https://developer.hashicorp.com/vault/tutorials/get-started/learn-terraform#auth-method-resource)
+    - [vault_generic_secret](https://registry.terraform.io/providers/hashicorp/vault/latest/docs/resources/generic_secret)
+
+    ```shell
+    resource "vault_generic_secret" "my_example" {
+    path = "secret/my_example"
+
+    data_json = <<EOT
+      {
+          "new":   "secret"
+      }
+      EOT
+    }
+    ```
 
 
 
