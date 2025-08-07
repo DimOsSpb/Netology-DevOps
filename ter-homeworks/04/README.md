@@ -285,7 +285,7 @@ module "vpc_dev" {
 
 ### Задание 7*
 
-  - **[Код выполненного задания в ветке terr-04-task6](https://github.com/DimOsSpb/Netology-DevOps/tree/terr-04-task6/ter-homeworks/04#%D0%B7%D0%B0%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5-7)**
+  - **[Код выполненного задания в ветке terr-04-task6](https://github.com/DimOsSpb/Netology-DevOps/tree/terr-04-task7/ter-homeworks/04#%D0%B7%D0%B0%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5-7)**
 
 ### Задание 8*
 Попробуйте самостоятельно разобраться в документаци и с помощью terraform remote state разделить root модуль на два отдельных root-модуля: создание VPC , создание ВМ . 
