@@ -279,15 +279,49 @@ module "vpc_dev" {
 
 1. Напишите модуль для создания кластера managed БД Mysql в Yandex Cloud с одним или несколькими(2 по умолчанию) хостами в зависимости от переменной HA=true или HA=false. Используйте ресурс yandex_mdb_mysql_cluster: передайте имя кластера и id сети.
 
-  - Код будет сохранен в ветке [terr-04-task5]()
-  - Кластер из 2-х узлов - не рекомендуемая конфигурация. Но для теста и экономии ресурсов - допустимо. Для реальных сред для HA кластера минимум 3 узла разнесенных по зонам.  
-  Т.е. потребуется изменить код модуля и добавить функциональность согласно рекомендациям [Managed Service for MySQL](https://yandex.cloud/ru/docs/terraform/resources/mdb_mysql_cluster)
-  - Важные параметры для типа хостов [Классы хостов MySQL](https://yandex.cloud/ru/docs/managed-mysql/concepts/instance-types)
-  - В модуль передается только VPC ID, модуль сам определяет подсети и зоны, распределяет по ним узлы. Требуется минимум одна подсеть.
+    - Код будет сохранен в ветке [terr-04-task5](https://github.com/DimOsSpb/Netology-DevOps/tree/terr-04-task5/ter-homeworks/04)
+    - Кластер из 2-х узлов - не рекомендуемая конфигурация. Но для теста и экономии ресурсов - допустимо. Для реальных сред для HA кластера минимум 3 узла разнесённых по зонам.  
+    Т.е. потребуется изменить код модуля и добавить функциональность согласно рекомендациям [Managed Service for MySQL](https://yandex.cloud/ru/docs/terraform/resources/mdb_mysql_cluster)
+    - Важные параметры для переменных [Классы хостов MySQL](https://yandex.cloud/ru/docs/managed-mysql/concepts/instance-types)
+    - В модуль передаётся только VPC ID и подсети, модуль сам определяет зоны, распределяет по ним узлы. Требуется минимум одна подсеть.
+    - [Модуль mysql](/home/odv/projects/MY/DevOpsCourse/ter-homeworks/04/src/modules/mysql)
 
 2. Напишите модуль для создания базы данных и пользователя в уже существующем кластере managed БД Mysql. Используйте ресурсы yandex_mdb_mysql_database и yandex_mdb_mysql_user: передайте имя базы данных, имя пользователя и id кластера при вызове модуля.
+
+    - [yandex_mdb_mysql_database](https://yandex.cloud/ru/docs/terraform/resources/mdb_mysql_database)
+    - [yandex_mdb_mysql_user](https://yandex.cloud/ru/docs/terraform/resources/mdb_mysql_database)
+    - [Модуль mysql_db](/home/odv/projects/MY/DevOpsCourse/ter-homeworks/04/src/modules/mysql_db)
+
 3. Используя оба модуля, создайте кластер example из одного хоста, а затем добавьте в него БД test и пользователя app. Затем измените переменную и превратите сингл хост в кластер из 2-х серверов.
-4. Предоставьте план выполнения и по возможности результат. Сразу же удаляйте созданные ресурсы, так как кластер может стоить очень дорого. Используйте минимальную конфигурацию.
+    
+    - [plan sql cluster](src/sqlcluster.plan)
+
+    ![T5-1](img/t5-1.png)
+    ![T5-2](img/t5-2.png)
+
+    - [plan sql + db + user](src/sqldb.plan)
+    
+    ![T5-1](img/t5-3.png)
+
+    - [plan cluster -> 2 hosts](src/sqlcluster2.plan)
+
+    ![T5-2](img/t5-4.png)
+
+    ```shell
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform destroy
+
+    ...
+
+    module.mysql.yandex_mdb_mysql_cluster.this: Still destroying... [id=c9q8gqin00vr1u693jls, 1m10s elapsed]
+    module.mysql.yandex_mdb_mysql_cluster.this: Destruction complete after 1m14s
+    module.vpc_dev.yandex_vpc_subnet.this["develop-0"]: Destroying... [id=e9b6fu1dokcjqdfv5hk8]
+    module.vpc_dev.yandex_vpc_subnet.this["develop-0"]: Destruction complete after 3s
+    module.vpc_dev.yandex_vpc_network.this: Destroying... [id=enpsljcpopf8u4i834q0]
+    module.vpc_dev.yandex_vpc_network.this: Destruction complete after 0s
+
+    Destroy complete! Resources: 5 destroyed.
+
+    ```
 
 ### Задание 6*
 1. Используя готовый yandex cloud terraform module и пример его вызова(examples/simple-bucket): https://github.com/terraform-yc-modules/terraform-yc-s3 .

@@ -33,19 +33,18 @@ resource "yandex_mdb_mysql_cluster" "this" {
 locals {
   hosts_count = var.HA ? 2 : 1
   
-  available_subnets = [
-    for s in data.yandex_vpc_network.this.subnet_ids : {
-      id   = s
-      zone = data.yandex_vpc_subnet.subnets[s].zone
-    }
-  ]
+  available_subnets = values(var.subnets)
 }
 
 data "yandex_vpc_network" "this" {
   network_id = var.network_id
 }
-data "yandex_vpc_subnet" "subnets" {
-  for_each  = toset(data.yandex_vpc_network.this.subnet_ids)
-  subnet_id = each.key
-}
 
+
+resource "null_resource" "check_subnets_exist" {
+  count = length(local.available_subnets) > 0 ? 0 : 1
+
+  provisioner "local-exec" {
+    command = "echo 'ERROR: VPC must have at least one subnet' && exit 1"
+  }
+}

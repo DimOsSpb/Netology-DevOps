@@ -49,7 +49,20 @@ variable "disk_size" {
 variable "network_id" {
   type        = string
   default     = ""
-  description = "Input variable - subnet_id"
+  description = "Input variable - vpc id"
+  
+  validation {
+    condition     = length(var.network_id) > 0
+    error_message = "VPC not defined"
+  }
+}
+
+variable "subnets" {
+  type = map(object({
+    id   = string
+    zone = string
+  }))
+  description = "Input variable - vpc subnets"
 }
 
 
