@@ -284,58 +284,64 @@ module "vpc_dev" {
 1. Используя готовый yandex cloud terraform module и пример его вызова(examples/simple-bucket): https://github.com/terraform-yc-modules/terraform-yc-s3 .
 Создайте и не удаляйте для себя s3 бакет размером 1 ГБ(это бесплатно), он пригодится вам в ДЗ к 5 лекции.
 
-### Задание 7*
+```shell
+odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src$ terraform apply
+random_string.unique_id: Refreshing state... [id=9tn2jwim]
+module.s3.random_string.unique_id: Refreshing state... [id=argbyy3j]
+module.s3.data.yandex_client_config.client: Reading...
+module.s3.data.yandex_client_config.client: Read complete after 1s [id=4182557970]
 
-1. Разверните у себя локально vault, используя docker-compose.yml в проекте.
-2. Для входа в web-интерфейс и авторизации terraform в vault используйте токен "education".
-3. Создайте новый секрет по пути http://127.0.0.1:8200/ui/vault/secrets/secret/create
-Path: example  
-secret data key: test 
-secret data value: congrats!  
-4. Считайте этот секрет с помощью terraform и выведите его в output по примеру:
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # module.s3.yandex_storage_bucket.this will be created
+  + resource "yandex_storage_bucket" "this" {
+      + acl                   = (known after apply)
+      + bucket                = "simple-bucket-9tn2jwim"
+      + bucket_domain_name    = (known after apply)
+      + default_storage_class = "STANDARD"
+      + folder_id             = "b1gg3ad99mhgfm5qo1tt"
+      + force_destroy         = false
+      + id                    = (known after apply)
+      + max_size              = 1
+      + policy                = (known after apply)
+      + website_domain        = (known after apply)
+      + website_endpoint      = (known after apply)
+
+      + versioning {
+          + enabled = true
+        }
+    }
+
+Plan: 1 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + bucket_name = (known after apply)
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+module.s3.yandex_storage_bucket.this: Creating...
+module.s3.yandex_storage_bucket.this: Creation complete after 3s [id=simple-bucket-9tn2jwim]
+
+Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+bucket_name = "simple-bucket-9tn2jwim"
 ```
-provider "vault" {
- address = "http://<IP_ADDRESS>:<PORT_NUMBER>"
- skip_tls_verify = true
- token = "education"
-}
-data "vault_generic_secret" "vault_example"{
- path = "secret/example"
-}
 
-output "vault_example" {
- value = "${nonsensitive(data.vault_generic_secret.vault_example.data)}"
-} 
+![T6](img/task6-1.png)
 
-Можно обратиться не к словарю, а конкретному ключу:
-terraform console: >nonsensitive(data.vault_generic_secret.vault_example.data.<имя ключа в секрете>)
-```
-5. Попробуйте самостоятельно разобраться в документации и записать новый секрет в vault с помощью terraform. 
+[### Задание 7* (Ветка main)](https://github.com/DimOsSpb/Netology-DevOps/blob/main/ter-homeworks/04/README.md#%D0%B7%D0%B0%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5-7)
 
-### Задание 8*
-Попробуйте самостоятельно разобраться в документаци и с помощью terraform remote state разделить root модуль на два отдельных root-модуля: создание VPC , создание ВМ . 
 
-### Правила приёма работы
 
-В своём git-репозитории создайте новую ветку terraform-04, закоммитьте в эту ветку свой финальный код проекта. Ответы на задания и необходимые скриншоты оформите в md-файле в ветке terraform-04.
-
-В качестве результата прикрепите ссылку на ветку terraform-04 в вашем репозитории.
-
-**Важно.** Удалите все созданные ресурсы.
-
-### Критерии оценки
-
-Зачёт ставится, если:
-
-* выполнены все задания,
-* ответы даны в развёрнутой форме,
-* приложены соответствующие скриншоты и файлы проекта,
-* в выполненных заданиях нет противоречий и нарушения логики.
-
-На доработку работу отправят, если:
-
-* задание выполнено частично или не выполнено вообще,
-* в логике выполнения заданий есть противоречия и существенные недостатки. 
 
 
 
