@@ -290,7 +290,42 @@ module "vpc_dev" {
 ### Задание 8*
 Попробуйте самостоятельно разобраться в документаци и с помощью terraform remote state разделить root модуль на два отдельных root-модуля: создание VPC , создание ВМ . 
 
-[### Задание 8* (Ветка main)](https://github.com/DimOsSpb/Netology-DevOps/blob/main/ter-homeworks/04/README.md#%D0%B7%D0%B0%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5-8)
+  - Сперва проинициализируем и соберем проект в src/vpc
+  - Перейдем в src/vm
+  - Инициализируем и соберем ссылаясь на стейт в src/vpc - первые две строки вывода:
+
+    **_data.terraform_remote_state.vpc: Reading...  
+    data.terraform_remote_state.vpc: Read complete after 0s_***
+
+    ```shell
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/04/src/vm$ terraform apply
+    data.terraform_remote_state.vpc: Reading...
+    data.terraform_remote_state.vpc: Read complete after 0s
+
+    ...
+
+    Plan: 1 to add, 0 to change, 0 to destroy.
+
+    Do you want to perform these actions?
+      Terraform will perform the actions described above.
+      Only 'yes' will be accepted to approve.
+
+      Enter a value: yes
+
+    yandex_compute_instance.vm: Creating...
+    yandex_compute_instance.vm: Still creating... [10s elapsed]
+    yandex_compute_instance.vm: Still creating... [20s elapsed]
+    yandex_compute_instance.vm: Still creating... [30s elapsed]
+    yandex_compute_instance.vm: Still creating... [40s elapsed]
+    yandex_compute_instance.vm: Still creating... [50s elapsed]
+    yandex_compute_instance.vm: Still creating... [1m0s elapsed]
+    yandex_compute_instance.vm: Still creating... [1m10s elapsed]
+    yandex_compute_instance.vm: Creation complete after 1m12s [id=fhmj7l95rpjkuhte2g3l]
+
+    Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+    ```
+
+[### (Ветка main)](https://github.com/DimOsSpb/Netology-DevOps/blob/main/ter-homeworks/04)
 
 
 
