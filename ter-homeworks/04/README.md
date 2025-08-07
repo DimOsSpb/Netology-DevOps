@@ -292,6 +292,9 @@ module "vpc_dev" {
 
   - Сперва проинициализируем и соберем проект в src/vpc
   - Перейдем в src/vm
+  
+    [main.tf](src/vm/main.tf)
+
   - Инициализируем и соберем ссылаясь на стейт в src/vpc - первые две строки вывода:
 
     **_data.terraform_remote_state.vpc: Reading...  
