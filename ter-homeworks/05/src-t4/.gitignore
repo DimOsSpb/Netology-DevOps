@@ -10,17 +10,3 @@
 
 # own secret vars store.
 personal.auto.tfvars
-
-
-terraform.tfvars
-
-tfplan
-
-# Временно
-demonstration*.*
-**/demonstration*/*
-O2/demo/
-03/demo/
-
-
-06/
