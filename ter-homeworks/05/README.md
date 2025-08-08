@@ -17,16 +17,21 @@
 
     - ДЗ к лекции 4 (src):
 
-    tflint: Warning: Missing version constraint for provider "yandex" in `required_providers` (terraform_required_providers)
+    tflint: Warning: Missing version constraint for provider "yandex" in `required_providers` (terraform_required_providers)  
+        
         - Нам следует отслеживать и фиксировать версии ПО, которое используем, т.к. от версии к версии его поведение может менятся и приводить к непредсказуемым результатам 
-    tflint: Warning: [Fixable] variable "vms_ssh_root_key" is declared but not used (terraform_unused_declarations)
+
+    tflint: Warning: [Fixable] variable "vms_ssh_root_key" is declared but not used (terraform_unused_declarations)  
+        
         - Переменные объявлены но не используются. Это может говорить о потенциальных ошибках, удаленном коде и приводить к дополнительному времени в работе terraform. Рекомендуется чистить эти объявления.
 
     - ДЗ к лекции 4 (vms):
-
+    ```
     tflint: Warning: Module source "git::https://github.com/udjin10/yandex_compute_instance.git?ref=main" uses a default branch as ref (main) (terraform_module_pinned_source)
     checkov: Check: CKV_TF_1: "Ensure Terraform module sources use a commit hash"
     checkov: Check: CKV_TF_2: "Ensure Terraform module sources use a tag with a version number"
+    ```
+    
         - Здесь не указана фиксированая версия модуля, ветку main не рекомендуется указывать, т.к. она меняется и поведение кода может быть не предсказуемо. Нужно указывать версию по тегу, например v1.2.3 (?ref=v1.2.0"), или конкретный commit hash
     
 ------
