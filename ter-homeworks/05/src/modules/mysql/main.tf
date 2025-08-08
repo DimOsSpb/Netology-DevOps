@@ -12,6 +12,7 @@ resource "yandex_mdb_mysql_cluster" "this" {
   environment = "PRESTABLE"
   network_id  = yandex_vpc_network.foo.id
   version     = "8.0"
+  security_group_ids = "enpujsk4a8dasstpbtl0" # develop
 
   resources {
     resource_preset_id = "s2.micro"
