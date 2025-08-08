@@ -34,6 +34,44 @@
 
 1. Возьмите ваш GitHub-репозиторий с **выполненным ДЗ 4** в ветке 'terraform-04' и сделайте из него ветку 'terraform-05'.
 2. Повторите демонстрацию лекции: настройте YDB, S3 bucket, yandex service account, права доступа и мигрируйте state проекта в S3 с блокировками. Предоставьте скриншоты процесса в качестве ответа.
+
+    - [Загрузка состояний Terraform в Yandex Object Storage](https://yandex.cloud/ru/docs/tutorials/infrastructure-management/terraform-state-storage)
+    - [Блокировка состояний Terraform с помощью Yandex Managed Service for YDB](https://yandex.cloud/ru/docs/tutorials/infrastructure-management/terraform-state-lock)
+
+    ```shell
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/05/src$ terraform init -backend-config="/home/odv/.secret/ya-tf-sa-keys"
+
+    Initializing the backend...
+    Do you want to copy existing state to the new backend?
+    Pre-existing state was found while migrating the previous "local" backend to the
+    newly configured "s3" backend. No existing state was found in the newly
+    configured "s3" backend. Do you want to copy this state to the new "s3"
+    backend? Enter "yes" to copy and "no" to start with an empty state.
+
+    Enter a value: yes
+
+
+    Successfully configured the backend "s3"! Terraform will automatically
+    use this backend unless the backend configuration changes.
+    Initializing modules...
+
+    Initializing provider plugins...
+    - Reusing previous version of yandex-cloud/yandex from the dependency lock file
+    - Reusing previous version of hashicorp/template from the dependency lock file
+    - Using previously-installed hashicorp/template v2.2.0
+    - Using previously-installed yandex-cloud/yandex v0.149.0
+
+    Terraform has been successfully initialized!
+
+    You may now begin working with Terraform. Try running "terraform plan" to see
+    any changes that are required for your infrastructure. All Terraform commands
+    should now work.
+
+    If you ever set or change modules or backend configuration for Terraform,
+    rerun this command to reinitialize your working directory. If you forget, other
+    commands will detect it and remind you to do so if necessary.
+    ```
+
 3. Закоммитьте в ветку 'terraform-05' все изменения.
 4. Откройте в проекте terraform console, а в другом окне из этой же директории попробуйте запустить terraform apply.
 5. Пришлите ответ об ошибке доступа к state.
