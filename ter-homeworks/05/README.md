@@ -75,14 +75,53 @@
 3. Закоммитьте в ветку 'terraform-05' все изменения.
 4. Откройте в проекте terraform console, а в другом окне из этой же директории попробуйте запустить terraform apply.
 5. Пришлите ответ об ошибке доступа к state.
+
+    ```shell
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/05/src$ terraform apply
+    ╷
+    │ Error: Error acquiring the state lock
+    │ 
+    │ Error message: operation error DynamoDB: PutItem, https response error StatusCode: 400, RequestID: 0f4996e8-106a-46b7-9fbd-24ca96589f09, ConditionalCheckFailedException: Condition not satisfied
+    │ Lock Info:
+    │   ID:        080c1051-8b3c-6463-56d8-f0601a2e4585
+    │   Path:      tfstate-develop-08082025/terraform.tfstate
+    │   Operation: OperationTypeInvalid
+    │   Who:       odv@matebook16s
+    │   Version:   1.8.4
+    │   Created:   2025-08-08 13:01:15.492002196 +0000 UTC
+    │   Info:      
+    │ 
+    │ 
+    │ Terraform acquires a state lock to protect the state from being written
+    │ by multiple users at the same time. Please resolve the issue above and try
+    │ again. For most commands, you can disable locking with the "-lock=false"
+    │ flag, but this is not recommended.
+    ```
 6. Принудительно разблокируйте state. Пришлите команду и вывод.
 
+    ```shell
+    odv@matebook16s:~/projects/MY/DevOpsCourse/ter-homeworks/05/src$ terraform force-unlock 080c1051-8b3c-6463-56d8-f0601a2e4585
+    Do you really want to force-unlock?
+    Terraform will remove the lock on the remote state.
+    This will allow local Terraform commands to modify this state, even though it
+    may still be in use. Only 'yes' will be accepted to confirm.
+
+    Enter a value: yes
+
+    Terraform state has been successfully unlocked!
+
+    The state has been unlocked, and Terraform commands should now be able to
+    obtain a new lock on the remote state.
+    ```
 
 ------
 ### Задание 3  
 
 1. Сделайте в GitHub из ветки 'terraform-05' новую ветку 'terraform-hotfix'.
 2. Проверье код с помощью tflint и checkov, исправьте все предупреждения и ошибки в 'terraform-hotfix', сделайте коммит.
+
+    - [Checkov policy index - all](https://www.checkov.io/5.Policy%20Index/all.html)
+     
 3. Откройте новый pull request 'terraform-hotfix' --> 'terraform-05'. 
 4. Вставьте в комментарий PR результат анализа tflint и checkov, план изменений инфраструктуры из вывода команды terraform plan.
 5. Пришлите ссылку на PR для ревью. Вливать код в 'terraform-05' не нужно.
