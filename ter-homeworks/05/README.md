@@ -81,6 +81,7 @@
 5. Пришлите ответ об ошибке доступа к state.
 6. Принудительно разблокируйте state. Пришлите команду и вывод.
 
+- **Исходный код данного задания сохранен в ветке [terraform-05](https://github.com/DimOsSpb/Netology-DevOps/tree/terraform-05/ter-homeworks/05#%D0%B7%D0%B0%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5-2)**
 
 ------
 ### Задание 3  
@@ -91,42 +92,37 @@
 4. Вставьте в комментарий PR результат анализа tflint и checkov, план изменений инфраструктуры из вывода команды terraform plan.
 5. Пришлите ссылку на PR для ревью. Вливать код в 'terraform-05' не нужно.
 
+- **Исходный код данного задания сохранен в ветке [terraform-hotfix](https://github.com/DimOsSpb/Netology-DevOps/tree/terraform-hotfix/ter-homeworks/05#%D0%B7%D0%B0%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5-3)**
+
 ------
 ### Задание 4
 
 1. Напишите переменные с валидацией и протестируйте их, заполнив default верными и неверными значениями. Предоставьте скриншоты проверок из terraform console. 
 
 - type=string, description="ip-адрес" — проверка, что значение переменной содержит верный IP-адрес с помощью функций cidrhost() или regex(). Тесты:  "192.168.0.1" и "1920.1680.0.1";
+
+    ![T1](img/t5-1.png)
+    ![T2](img/t5-2.png)
+
 - type=list(string), description="список ip-адресов" — проверка, что все адреса верны. Тесты:  ["192.168.0.1", "1.1.1.1", "127.0.0.1"] и ["192.168.0.1", "1.1.1.1", "1270.0.0.1"].
 
-## Дополнительные задания (со звёздочкой*)
+    ![T1](img/t5-3.png)
+    ![T2](img/t5-4.png)
 
-**Настоятельно рекомендуем выполнять все задания со звёздочкой.** Их выполнение поможет глубже разобраться в материале.   
-Задания со звёздочкой дополнительные, не обязательные к выполнению и никак не повлияют на получение вами зачёта по этому домашнему заданию. 
+
 ------
 ### Задание 5*
 1. Напишите переменные с валидацией:
 - type=string, description="любая строка" — проверка, что строка не содержит символов верхнего регистра;
+
+    ![T1](img/t5-5.png)
+    ![T2](img/t5-6.png)
+
 - type=object — проверка, что одно из значений равно true, а второе false, т. е. не допускается false false и true true:
-```
-variable "in_the_end_there_can_be_only_one" {
-    description="Who is better Connor or Duncan?"
-    type = object({
-        Dunkan = optional(bool)
-        Connor = optional(bool)
-    })
 
-    default = {
-        Dunkan = true
-        Connor = false
-    }
+    ![T1](img/t5-7.png)
+    ![T2](img/t5-8.png)
 
-    validation {
-        error_message = "There can be only one MacLeod"
-        condition = <проверка>
-    }
-}
-```
 ------
 ### Задание 6*
 
