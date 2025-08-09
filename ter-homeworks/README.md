@@ -10,5 +10,9 @@
 
 5. [Использование Terraform в команде](05/README.md)
 
+---
 
+# Задания, решения которых отложено.
+
+5. [ter-homeworks 05 - task 6* (после изучения Jenkins/Teamcity/Gitlab)](05/README.md#задание-6)
 
