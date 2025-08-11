@@ -2,6 +2,7 @@
 ## Разделы
 - [Виртуализация и контейнеризация](homeworks/README.md)
 - [Облачная инфраструктура. Terraform](ter-homeworks/README.md)
+- [Система управления конфигурациями](ansible-homeworks/README.md)
 ---
 ---
 - [Вопросы и комментарии по курсу](Questions&Comments/README.md)
