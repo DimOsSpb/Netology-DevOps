@@ -11,21 +11,22 @@
     - block:
         - name: Get clickhouse distrib
           ansible.builtin.get_url:
-            url: "https://packages.clickhouse.com/rpm/stable/{{ item }}-{{ clickhouse_version }}.noarch.rpm"
+            url: "https://packages.clickhouse.com/{{ pakage_manager }}/stable/{{ item }}-{{ clickhouse_version }}.noarch.{{ pakage_manager }}"
             dest: "./{{ item }}-{{ clickhouse_version }}.rpm"
           with_items: "{{ clickhouse_packages }}"
       rescue:
         - name: Get clickhouse distrib
           ansible.builtin.get_url:
-            url: "https://packages.clickhouse.com/rpm/stable/clickhouse-common-static-{{ clickhouse_version }}.x86_64.rpm"
-            dest: "./clickhouse-common-static-{{ clickhouse_version }}.rpm"
+            url: "https://packages.clickhouse.com/{{ pakage_manager }}/stable/clickhouse-common-static-{{ clickhouse_version }}.x86_64.{{ pakage_manager }}"
+            dest: "./clickhouse-common-static-{{ clickhouse_version }}.{{ pakage_manager }}"
     - name: Install clickhouse packages
       become: true
-      ansible.builtin.yum:
+      ansible.builtin.package:
         name:
-          - clickhouse-common-static-{{ clickhouse_version }}.rpm
-          - clickhouse-client-{{ clickhouse_version }}.rpm
-          - clickhouse-server-{{ clickhouse_version }}.rpm
+          - "{{ 'clickhouse-common-static-' ~ clickhouse_version ~ '.' ~ pakage_manager }}"
+          - "{{ 'clickhouse-client-' ~ clickhouse_version ~ '.' ~ pakage_manager }}"
+          - "{{ 'clickhouse-server-' ~ clickhouse_version ~ '.' ~ pakage_manager }}"
+        state: present
       notify: Start clickhouse service
     - name: Flush handlers
       meta: flush_handlers

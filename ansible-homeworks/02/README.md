@@ -10,6 +10,9 @@
 ## Основная часть
 
 1. Подготовьте свой inventory-файл `prod.yml`.
+
+    - Установил два узла на yandex cloude через terraform [src/tf](src/ft) clickhouse & vector
+
 2. Допишите playbook: нужно сделать ещё один play, который устанавливает и настраивает [vector](https://vector.dev). Конфигурация vector должна деплоиться через template файл jinja2. От вас не требуется использовать все возможности шаблонизатора, просто вставьте стандартный конфиг в template файл. Информация по шаблонам по [ссылке](https://www.dmosk.ru/instruktions.php?object=ansible-nginx-install). не забудьте сделать handler на перезапуск vector в случае изменения конфигурации!
 3. При создании tasks рекомендую использовать модули: `get_url`, `template`, `unarchive`, `file`.
 4. Tasks должны: скачать дистрибутив нужной версии, выполнить распаковку в выбранную директорию, установить vector.
