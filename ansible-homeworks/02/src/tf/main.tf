@@ -38,7 +38,8 @@ resource "yandex_compute_instance" "platform" {
 
   metadata = {
     serial-port-enable = 1
-    ssh-keys           = "${each.value.user_name}:${file("/home/odv/.ssh/netology.pub")}"
+    # ssh-keys           = "${each.value.user_name}:${file("/home/odv/.ssh/netology.pub")}"
+    user-data = data.template_file.metadata.rendered
   }
 
 }

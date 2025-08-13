@@ -23,3 +23,5 @@ ansible-playbook site.yml -i inventory/prod.yml --ask-vault-pass
 
 # Чтобы не удалять руками
 docker rm -f $centos_id $ubuntu_id $fedora_id >/dev/null 2>&1; 
+
+

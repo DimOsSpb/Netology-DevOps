@@ -14,7 +14,7 @@ variable "vms_resources" {
     type = map(object({
         platform_id    = string,
         platform_name    = string,
-        user_name    = string,        
+        
         cores          = number,
         memory         = number,
         core_fraction  = number,
@@ -26,7 +26,7 @@ variable "vms_resources" {
         clickhouse = {
             platform_name = "clickhouse"
             platform_id = "standard-v3",
-            user_name = "debian"
+
             cores=2,
             memory=1,
             core_fraction=20,
@@ -36,7 +36,7 @@ variable "vms_resources" {
         vector = {
             platform_name = "vector"
             platform_id = "standard-v3",
-            user_name = "debian"
+
             cores=2,
             memory=1,
             core_fraction=20,
@@ -53,3 +53,12 @@ variable "vm_yandex_compute_image" {
   description = "Compute Image"
 }
 
+data template_file "metadata" {
+  template = file("${path.module}/cloud-config.yaml")
+
+  vars = {
+    username           = "odv"
+    ssh_public_key     = file("/home/odv/.ssh/netology.pub")
+
+  }
+}

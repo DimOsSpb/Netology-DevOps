@@ -9,29 +9,47 @@
         state: restarted
   tasks:
     - block:
-        - name: Get clickhouse distrib
-          ansible.builtin.get_url:
-            url: "https://packages.clickhouse.com/{{ pakage_manager }}/stable/{{ item }}-{{ clickhouse_version }}.noarch.{{ pakage_manager }}"
-            dest: "./{{ item }}-{{ clickhouse_version }}.rpm"
-          with_items: "{{ clickhouse_packages }}"
-      rescue:
-        - name: Get clickhouse distrib
-          ansible.builtin.get_url:
-            url: "https://packages.clickhouse.com/{{ pakage_manager }}/stable/clickhouse-common-static-{{ clickhouse_version }}.x86_64.{{ pakage_manager }}"
-            dest: "./clickhouse-common-static-{{ clickhouse_version }}.{{ pakage_manager }}"
-    - name: Install clickhouse packages
-      become: true
-      ansible.builtin.package:
-        name:
-          - "{{ 'clickhouse-common-static-' ~ clickhouse_version ~ '.' ~ pakage_manager }}"
-          - "{{ 'clickhouse-client-' ~ clickhouse_version ~ '.' ~ pakage_manager }}"
-          - "{{ 'clickhouse-server-' ~ clickhouse_version ~ '.' ~ pakage_manager }}"
-        state: present
-      notify: Start clickhouse service
+      - name: Get clickhouse distrib
+        ansible.builtin.get_url:
+          url: "https://packages.clickhouse.com/deb/pool/main/c/{{ item }}/{{ item }}_{{ clickhouse_version }}_amd64.{{ pakage_type }}"
+          dest: "./{{ item }}-{{ clickhouse_version }}.{{ pakage_type }}"
+        with_items: "{{ clickhouse_packages }}"
+      # rescue:
+      #   - name: Handle get clickhouse error
+      #     debug:
+      #       msg: "Failed to download packages!"
+
+
+      - name: Install clickhouse packages manually
+        become: true
+        ansible.builtin.apt:
+          deb: ./{{ item }}-{{ clickhouse_version }}.{{ pakage_type }}
+          state: present
+        with_items: "{{ clickhouse_packages }}"
+        when: pakage_type == 'deb'
+        notify: Start clickhouse service
+
+      - name: Install clickhouse packages manually
+        become: true
+        ansible.builtin.command: rpm -ivh ./{{ item }}-{{ clickhouse_version }}.{{ pakage_type }}
+        with_items: "{{ clickhouse_packages }}"
+        when: pakage_type == 'rpm'
+        notify: Start clickhouse service
+
     - name: Flush handlers
       meta: flush_handlers
+
+    - name: Wait until port 9000 becomes reachable
+      become: true
+      ansible.builtin.wait_for:
+        host: localhost
+        port: 9000
+        timeout: 120
+      register: wait_port_result
+      failed_when: wait_port_result.failed
+
     - name: Create database
-      ansible.builtin.command: "clickhouse-client -q 'create database logs;'"
+      ansible.builtin.command: "clickhouse-client -q 'CREATE DATABASE IF NOT EXISTS logs;'"
       register: create_db
       failed_when: create_db.rc != 0 and create_db.rc !=82
       changed_when: create_db.rc == 0
