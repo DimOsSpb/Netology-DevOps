@@ -24,7 +24,7 @@
 - Перейти в каталог с плейбуком site.yml
 - Выполнить плейбук
 ```shell
-playbook$ ansible-playbook -i inventory/prod.yml site.yml
+ansible-playbook -i inventory/prod.yml site.yml
 ```
 
 ## Ссылки
