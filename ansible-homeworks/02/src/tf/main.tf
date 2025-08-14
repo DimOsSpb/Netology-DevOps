@@ -26,6 +26,8 @@ resource "yandex_compute_instance" "platform" {
   boot_disk {
     initialize_params {
       image_id = data.yandex_compute_image.image.image_id
+      size = each.value.disk_size
+      type = each.value.disk_type
     }
   }
   scheduling_policy {
