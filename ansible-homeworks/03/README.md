@@ -25,7 +25,7 @@
 
 ## Как результат:
 
-    [08-ansible-03-yandex](https://github.com/DimOsSpb/Netology-DevOps/tree/08-ansible-03-yandex/ansible-homeworks/03/src/playbook)
+[08-ansible-03-yandex](https://github.com/DimOsSpb/Netology-DevOps/tree/08-ansible-03-yandex/ansible-homeworks/03/src/playbook)
 
     ```shell
     odv@matebook16s:~/projects/MY/DevOpsCourse/ansible-homeworks/03/src/playbook$ ansible-playbook -i inventory/prod.yml site.yml
