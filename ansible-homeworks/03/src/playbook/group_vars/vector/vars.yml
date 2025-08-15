@@ -1,4 +1,6 @@
 ---
 vector_version: "0.49.0-1"
-vector_input_type: "stdin"
+vector_input_type: "file"
+vector_input_include:
+  - /var/log/**/*.log
 pakage_type: "deb"

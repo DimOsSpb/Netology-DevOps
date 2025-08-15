@@ -1,6 +1,11 @@
 sources:
   in:
     type: "{{ vector_input_type }}"
+    include: 
+{% for path in vector_input_include %}
+      - "{{ path }}"
+{% endfor %}    
+         
 
 sinks:
   out:
@@ -9,3 +14,5 @@ sinks:
     type: "console"
     encoding:
       codec: "text"
+api:
+  enabled: true

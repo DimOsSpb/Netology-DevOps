@@ -1,6 +1,8 @@
 ---
 - name: Install Clickhouse
   hosts: clickhouse
+  tags: 
+    - clickhouse
   any_errors_fatal: false
   handlers:
     - name: Start clickhouse service
@@ -33,13 +35,6 @@
           ansible.builtin.debug:
             msg: "Произошла ошибка, но продолжаем playbook"
 
-      # always:
-      #   - name: Remove temporary deb files
-      #     become: true
-      #     ansible.builtin.file:
-      #       path: "/tmp/{{ item }}-{{ clickhouse_version }}.{{ pakage_type }}"
-      #       state: absent
-      #     loop: "{{ clickhouse_packages }}"
 
     - name: Flush handlers
       ansible.builtin.meta: flush_handlers
@@ -50,10 +45,6 @@
         port: 9000
         state: started   # Ждать, пока порт откроется
         timeout: 60      # Максимум 60 секунд
-    # - name: Wait for ClickHouse service
-    #   ansible.builtin.systemd:
-    #     name: clickhouse-server
-    #     state: started
 
     - name: Create database
       ansible.builtin.command: "clickhouse-client -q 'CREATE DATABASE IF NOT EXISTS logs;'"
@@ -63,6 +54,8 @@
 
 - name: Install Vector
   hosts: vector
+  tags: 
+    - vector
   become: true
   handlers:
     - name: Restart vector service
@@ -111,3 +104,90 @@
 
     - name: Flush handlers
       ansible.builtin.meta: flush_handlers
+
+- name: Install nginx
+  hosts: lighthouse
+  tags: 
+    - nginx  
+  become: true
+  tasks:
+    - name: Nginx setup
+      block:
+        - name: Install nginx
+          ansible.builtin.apt:
+            name: nginx
+            state: present
+            update_cache: yes
+          register: nginx_installed 
+            
+        - name: Create nginx config
+          ansible.builtin.template:
+            src: "templates/nginx.conf.j2"
+            dest: "/etc/nginx/sites-available/{{ lighthouse_nginx_conf }}"
+            owner: root
+            group: root
+            mode: "0644" 
+
+      rescue:
+        - name: Log error in nginx install
+          ansible.builtin.debug:
+            msg: "Произошла ошибка - nginx"
+
+- name: Install lighthouse
+  hosts: lighthouse
+  tags: 
+    - lighthouse  
+  become: true
+  tasks:
+    - name: Clone lighthouse
+      block:
+        
+        - name: Install git
+          ansible.builtin.apt:
+            name: git
+            state: present
+            update_cache: yes
+
+        - name: Clone Lighthouse repo
+          ansible.builtin.git:
+            repo: "{{ lighthouse_rep }}"
+            dest: "{{ lighthouse_dir }}"
+            version: "{{ lighthouse_version }}"
+            force: yes
+          register: git_clone  
+          retries: 3
+          delay: 10
+          until: git_clone is succeeded
+        
+        - name: Set permissions
+          ansible.builtin.file:
+            path: "{{ lighthouse_dir }}"
+            owner: "www-data"
+            group: "www-data"
+            mode: "0755"
+            recurse: yes  
+          
+
+        - name: Enable lighthouse_nginx_conf
+          ansible.builtin.file:
+            src: "/etc/nginx/sites-available/{{ lighthouse_nginx_conf }}"
+            dest: "/etc/nginx/sites-enabled/{{ lighthouse_nginx_conf }}"
+            state: link
+
+        - name: Remove default config
+          ansible.builtin.file:
+            path: "/etc/nginx/sites-enabled/default"
+            state: absent
+
+        - name: Restart Nginx
+          ansible.builtin.service:
+            name: nginx
+            state: restarted
+
+      when: nginx_installed is succeeded
+
+      rescue:
+        - name: Log error in lighthouse install
+          ansible.builtin.debug:
+            msg: "Произошла ошибка - lighthouse"
+    

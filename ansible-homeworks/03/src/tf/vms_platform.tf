@@ -78,7 +78,7 @@ variable "services" {
           disk_size     = 10,                     
           disk_type     = "network-hdd",
           cores=2,
-          memory=2,
+          memory=4,
           core_fraction=20,
           preemptible=true,
           nat_enabled=true
@@ -86,6 +86,12 @@ variable "services" {
       ]
     }
   }
+}
+
+variable "ssh_pk_path" {
+  type        = string
+  default     = "/home/odv/.ssh/netology"
+  description = "Shh pk path"
 }
 
 variable "vm_yandex_compute_image" {
@@ -99,7 +105,7 @@ data template_file "metadata" {
 
   vars = {
     username           = "odv"
-    ssh_public_key     = file("/home/odv/.ssh/netology.pub")
+    ssh_public_key     = file("${var.ssh_pk_path}.pub")
 
   }
 }
@@ -110,6 +116,8 @@ locals {
       service_name  = inst.labels.service
       instance_name = inst.name
       external_ip   = try(inst.network_interface[0].nat_ip_address, "")
+      user = data.template_file.metadata.vars.username
+      pkeyfile = var.ssh_pk_path
     }
   ]
 }
@@ -119,4 +127,5 @@ resource "local_file" "inventory" {
     instances = local.instances_info 
   })
   filename = "${abspath("${path.module}/../playbook/inventory/prod.yml")}"
+  depends_on = [local.instances_info]
 }
