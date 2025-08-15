@@ -21,8 +21,11 @@
 9. Подготовьте README.md-файл по своему playbook. В нём должно быть описано: что делает playbook, какие у него есть параметры и теги.
 10. Готовый playbook выложите в свой репозиторий, поставьте тег `08-ansible-03-yandex` на фиксирующий коммит, в ответ предоставьте ссылку на него.
 
+---
 
-Как результат:
+## Как результат:
+
+    [08-ansible-03-yandex](https://github.com/DimOsSpb/Netology-DevOps/tree/08-ansible-03-yandex/ansible-homeworks/03/src/playbook)
 
     ```shell
     odv@matebook16s:~/projects/MY/DevOpsCourse/ansible-homeworks/03/src/playbook$ ansible-playbook -i inventory/prod.yml site.yml
@@ -111,3 +114,5 @@
 ![2](img/03-2.png)
 
 ![3](img/03-3.png)
+
+[08-ansible-03-yandex](https://github.com/DimOsSpb/Netology-DevOps/tree/08-ansible-03-yandex/ansible-homeworks/03/src/playbook)
