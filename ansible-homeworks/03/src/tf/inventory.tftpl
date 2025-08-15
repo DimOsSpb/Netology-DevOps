@@ -1,0 +1,9 @@
+---
+%{ for inst in instances ~}
+%{ if inst.service_name != "" && inst.external_ip != "" ~}
+${inst.service_name}:
+  hosts:
+    ${inst.instance_name}:
+      ansible_host: ${inst.external_ip}
+%{ endif ~}
+%{ endfor ~}

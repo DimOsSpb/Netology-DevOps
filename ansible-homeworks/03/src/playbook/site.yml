@@ -1,0 +1,113 @@
+---
+- name: Install Clickhouse
+  hosts: clickhouse
+  any_errors_fatal: false
+  handlers:
+    - name: Start clickhouse service
+      become: true
+      ansible.builtin.service:
+        name: clickhouse-server
+        state: restarted
+        enabled: true
+  tasks:
+    - name: Download and install ClickHouse
+      block:
+        - name: Get clickhouse distrib
+          become: true
+          ansible.builtin.get_url:
+            url: "https://packages.clickhouse.com/deb/pool/main/c/{{ item }}/{{ item }}_{{ clickhouse_version }}_amd64.{{ pakage_type }}"
+            dest: "/tmp/{{ item }}-{{ clickhouse_version }}.{{ pakage_type }}"
+            mode: '0644'
+          loop: "{{ clickhouse_packages }}"
+
+        - name: Install clickhouse packages manually
+          become: true
+          ansible.builtin.apt:
+            deb: /tmp/{{ item }}-{{ clickhouse_version }}.{{ pakage_type }}
+            state: present
+          loop: "{{ clickhouse_packages }}"
+          when: pakage_type == 'deb'
+          notify: Start clickhouse service
+      rescue:
+        - name: Log error in ClickHouse install
+          ansible.builtin.debug:
+            msg: "Произошла ошибка, но продолжаем playbook"
+
+      # always:
+      #   - name: Remove temporary deb files
+      #     become: true
+      #     ansible.builtin.file:
+      #       path: "/tmp/{{ item }}-{{ clickhouse_version }}.{{ pakage_type }}"
+      #       state: absent
+      #     loop: "{{ clickhouse_packages }}"
+
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Wait for ClickHouse ready
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: 9000
+        state: started   # Ждать, пока порт откроется
+        timeout: 60      # Максимум 60 секунд
+    # - name: Wait for ClickHouse service
+    #   ansible.builtin.systemd:
+    #     name: clickhouse-server
+    #     state: started
+
+    - name: Create database
+      ansible.builtin.command: "clickhouse-client -q 'CREATE DATABASE IF NOT EXISTS logs;'"
+      register: create_db
+      failed_when: create_db.rc != 0 and create_db.rc != 82
+      changed_when: create_db.rc == 0
+
+- name: Install Vector
+  hosts: vector
+  become: true
+  handlers:
+    - name: Restart vector service
+      ansible.builtin.service:
+        name: vector
+        state: restarted
+        enabled: true
+  tasks:
+    - name: Download and install Vector
+      block:
+        - name: Download Vector package
+          become: true
+          ansible.builtin.get_url:
+            url: "https://apt.vector.dev/pool/v/ve/vector_{{ vector_version }}_amd64.{{ pakage_type }}"
+            dest: "/tmp/vector-{{ vector_version }}.{{ pakage_type }}"
+            mode: '0644'
+        - name: Install vector packages manually
+          become: true
+          ansible.builtin.apt:
+            deb: /tmp/vector-{{ vector_version }}.{{ pakage_type }}
+            state: present
+          when: pakage_type == 'deb'
+          notify: Restart vector service
+
+        - name: Vector config from template
+          become: true
+          ansible.builtin.template:
+            src: ./templates/vector.yaml.j2
+            dest: /etc/vector/vector.yaml
+            owner: root
+            group: root
+            mode: '0644'
+          notify: Restart vector service
+
+      rescue:
+        - name: Log error in Vector install
+          ansible.builtin.debug:
+            msg: "Произошла ошибка - vector"
+
+      # always:
+      #   - name: Remove temporary deb files
+      #     become: true
+      #     ansible.builtin.file:
+      #       path: "/tmp/vector-{{ vector_version }}.{{ pakage_type }}"
+      #       state: absent
+
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
