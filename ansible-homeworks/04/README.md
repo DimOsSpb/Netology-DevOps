@@ -10,8 +10,7 @@
 
 11. В ответе дайте ссылки на оба репозитория с roles и одну ссылку на репозиторий с playbook.
 
-
-- [role vector v1.0.1](https://github.com/DimOsSpb/ansible-role-vector/tree/v1.0.1)
-- [role lighthouse v1.0.0](https://github.com/DimOsSpb/ansible-role-lighthouse/tree/v1.0.0)
+- [Role vector v1.0.1](https://github.com/DimOsSpb/ansible-role-vector/tree/v1.0.1)
+- [Role lighthouse v1.0.0](https://github.com/DimOsSpb/ansible-role-lighthouse/tree/v1.0.0)
 - [Playbook](./README.md)
 
