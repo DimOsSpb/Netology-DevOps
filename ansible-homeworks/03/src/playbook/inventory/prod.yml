@@ -2,18 +2,18 @@
 clickhouse:
   hosts:
     clickhouse-1:
-      ansible_host: 158.160.97.222
+      ansible_host: 84.201.131.99
       ansible_user: odv
       ansible_ssh_private_key_file: /home/odv/.ssh/netology
 lighthouse:
   hosts:
     lighthouse-1:
-      ansible_host: 158.160.98.242
+      ansible_host: 158.160.43.149
       ansible_user: odv
       ansible_ssh_private_key_file: /home/odv/.ssh/netology
 vector:
   hosts:
     vector-1:
-      ansible_host: 46.21.245.167
+      ansible_host: 158.160.115.69
       ansible_user: odv
       ansible_ssh_private_key_file: /home/odv/.ssh/netology

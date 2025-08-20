@@ -1,2 +1,4 @@
 files/*
-roles/
+roles/*
+!roles/vector
+!roles/lighthouse
