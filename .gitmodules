@@ -2,3 +2,9 @@
 [submodule "submodules/shvirtd-example-python"]
 	path = submodules/shvirtd-example-python
 	url = https://github.com/DimOsSpb/shvirtd-example-python.git
+[submodule "ansible-homeworks/04/src/playbook/roles/vector"]
+	path = ansible-homeworks/04/src/playbook/roles/vector
+	url = git@github.com:DimOsSpb/ansible-role-vector.git
+[submodule "ansible-homeworks/04/src/playbook/roles/lighthouse"]
+	path = ansible-homeworks/04/src/playbook/roles/lighthouse
+	url = git@github.com:DimOsSpb/ansible-role-lighthouse.git
