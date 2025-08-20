@@ -1,0 +1,193 @@
+---
+- name: Install Clickhouse
+  hosts: clickhouse
+  tags: 
+    - clickhouse
+  any_errors_fatal: false
+  handlers:
+    - name: Start clickhouse service
+      become: true
+      ansible.builtin.service:
+        name: clickhouse-server
+        state: restarted
+        enabled: true
+  tasks:
+    - name: Download and install ClickHouse
+      block:
+        - name: Get clickhouse distrib
+          become: true
+          ansible.builtin.get_url:
+            url: "https://packages.clickhouse.com/deb/pool/main/c/{{ item }}/{{ item }}_{{ clickhouse_version }}_amd64.{{ pakage_type }}"
+            dest: "/tmp/{{ item }}-{{ clickhouse_version }}.{{ pakage_type }}"
+            mode: '0644'
+          loop: "{{ clickhouse_packages }}"
+
+        - name: Install clickhouse packages manually
+          become: true
+          ansible.builtin.apt:
+            deb: /tmp/{{ item }}-{{ clickhouse_version }}.{{ pakage_type }}
+            state: present
+          loop: "{{ clickhouse_packages }}"
+          when: pakage_type == 'deb'
+          notify: Start clickhouse service
+      rescue:
+        - name: Log error in ClickHouse install
+          ansible.builtin.debug:
+            msg: "Произошла ошибка, но продолжаем playbook"
+
+
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Wait for ClickHouse ready
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: 9000
+        state: started   # Ждать, пока порт откроется
+        timeout: 60      # Максимум 60 секунд
+
+    - name: Create database
+      ansible.builtin.command: "clickhouse-client -q 'CREATE DATABASE IF NOT EXISTS logs;'"
+      register: create_db
+      failed_when: create_db.rc != 0 and create_db.rc != 82
+      changed_when: create_db.rc == 0
+
+- name: Install Vector
+  hosts: vector
+  tags: 
+    - vector
+  become: true
+  handlers:
+    - name: Restart vector service
+      ansible.builtin.service:
+        name: vector
+        state: restarted
+        enabled: true
+  tasks:
+    - name: Download and install Vector
+      block:
+        - name: Download Vector package
+          become: true
+          ansible.builtin.get_url:
+            url: "https://apt.vector.dev/pool/v/ve/vector_{{ vector_version }}_amd64.{{ pakage_type }}"
+            dest: "/tmp/vector-{{ vector_version }}.{{ pakage_type }}"
+            mode: '0644'
+        - name: Install vector packages manually
+          become: true
+          ansible.builtin.apt:
+            deb: /tmp/vector-{{ vector_version }}.{{ pakage_type }}
+            state: present
+          when: pakage_type == 'deb'
+          notify: Restart vector service
+
+        - name: Vector config from template
+          become: true
+          ansible.builtin.template:
+            src: ./templates/vector.yaml.j2
+            dest: /etc/vector/vector.yaml
+            owner: root
+            group: root
+            mode: '0644'
+          notify: Restart vector service
+
+      rescue:
+        - name: Log error in Vector install
+          ansible.builtin.debug:
+            msg: "Произошла ошибка - vector"
+
+      # always:
+      #   - name: Remove temporary deb files
+      #     become: true
+      #     ansible.builtin.file:
+      #       path: "/tmp/vector-{{ vector_version }}.{{ pakage_type }}"
+      #       state: absent
+
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+
+- name: Install nginx
+  hosts: lighthouse
+  tags: 
+    - nginx  
+  become: true
+  tasks:
+    - name: Nginx setup
+      block:
+        - name: Install nginx
+          ansible.builtin.apt:
+            name: nginx
+            state: present
+            update_cache: yes
+          register: nginx_installed 
+            
+        - name: Create nginx config
+          ansible.builtin.template:
+            src: "templates/nginx.conf.j2"
+            dest: "/etc/nginx/sites-available/{{ lighthouse_nginx_conf }}"
+            owner: root
+            group: root
+            mode: "0644" 
+
+      rescue:
+        - name: Log error in nginx install
+          ansible.builtin.debug:
+            msg: "Произошла ошибка - nginx"
+
+- name: Install lighthouse
+  hosts: lighthouse
+  tags: 
+    - lighthouse  
+  become: true
+  tasks:
+    - name: Clone lighthouse
+      block:
+        
+        - name: Install git
+          ansible.builtin.apt:
+            name: git
+            state: present
+            update_cache: yes
+
+        - name: Clone Lighthouse repo
+          ansible.builtin.git:
+            repo: "{{ lighthouse_rep }}"
+            dest: "{{ lighthouse_dir }}"
+            version: "{{ lighthouse_version }}"
+            force: yes
+          register: git_clone  
+          retries: 3
+          delay: 10
+          until: git_clone is succeeded
+        
+        - name: Set permissions
+          ansible.builtin.file:
+            path: "{{ lighthouse_dir }}"
+            owner: "www-data"
+            group: "www-data"
+            mode: "0755"
+            recurse: yes  
+          
+
+        - name: Enable lighthouse_nginx_conf
+          ansible.builtin.file:
+            src: "/etc/nginx/sites-available/{{ lighthouse_nginx_conf }}"
+            dest: "/etc/nginx/sites-enabled/{{ lighthouse_nginx_conf }}"
+            state: link
+
+        - name: Remove default config
+          ansible.builtin.file:
+            path: "/etc/nginx/sites-enabled/default"
+            state: absent
+
+        - name: Restart Nginx
+          ansible.builtin.service:
+            name: nginx
+            state: restarted
+
+      when: nginx_installed is succeeded
+
+      rescue:
+        - name: Log error in lighthouse install
+          ansible.builtin.debug:
+            msg: "Произошла ошибка - lighthouse"
+    

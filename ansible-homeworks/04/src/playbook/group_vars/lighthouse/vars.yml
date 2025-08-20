@@ -1,0 +1,7 @@
+---
+lighthouse_version: "master" # "d701335c25cd1bb9b5155711190bad8ab852c2ce" # commit id
+lighthouse_rep: "https://github.com/VKCOM/lighthouse.git"
+lighthouse_dir: "/var/www/lighthouse"
+lighthouse_nginx_conf: "lighthouse.conf"
+lighthouse_nginx_name: "lighthouse"
+pakage_type: "deb"
