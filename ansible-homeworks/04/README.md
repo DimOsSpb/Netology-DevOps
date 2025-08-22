@@ -12,5 +12,5 @@
 
 - [Role Repository vector v1.0.1](https://github.com/DimOsSpb/ansible-role-vector/tree/v1.0.1)
 - [Role Repository lighthouse v1.0.0](https://github.com/DimOsSpb/ansible-role-lighthouse/tree/v1.0.0)
-- [Playbook](./README.md)
+- [Playbook](src/playbook/site.yml)
 
