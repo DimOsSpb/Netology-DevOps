@@ -1,0 +1,4 @@
+files/*
+roles/*
+!roles/vector
+!roles/lighthouse

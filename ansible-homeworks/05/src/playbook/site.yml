@@ -1,0 +1,64 @@
+---
+- name: Install Clickhouse
+  hosts: clickhouse
+  become: true
+  tags: 
+    - clickhouse
+  any_errors_fatal: false
+  pre_tasks:
+    - name: Install gpg manually
+      become: true
+      ansible.builtin.apt:
+        name: gpg
+        state: present
+        update_cache: true
+  roles:
+    - role: clickhouse
+
+- name: Install Vector
+  hosts: vector
+  tags: 
+    - vector
+  become: true
+  roles:
+    - role: vector
+
+
+- name: Install nginx
+  hosts: lighthouse
+  tags: 
+    - nginx  
+  become: true
+  tasks:
+    - name: Nginx setup
+      block:
+        - name: Install nginx
+          ansible.builtin.apt:
+            name: nginx
+            state: present
+            update_cache: yes
+          register: nginx_installed 
+            
+        - name: Create nginx config
+          ansible.builtin.template:
+            src: "templates/nginx.conf.j2"
+            dest: "/etc/nginx/sites-available/{{ lighthouse_nginx_conf }}"
+            owner: root
+            group: root
+            mode: "0644" 
+
+      rescue:
+        - name: Log error in nginx install
+          ansible.builtin.debug:
+            msg: "Произошла ошибка - nginx"
+
+- name: Install lighthouse
+  hosts: lighthouse
+  tags: 
+    - lighthouse  
+  become: true
+  roles:
+    - role: clickhouse
+      when: nginx_installed is succeeded
+
+    

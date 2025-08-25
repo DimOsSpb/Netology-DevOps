@@ -1,0 +1,19 @@
+server {
+    listen 80;
+    server_name {{ lighthouse_nginx_name }};
+    root {{ lighthouse_dir }};
+
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Блокировка доступа к скрытым файлам
+    location ~ /\. {
+        deny all;
+    }
+
+    access_log /var/log/nginx/lighthouse.access.log;
+    error_log /var/log/nginx/lighthouse.error.log;
+}
