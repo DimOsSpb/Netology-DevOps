@@ -828,6 +828,11 @@ INFO     Pruning extra files from scenario ephemeral directory
   py310-ansible215: OK (26.54=setup[0.01]+cmd[26.53] seconds)
   congratulations :) (256.88 seconds)
 ```
+---
+
+* [Vector role repository - TOX light tests version](https://github.com/DimOsSpb/ansible-role-vector/tree/TOX)
+
+---
 
 9. Добавьте новый тег на коммит с рабочим сценарием в соответствии с семантическим версионированием.
 
