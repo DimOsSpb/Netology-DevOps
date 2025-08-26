@@ -554,28 +554,277 @@ INFO     default ➜ verify: Completed
 
 1. Добавьте в директорию с vector-role файлы из [директории](./example).
 2. Запустите `docker run --privileged=True -v <path_to_repo>:/opt/vector-role -w /opt/vector-role -it aragast/netology:latest /bin/bash`, где path_to_repo — путь до корня репозитория с vector-role на вашей файловой системе.
-
-docker run --privileged=True -v /home/odv/projects/MY/DevOpsCourse/ansible-homeworks/05/src/playbook/roles/vector:/opt/vector-role -w /opt/vector-role -it aragast/netology:latest /bin/bash`
-
 3. Внутри контейнера выполните команду `tox`, посмотрите на вывод.
+
+```
+docker run --privileged=True -v /home/odv/projects/MY/DevOpsCourse/ansible-homeworks/05/src/playbook/roles/vector:/opt/vector-role -w /opt/vector-role -it aragast/netology:latest /bin/bash`
+```
+- Падает по ошибке, понятно почему - у меня нет сценария molecule **compatibility**. И даже если пропишу в tox.ini свой - не поедет, т.к. драйвер docker.
+```
+sudo apt install -y podman
+```
+
 5. Создайте облегчённый сценарий для `molecule` с драйвером `molecule_podman`. Проверьте его на исполнимость.
+
+```
+odv@matebook16s:~/projects/MY/DevOpsCourse/ansible-homeworks/05/src/playbook/roles/vector$ molecule init scenario --driver-name podman podman_light
+WARNING  default ➜ config: Driver 'docker' is currently in use but the scenario config has changed and now defines 'default'. To change drivers, run 'molecule destroy' for converged scenarios or 'molecule reset' otherwise.
+WARNING  default ➜ config: Driver 'docker' is currently in use but the scenario config has changed and now defines 'default'. To change drivers, run 'molecule destroy' for converged scenarios or 'molecule reset' otherwise.
+INFO     podman_light ➜ init: Initializing new scenario podman_light...
+
+PLAY [Create a new molecule scenario] ******************************************
+
+TASK [Check if destination folder exists] **************************************
+changed: [localhost]
+
+TASK [Check if destination folder is empty] ************************************
+ok: [localhost]
+
+TASK [Fail if destination folder is not empty] *********************************
+skipping: [localhost]
+
+TASK [Expand templates] ********************************************************
+changed: [localhost] => (item=molecule/podman_light/converge.yml)
+skipping: [localhost] => (item=molecule/podman_light/create.yml)
+changed: [localhost] => (item=molecule/podman_light/molecule.yml)
+skipping: [localhost] => (item=molecule/podman_light/destroy.yml)
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=3    changed=2    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+
+INFO     podman_light ➜ init: Initialized scenario in /home/odv/projects/MY/DevOpsCourse/ansible-homeworks/05/src/playbook/roles/vector/molecule/podman_light successfully.
+```
+
+```
+odv@matebook16s:~/projects/MY/DevOpsCourse/ansible-homeworks/05/src/playbook/roles/vector$ molecule create -s podman_light
+WARNING  Driver podman does not provide a schema.
+WARNING  Driver docker does not provide a schema.
+INFO     podman_light ➜ discovery: scenario test matrix: dependency, create, prepare
+INFO     podman_light ➜ prerun: Performing prerun with role_name_check=0...
+INFO     podman_light ➜ dependency: Starting
+WARNING  podman_light ➜ dependency: Skipping, missing the requirements file.
+WARNING  podman_light ➜ dependency: Skipping, missing the requirements file.
+INFO     podman_light ➜ dependency: Completed
+INFO     podman_light ➜ create: Starting
+INFO     podman_light ➜ create: ansible-playbook version: ansible-playbook
+  config file = None
+  configured module search path = ['/home/odv/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']
+  ansible python module location = /home/odv/.pyenv/versions/3.12.9/lib/python3.12/site-packages/ansible
+  ansible collection location = /home/odv/.ansible/collections:/usr/share/ansible/collections
+  executable location = /home/odv/.pyenv/versions/3.12.9/bin/ansible-playbook
+  python version = 3.12.9 (main, Apr  3 2025, 17:05:56)  (/home/odv/.pyenv/versions/3.12.9/bin/python3.12)
+  jinja version = 3.1.6
+  libyaml = True
+INFO     Sanity checks: 'podman'
+
+PLAY [Create] ******************************************************************
+
+TASK [get podman executable path] **********************************************
+ok: [localhost]
+
+TASK [save path to executable as fact] *****************************************
+ok: [localhost]
+
+TASK [Set async_dir for HOME env] **********************************************
+ok: [localhost]
+
+TASK [Log into a container registry] *******************************************
+skipping: [localhost] => (item="redos registry username: None specified")
+skipping: [localhost]
+
+TASK [Check presence of custom Dockerfiles] ************************************
+ok: [localhost] => (item=Dockerfile: ../resources/Dockerfile-rom.j2)
+
+TASK [Create Dockerfiles from image names] *************************************
+changed: [localhost] => (item="Dockerfile: ../resources/Dockerfile-rom.j2; Image: registry.red-soft.ru/ubi8/ubi")
+
+TASK [Discover local Podman images] ********************************************
+ok: [localhost] => (item=redos)
+
+TASK [Build an Ansible compatible image] ***************************************
+changed: [localhost] => (item=registry.red-soft.ru/ubi8/ubi)
+
+TASK [Determine the CMD directives] ********************************************
+ok: [localhost] => (item="redos command: /usr/sbin/init")
+
+TASK [Remove possible pre-existing containers] *********************************
+changed: [localhost]
+
+TASK [Discover local podman networks] ******************************************
+skipping: [localhost] => (item=redos: None specified)
+skipping: [localhost]
+
+TASK [Create podman network dedicated to this scenario] ************************
+skipping: [localhost]
+
+TASK [Create molecule instance(s)] *********************************************
+changed: [localhost] => (item=redos)
+
+TASK [Wait for instance(s) creation to complete] *******************************
+FAILED - RETRYING: [localhost]: Wait for instance(s) creation to complete (300 retries left).
+changed: [localhost] => (item=redos)
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=11   changed=5    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0
+
+INFO     podman_light ➜ create: Completed
+INFO     podman_light ➜ prepare: Starting
+WARNING  podman_light ➜ prepare: Skipping, prepare playbook not configured.
+INFO     podman_light ➜ prepare: Completed
+odv@matebook16s:~/projects/MY/DevOpsCourse/ansible-homeworks/05/src/playbook/roles/vector$ molecule converge -s podman_light
+WARNING  Driver podman does not provide a schema.
+WARNING  Driver docker does not provide a schema.
+INFO     podman_light ➜ discovery: scenario test matrix: dependency, create, prepare, converge
+INFO     podman_light ➜ prerun: Performing prerun with role_name_check=0...
+INFO     podman_light ➜ dependency: Starting
+WARNING  podman_light ➜ dependency: Skipping, missing the requirements file.
+WARNING  podman_light ➜ dependency: Skipping, missing the requirements file.
+INFO     podman_light ➜ dependency: Completed
+INFO     podman_light ➜ create: Starting
+WARNING  podman_light ➜ create: Skipping, instances already created.
+INFO     podman_light ➜ create: Completed
+INFO     podman_light ➜ prepare: Starting
+WARNING  podman_light ➜ prepare: Skipping, prepare playbook not configured.
+INFO     podman_light ➜ prepare: Completed
+INFO     podman_light ➜ converge: Starting
+INFO     podman_light ➜ converge: ansible-playbook version: ansible-playbook
+  config file = None
+  configured module search path = ['/home/odv/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']
+  ansible python module location = /home/odv/.pyenv/versions/3.12.9/lib/python3.12/site-packages/ansible
+  ansible collection location = /home/odv/.ansible/collections:/usr/share/ansible/collections
+  executable location = /home/odv/.pyenv/versions/3.12.9/bin/ansible-playbook
+  python version = 3.12.9 (main, Apr  3 2025, 17:05:56)  (/home/odv/.pyenv/versions/3.12.9/bin/python3.12)
+  jinja version = 3.1.6
+  libyaml = True
+INFO     Sanity checks: 'podman'
+
+PLAY [Converge] ****************************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [redos]
+
+TASK [Include role] ************************************************************
+included: ../../../vector for redos
+
+TASK [../../../vector : Show OS family] ****************************************
+ok: [redos] => {
+    "msg": "OS family detected: RED"
+}
+
+TASK [../../../vector : Download Vector DEB] ***********************************
+skipping: [redos]
+
+TASK [../../../vector : Install Vector DEB] ************************************
+skipping: [redos]
+
+TASK [../../../vector : Add Vector GPG key RHEL] *******************************
+changed: [redos]
+
+TASK [../../../vector : Install Vector on RHEL] ********************************
+changed: [redos]
+
+TASK [../../../vector : Vector config from template] ***************************
+changed: [redos]
+
+RUNNING HANDLER [../../../vector : Restart vector service] *********************
+included: /home/odv/projects/MY/DevOpsCourse/ansible-homeworks/05/src/playbook/roles/vector/tasks/restart_vector.yml for redos
+
+RUNNING HANDLER [../../../vector : Restart via systemd on VM] ******************
+skipping: [redos]
+
+RUNNING HANDLER [../../../vector : Stop vector manually in Docker/container] ***
+changed: [redos]
+
+RUNNING HANDLER [../../../vector : Start vector manually in Docker/container] ***
+changed: [redos]
+
+PLAY RECAP *********************************************************************
+redos                      : ok=9    changed=5    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0
+
+INFO     podman_light ➜ converge: Completed
+```
+
 6. Пропишите правильную команду в `tox.ini`, чтобы запускался облегчённый сценарий.
 8. Запустите команду `tox`. Убедитесь, что всё отработало успешно.
+
+```
+python3 -m pip install --user tox
+```
+- [Tox](https://tox.wiki/en/latest/user_guide.html)
+- Задача иметь один проект, который можно тестировать на нескольких версиях Python и нескольких версиях Ansible. Для начала нам надо установить сам Tox на мой компьютер.
+  У нас в tox.ini несколько версий Ansible, и они зависят от Python-окружения
+
+  tox-requirements.txt = общие зависимости
+
+  tox.ini = специфичные версии (Python/Ansible)
+
+  pyenv versions - Покажет установленные версии Python
+
+  В одном виртуальном окружении (venv) может быть только одна версия Ansible
+
+  ansible --version
+
+  [ansible-core versions table](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-core-support-matrix)
+
+  Для понимания среды, схема того, как версии Python и Ansible могут сосуществовать:
+
+      Система (system)
+      ├─ Python 3.11
+      │  └─ Пакеты: базовые (pip, setuptools…)
+      ├─ Python 3.12
+      │  └─ Пакеты: базовые (pip, setuptools…)
+      └─ Ansible (если установлен в system-wide) → версия 2.10
+
+      Виртуальные окружения (venv)
+      ├─ venv-ansible210
+      │  ├─ Python: 3.11
+      │  └─ Ansible: 2.10
+      ├─ venv-ansible218
+      │  ├─ Python: 3.12
+      │  └─ Ansible: 2.18
+      └─ venv-ansible30
+        ├─ Python: 3.12
+        └─ Ansible: 3.0
+
+
+## tox.ini
+
+- Т.о. Смотрим какой пайтон есть в системе (pyenv versions), ставим если нет но нужен (pyenv install -s x.x.x)
+- По таблице выбираем подходящий ansible [ansible-core versions table](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-core-support-matrix)
+- Согласно этим соответсвиям формируем envlist
+- Зависимости и соответствия версий ansible в deps
+   - Замечание - начиная с Ansible 2.10 проект разделили:
+      - ansible-core → ядро, версии 2.11, 2.12, 2.14, 2.15, 2.16, 2.17 и т. д.
+      - ansible → метапакет, начиная с 5.x. У него версия ≠ ansible-core, а мажорная:
+      - ansible==7.* → тянет ansible-core==2.14.*
+      - ansible==8.* → тянет ansible-core==2.15.*
+
+- Для версий python в глобальном PATH системы должен быть путь до папки с python версии. Настройка через basepython
+- Пример установки пакета ansible версию которого не находит pip для tox. Переключиться на совместимый python (должен быть в системе) и установить пакет:
+```shell
+pyenv global 3.9.20
+python -m pip install "ansible-core==2.15.*"
+```
+
+```shell
+PLAY RECAP *********************************************************************
+localhost                  : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+INFO     podman_light ➜ destroy: Completed
+INFO     podman_light ➜ scenario: Pruning extra files from scenario ephemeral directory
+  py311-ansible218: OK (121.70=setup[22.49]+cmd[99.21] seconds)
+  py312-ansible218: OK (113.39=setup[22.50]+cmd[90.89] seconds)
+  congratulations :) (235.14 seconds)
+```
+
 9. Добавьте новый тег на коммит с рабочим сценарием в соответствии с семантическим версионированием.
 
 После выполнения у вас должно получится два сценария molecule и один tox.ini файл в репозитории. Не забудьте указать в ответе теги решений Tox и Molecule заданий. В качестве решения пришлите ссылку на  ваш репозиторий и скриншоты этапов выполнения задания.
 
-## Необязательная часть
+## Необязательная часть - возможно позже для полноценного стека
 
 1. Проделайте схожие манипуляции для создания роли LightHouse.
 2. Создайте сценарий внутри любой из своих ролей, который умеет поднимать весь стек при помощи всех ролей.
 3. Убедитесь в работоспособности своего стека. Создайте отдельный verify.yml, который будет проверять работоспособность интеграции всех инструментов между ними.
 4. Выложите свои roles в репозитории.
 
-В качестве решения пришлите ссылки и скриншоты этапов выполнения задания.
-
----
-
-### Как оформить решение задания
-
-Выполненное домашнее задание пришлите в виде ссылки на .md-файл в вашем репозитории.
