@@ -24,6 +24,9 @@
 ---
 
 # Выполнение задания
+
+* [Vector role repository - Molecule tests version](https://github.com/DimOsSpb/ansible-role-vector/tree/Molecule)
+
 ## Замечания по ошибкам, исправлениям и ситуациям
 
 - Тестирование роли требует на целевой системе установленных зависимостей для работы ansible. Не все образы имеют python3, sudo. По ссылке ниже приведены примеры решения этой задачи для molecule
@@ -39,7 +42,7 @@
 - По этому проще и удобнее использовать готовые образы с необходимыми зависимостями.
 ---
 
-## Вывод по этапам проверки molecule:
+## Вывод консолипо этапам проверки molecule:
 ---
 
 - **Создание:**
@@ -543,6 +546,9 @@ redos                      : ok=7    changed=0    unreachable=0    failed=0    s
 INFO     default ➜ verify: Verifier completed successfully.
 INFO     default ➜ verify: Completed
 ```
+
+* [Vector role repository - Molecule tests version](https://github.com/DimOsSpb/ansible-role-vector/tree/Molecule)
+
 
 ### Tox
 
