@@ -805,16 +805,28 @@ python3 -m pip install --user tox
 pyenv global 3.9.20
 python -m pip install "ansible-core==2.15.*"
 ```
+- **Успешный тест**
 
 ```shell
+odv@matebook16s:~/projects/MY/DevOpsCourse/ansible-homeworks/05/src/playbook/roles/vector$ tox
+py310-ansible214: install_deps> python -I -m pip install 'ansible-core==2.14.*' -r tox-requirements.txt
+py310-ansible214: commands[0]> molecule test -s podman_light --destroy always
+WARNING  Driver podman does not provide a schema.
+INFO     podman_light scenario test matrix: dependency, cleanup, destroy, syntax, create, prepare, converge, idempotence, side_effect, verify, cleanup, destroy
+INFO     Performing prerun with role_name_check=0...
+INFO     Running podman_light > dependenc
+
+-.-.-.-.-.-.-.-
+
 PLAY RECAP *********************************************************************
 localhost                  : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 
-INFO     podman_light ➜ destroy: Completed
-INFO     podman_light ➜ scenario: Pruning extra files from scenario ephemeral directory
-  py311-ansible218: OK (121.70=setup[22.49]+cmd[99.21] seconds)
-  py312-ansible218: OK (113.39=setup[22.50]+cmd[90.89] seconds)
-  congratulations :) (235.14 seconds)
+INFO     Pruning extra files from scenario ephemeral directory
+  py311-ansible218: OK (101.41=setup[0.04]+cmd[101.37] seconds)
+  py312-ansible218: OK (102.95=setup[0.01]+cmd[102.94] seconds)
+  py310-ansible214: OK (25.92=setup[0.01]+cmd[25.91] seconds)
+  py310-ansible215: OK (26.54=setup[0.01]+cmd[26.53] seconds)
+  congratulations :) (256.88 seconds)
 ```
 
 9. Добавьте новый тег на коммит с рабочим сценарием в соответствии с семантическим версионированием.
@@ -827,4 +839,3 @@ INFO     podman_light ➜ scenario: Pruning extra files from scenario ephemeral 
 2. Создайте сценарий внутри любой из своих ролей, который умеет поднимать весь стек при помощи всех ролей.
 3. Убедитесь в работоспособности своего стека. Создайте отдельный verify.yml, который будет проверять работоспособность интеграции всех инструментов между ними.
 4. Выложите свои roles в репозитории.
-
