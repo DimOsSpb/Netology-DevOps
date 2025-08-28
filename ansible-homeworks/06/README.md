@@ -65,7 +65,7 @@ localhost                  : ok=2    changed=0    unreachable=0    failed=0    s
 **Шаг 17.** В ответ необходимо прислать ссылки на collection и tar.gz архив, а также скриншоты выполнения пунктов 4, 6, 15 и 16.
 
 - [Collection](https://github.com/DimOsSpb/my_own_collection/tree/1.0.0?tab=readme-ov-file)
-- [tar.gz](https://github.com/DimOsSpb/my_own_collection/blob/c0650a6785cc5089d45f39226a4917f5d7fa5a55/dimosspb_devopscourse-training-1.0.0.tar.gz)
+- [tar.gz](https://github.com/DimOsSpb/my_own_collection/raw/c0650a6785cc5089d45f39226a4917f5d7fa5a55/dimosspb_devopscourse-training-1.0.0.tar.gz)
 
 ## Необязательная часть
 
