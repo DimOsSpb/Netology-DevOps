@@ -8,3 +8,6 @@
 [submodule "ansible-homeworks/05/src/playbook/roles/lighthouse"]
 	path = ansible-homeworks/05/src/playbook/roles/lighthouse
 	url = git@github.com:DimOsSpb/ansible-role-lighthouse.git
+[submodule "ansible-homeworks/06/dimosspb_devopscourse/training"]
+	path = ansible-homeworks/06/dimosspb_devopscourse/training
+	url = https://github.com/DimOsSpb/my_own_collection.git
