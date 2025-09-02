@@ -1,7 +1,60 @@
 ---
-- name: My Own Role Playbook
+- name: Managing virtual machines in yandex cloud
   hosts: localhost
-  # collections:
-  #   - dimosspb_devopscourse.training
-  roles:
-    - dimosspb_devopscourse.training.my_own_role
+  tasks:
+    - name: Create or update VMs in Yandex Cloud
+      yc:
+        folder_id: "b1gg3ad99mhgfm5qo1tt"
+        service_key_file: "/home/odv/.secret/ya-tf-sa.json"
+        vms:
+          - name: "vm-test-1"
+            zone: "ru-central1-a"
+            platform_id: "standard-v1"
+            force_recreate: false
+            force_restart: false
+            resources_spec:
+              cores: 2
+              memory: 2
+              core_fraction: 20
+            boot_disk_spec:
+              disk_spec:
+                type_id: "network-hdd"
+                size: 10
+                image_id: "fd8km89hm9t7kra2ut6h"
+            network_interface_specs:
+              subnet_id: "e9blnkogkk41e4av5fdu"
+              primary_v4_address_spec:
+                nat: true
+            scheduling_policy:
+              preemptible: true
+            metadata:
+              ssh-keys: "odv:ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDffPBZFrnDjeZInRI4J5VIP0WoiJOMx1vfGkSRwVcjy dimosspb@vk.ru"
+
+          - name: "vm-test-2"
+            zone: "ru-central1-a"
+            platform_id: "standard-v1"
+            force_recreate: false
+            force_restart: false
+            resources_spec:
+              cores: 2
+              memory: 2
+              core_fraction: 20
+            boot_disk_spec:
+              disk_spec:
+                type_id: "network-hdd"
+                size: 10
+                image_id: "fd8km89hm9t7kra2ut6h"
+            network_interface_specs:
+              subnet_id: "e9blnkogkk41e4av5fdu"
+              primary_v4_address_spec:
+                nat: true
+            scheduling_policy:
+              preemptible: true
+            metadata:
+              ssh-keys: "odv:ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDffPBZFrnDjeZInRI4J5VIP0WoiJOMx1vfGkSRwVcjy dimosspb@vk.ru"
+# - name: My Own Role Playbook
+#   hosts: localhost
+#   # collections:
+#   #   - dimosspb_devopscourse.training
+#   roles:
+#     - dimosspb_devopscourse.training.my_own_role
