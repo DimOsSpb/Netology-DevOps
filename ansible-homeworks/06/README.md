@@ -155,7 +155,7 @@ localhost                  : ok=2    changed=0    unreachable=0    failed=0    s
 odv@matebook16s:~/projects/MY/DevOpsCourse/ansible-homeworks/06$
 ```
 
-- [Ansible Collection - Yandex Cloud module included](https://github.com/DimOsSpb/my_own_collection/tree/1.1.1)
+- [Ansible Collection - Yandex Cloud module included](https://github.com/DimOsSpb/my_own_collection/tree/1.1.2)
 - [my_own_collection/plugins/modules/yc.py](https://github.com/DimOsSpb/my_own_collection/blob/1.1.1/plugins/modules/yc.py)
 
 - **Полноценно выполнить задание по пунктам ниже - оверхед по времени.**
