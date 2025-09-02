@@ -158,7 +158,7 @@ odv@matebook16s:~/projects/MY/DevOpsCourse/ansible-homeworks/06$
 - [Ansible Collection - Yandex Cloud module included](https://github.com/DimOsSpb/my_own_collection/tree/1.1.1)
 - [my_own_collection/plugins/modules/yc.py](https://github.com/DimOsSpb/my_own_collection/blob/1.1.1/plugins/modules/yc.py)
 
-- **Полноценно выполнить задание по пунктам ниже - оверлоад по времени.**
+- **Полноценно выполнить задание по пунктам ниже - оверхед по времени.**
 
 ---
 ---
