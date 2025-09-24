@@ -92,6 +92,6 @@ sudo chown -R 65534:65534 ./prometheus/
 1. В качестве решения задания приведите листинг этого файла.
 
 ---
-[Dashboard.json](grafana_home/docker-compose.yml)
+[Dashboard.json](grafana_home/grafana/Dashboard.json)
 
 
