@@ -1,0 +1,3 @@
+grafana_home/grafana/storage
+grafana_home/prometheus/data
+grafana.db

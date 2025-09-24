@@ -1,0 +1,47 @@
+{{- if gt (len .Alerts.Firing) 0 }}
+🔥 <u><b>Firing</b></u>
+{{- $f := .Alerts.Firing }}
+{{- $first := index $f 0 }}
+<b>Alert:</b> {{ $first.Labels.alertname }}
+Host: {{ or $first.Labels.instance_name $first.Labels.instance }}
+{{- $t := $first.Labels.type -}}
+{{- if eq $t "cpu" }}
+CPU Utilization = {{ printf "%.2f" (index $first.Values "A") }} %
+{{- else if eq $t "la" }}
+CPU Load values:
+{{- range $i, $a := $f }}
+  {{- $val := "" -}}
+  {{- range $k, $vv := $a.Values }}
+    {{- if eq $k "A" }}
+      {{- $val = printf "%.2f" $vv -}}
+    {{- end }}
+  {{- end }}
+  {{- if eq $a.Labels.load "1" }}
+• Load1 = {{ $val }}
+  {{- else if eq $a.Labels.load "5" }}
+• Load5 = {{ $val }}
+  {{- else if eq $a.Labels.load "15" }}
+• Load15 = {{ $val }}
+  {{- else }}
+• Load{{ $a.Labels.load }} = {{ $val }}
+  {{- end }}
+{{- end }}
+
+{{- else if eq $t "mem" }}
+Memory Free = {{ printf "%.2f" (index $first.Values "A") }} Bytes
+{{- else if eq $t "disk" }}
+Disk free {{ $first.Labels.device }} = {{ printf "%.2f" (index $first.Values "A") }} Bytes
+{{- else }}
+
+Value = {{ $first.ValueString }}
+
+{{- end }}
+{{- end }}
+
+{{- if gt (len .Alerts.Resolved) 0 }}
+{{- $f := .Alerts.Resolved }}
+{{- $first := index $f 0 }}
+✅ <u><b>Resolved</b></u>
+<b>Alert:</b> {{ $first.Labels.alertname }}
+Host: {{ or $first.Labels.instance_name $first.Labels.instance }}
+{{- end }}
