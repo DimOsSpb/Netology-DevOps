@@ -1,0 +1,2 @@
+- pipeline.id: filebeat_pipeline
+  path.config: "/usr/share/logstash/pipeline/filebeat.conf"

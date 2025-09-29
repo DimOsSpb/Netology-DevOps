@@ -1,0 +1,215 @@
+services:
+  setup:
+    container_name: elk-setup
+    image: elasticsearch:${STACK_VERSION}
+    volumes:
+      - ./certs:/usr/share/elasticsearch/config/certs
+      - ./logstash/config/certs:/usr/share/elasticsearch/config/logstash/certs
+    user: "0"
+    command: >
+      bash -c '
+        if [ x${ELASTIC_PASSWORD} == x ]; then
+          echo "Set the ELASTIC_PASSWORD environment variable in the .env file";
+          exit 1;
+        fi;
+
+        # REMOVE OLD CERTS
+        chmod -R 777 config/certs
+        rm -rf config/certs/*
+        echo "Creating CA";
+        bin/elasticsearch-certutil ca --silent --pem -out config/certs/ca.zip;
+        unzip config/certs/ca.zip -d config/certs;
+
+        echo "Creating certs";
+        echo -ne \
+        "instances:\n"\
+        "  - name: es01\n"\
+        "    dns:\n"\
+        "      - es01\n"\
+        "      - localhost\n"\
+        "    ip:\n"\
+        "      - 127.0.0.1\n"\
+        "  - name: es02\n"\
+        "    dns:\n"\
+        "      - es02\n"\
+        "      - localhost\n"\
+        "    ip:\n"\
+        "      - 127.0.0.1\n"\
+        > config/certs/instances.yml;
+        bin/elasticsearch-certutil cert --silent --pem -out config/certs/certs.zip --in config/certs/instances.yml --ca-cert config/certs/ca/ca.crt --ca-key config/certs/ca/ca.key;
+        unzip config/certs/certs.zip -d config/certs;
+
+        cp -f config/certs/ca/ca.crt config/logstash/certs/ca.crt;
+        chown 1000:root config/logstash/certs/ca.crt;
+        chmod 644 config/logstash/certs/ca.crt;
+        chown -R root:root config/certs;
+        find . -type d -exec chmod 750 \{\} \;;
+        find . -type f -exec chmod 640 \{\} \;;
+        echo "Waiting for Elasticsearch availability";
+        until curl -s --cacert config/certs/ca/ca.crt https://es01:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
+        echo "Setting kibana_system password";
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        echo "All done!";
+        touch config/certs/setup-done;        
+      '
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f config/certs/es01/es01.crt ]"]
+      interval: 1s
+      timeout: 5s
+      retries: 120
+
+  es01:
+    container_name: es-hot
+    depends_on:
+      setup:
+        condition: service_healthy
+    image: elasticsearch:${STACK_VERSION}
+    volumes:
+      - ./certs:/usr/share/elasticsearch/config/certs
+      - ./esdata01:/usr/share/elasticsearch/data
+    ports:
+      - ${ES_PORT_HOT}:9200
+    environment:
+      - node.name=es-hot
+      - cluster.name=${CLUSTER_NAME}
+      - discovery.seed_hosts=es-hot,es-warm
+      - cluster.initial_master_nodes=es-hot,es-warm
+      - node.roles=master,data_content,data_hot,remote_cluster_client
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=true
+      - xpack.security.enrollment.enabled=true
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.key=certs/es01/es01.key
+      - xpack.security.http.ssl.certificate=certs/es01/es01.crt
+      - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.key=certs/es01/es01.key
+      - xpack.security.transport.ssl.certificate=certs/es01/es01.crt
+      - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.license.self_generated.type=${LICENSE}
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    mem_limit: ${MEM_LIMIT}
+    # Рекомендуется еще отключать swap в прод. Если еластик полезет в своп - будут тормоза!
+    # В моем случае это не существенно, но оставлю
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'"]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+  es02:
+    container_name: es-warm
+    depends_on:
+      setup:
+        condition: service_healthy
+    image: elasticsearch:${STACK_VERSION}
+    volumes:
+      - ./certs:/usr/share/elasticsearch/config/certs
+      - ./esdata02:/usr/share/elasticsearch/data
+    ports:
+      - ${ES_PORT_WARM}:9200
+    environment:
+      - node.name=es-warm
+      - cluster.name=${CLUSTER_NAME}
+      - discovery.seed_hosts=es-hot,es-warm
+      - cluster.initial_master_nodes=es-hot,es-warm
+      - node.roles=master,data_warm,remote_cluster_client
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=true
+      - xpack.security.enrollment.enabled=true
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.key=certs/es02/es02.key
+      - xpack.security.http.ssl.certificate=certs/es02/es02.crt
+      - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.key=certs/es02/es02.key
+      - xpack.security.transport.ssl.certificate=certs/es02/es02.crt
+      - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.license.self_generated.type=${LICENSE}
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    mem_limit: ${MEM_LIMIT}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    healthcheck:
+      test: ["CMD-SHELL", "test -f config/certs/setup-done"]
+      interval: 5s
+      retries: 30
+
+
+  kibana:
+    container_name: kibana
+    depends_on:
+      es01:
+        condition: service_healthy
+    image: kibana:${STACK_VERSION}
+    volumes:
+      - ./certs:/usr/share/kibana/config/certs
+      - ./kibanadata:/usr/share/kibana/data
+    ports:
+      - ${KIBANA_PORT}:5601
+    environment:
+      - SERVERNAME=kibana
+      - ELASTICSEARCH_HOSTS=https://es01:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
+      - XPACK_FLEET_ENABLED=false
+      - XPACK_ENCRYPTED_SAVED_OBJECTS_ENCRYPTIONKEY=12345678901234567890123456789012
+      - NODE_OPTIONS=--max-old-space-size=2048  # увеличить до 2 GB
+    mem_limit: 2GB
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'"]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+  logstash:
+    container_name: logstash
+    depends_on:
+      es01:
+        condition: service_healthy
+    image: logstash:${STACK_VERSION}
+    volumes:
+      - ./logstash/pipeline/:/usr/share/logstash/pipeline/
+      - ./logstash/config/:/usr/share/logstash/config/
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - LS_JAVA_OPTS=-Xms256m -Xmx256m
+    mem_limit: 1g
+
+      
+
+  filebeat:
+    container_name: filebeat
+    depends_on:
+      - logstash
+    image: elastic/filebeat:${BEAT_VERSION}
+    user: root
+    privileged: true
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./filebeat/registry:/usr/share/filebeat/data:rw
+      - /var/log:/var/log:ro
+    environment:
+      - STRICT_PERMS=false
+    mem_limit: 512m
+
+  
