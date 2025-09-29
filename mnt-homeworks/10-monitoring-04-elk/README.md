@@ -104,7 +104,8 @@ logging.json: true
 logging.metrics.enabled: false
 
 ```
-- [logstash configs](ELK/logstash)
+- [logstash pipeline](ELK/logstash/pipeline/filebeat.conf)
+- [logstash configs all](ELK/logstash)
 - [Все здесь](ELK)
 
 
