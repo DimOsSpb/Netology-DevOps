@@ -20,6 +20,7 @@
 
     В качестве решения задания пришлите скриншот меню Projects.
 
+
 ![img](img/1.png)
 
 ## Задание 2
@@ -57,5 +58,29 @@
 ![img](img/7.png)
 
 - **[test.py](src/test_sentry/test.py)**
+
+**ЗЫ.**
+## - Для решения задачи VPN пришлось поднимать однако.  
+
+    FAQ: Sentry’s Response to U.S.-Russia Sanctions
+
+    On June 12, 2024, the U.S. Department of the Treasury, Office of Foreign Assets Control (OFAC) issued additional sanctions against Russia.
+
+    These sanctions prohibit the export, sale or supply by U.S. companies of various IT services, including certain “cloud-based services” related to enterprise management software, directly or indirectly to any person located in Russia, absent authorization from OFAC.
+
+    These sanctions have gone into effect as of September 12, 2024.
+
+- И Еще про сентябрь 2027 молчу.
+
+- Как вариант [Hawk — российский трекер ошибок в ПО ](https://hawk-tracker.ru/).  
+
+- Что разрешено
+
+    изучать код
+    использовать SDK для интеграции Хоука в свои проекты,
+    разворачивать self-hosted версию Хоука для собственных нужд,
+    улучшать, модифицировать и форкать код в рамках лицензии
+
+
 
 
