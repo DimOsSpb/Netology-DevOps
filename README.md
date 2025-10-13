@@ -5,6 +5,7 @@
 - [Система управления конфигурациями](ansible-homeworks/README.md)
 - [Непрерывная разработка и интеграция](Life-cycle/README.md)
 - [Мониторинг и логи](mnt-homeworks/README.md)
+- [Микросервисы](micros-homeworks/README.md)
 ---
 ---
 - [Вопросы и комментарии по курсу](Questions&Comments/README.md)
