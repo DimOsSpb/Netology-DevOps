@@ -138,7 +138,7 @@ API Gateway - это единая точка входа для всех запр
 
 ### Решение:
 
-#### Что сделал:
+#### Что сделал в [api-gateway](api-gateway):
 
 1. Подготовил [gateway/nginx.conf](api-gateway/gateway/nginx.conf)
 2. Модифицировал [security/src/server.py](api-gateway/security/src/server.py) и [security/requirements.txt](api-gateway/security/requirements.txt) чтобы подружить библиотеки под свежие версии и привести код в рабочее состояние в текущем окружении.
