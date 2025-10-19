@@ -70,9 +70,9 @@ services:
       - security
 
 
-  setup:
+  elk_setup:
     container_name: elk-setup
-    image: elasticsearch:${STACK_VERSION}
+    image: elasticsearch:${ELK_VERSION}
     volumes:
       - ./certs:/usr/share/elasticsearch/config/certs
       - ./logstash/config/certs:/usr/share/elasticsearch/config/logstash/certs
@@ -119,7 +119,10 @@ services:
         echo "Waiting for Elasticsearch availability";
         until curl -s --cacert config/certs/ca/ca.crt https://es01:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
         echo "Setting kibana_system password";
-        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_SYSTEM_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        echo "Creating admin user";
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/${KIBANA_USER} -d "{\"password\":\"${KIBANA_PASSWORD}\",\"roles\":[\"superuser\"],\"full_name\":\"Administrator\",\"email\":\"admin@example.com\"}" | grep -E "^{|already_exists"; do sleep 10; done;
+
         echo "All done!";
         touch config/certs/setup-done;        
       '
@@ -132,9 +135,9 @@ services:
   es01:
     container_name: es-hot
     depends_on:
-      setup:
+      elk_setup:
         condition: service_healthy
-    image: elasticsearch:${STACK_VERSION}
+    image: elasticsearch:${ELK_VERSION}
     volumes:
       - ./certs:/usr/share/elasticsearch/config/certs
       - ./esdata01:/usr/share/elasticsearch/data
@@ -180,9 +183,9 @@ services:
   es02:
     container_name: es-warm
     depends_on:
-      setup:
+      elk_setup:
         condition: service_healthy
-    image: elasticsearch:${STACK_VERSION}
+    image: elasticsearch:${ELK_VERSION}
     volumes:
       - ./certs:/usr/share/elasticsearch/config/certs
       - ./esdata02:/usr/share/elasticsearch/data
@@ -228,22 +231,26 @@ services:
     depends_on:
       es01:
         condition: service_healthy
-    image: kibana:${STACK_VERSION}
+    image: kibana:${ELK_VERSION}
     volumes:
       - ./certs:/usr/share/kibana/config/certs
-      - ./kibanadata:/usr/share/kibana/data
+      - ./kibana/kibanadata:/usr/share/kibana/data
+      - ./kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
     ports:
       - ${KIBANA_PORT}:5601
     environment:
       - SERVERNAME=kibana
       - ELASTICSEARCH_HOSTS=https://es01:9200
       - ELASTICSEARCH_USERNAME=kibana_system
-      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - ELASTICSEARCH_PASSWORD=${KIBANA_SYSTEM_PASSWORD}
+      - KIBANA_SYSTEM_PASSWORD=${KIBANA_SYSTEM_PASSWORD}
+      - KIBANA_USER=${KIBANA_USER}
+      - KIBANA_PASSWORD=${KIBANA_PASSWORD}
       - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
       - XPACK_FLEET_ENABLED=false
       - XPACK_ENCRYPTED_SAVED_OBJECTS_ENCRYPTIONKEY=12345678901234567890123456789012
-      - NODE_OPTIONS=--max-old-space-size=2048  # увеличить до 2 GB
-    mem_limit: 2GB
+      - NODE_OPTIONS=--max-old-space-size=512  # увеличить до 2 GB ?
+    mem_limit: 1g
     healthcheck:
       test: ["CMD-SHELL", "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'"]
       interval: 10s
@@ -256,20 +263,22 @@ services:
       es01:
         condition: service_healthy
     image: timberio/vector:${VEKTOR_VERSION}
-    # volumes:
-      # - ./logstash/pipeline/:/usr/share/logstash/pipeline/
-      # - ./logstash/config/:/usr/share/logstash/config/
-    # environment:
-    #   - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-    #   - LS_JAVA_OPTS=-Xms256m -Xmx256m
-    mem_limit: 1g
+
+    mem_limit: 512m
+    volumes:
+      - ./vector/vector.yaml:/etc/vector/vector.yaml:ro
+    expose: 
+      - 6000      
+    # ports:
+    #   - "8686:8686" # для метрик / Prometheus Exporter ?
+    #   - "6000:6000" # для входящих логов от Filebeat (Logstash протокол)
 
       
 
   filebeat:
     container_name: filebeat
     depends_on:
-      - logstash
+      - vector
     image: elastic/filebeat:${BEAT_VERSION}
     user: root
     privileged: true

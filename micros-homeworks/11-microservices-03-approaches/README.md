@@ -150,14 +150,56 @@
 ---
 ## Задача 4: Логи * (необязательная)
 
-Продолжить работу по задаче API Gateway: сервисы, используемые в задаче, пишут логи в stdout. 
+    Продолжить работу по задаче API Gateway: сервисы, используемые в задаче, пишут логи в stdout. 
 
-Добавить в систему сервисы для сбора логов Vector + ElasticSearch + Kibana со всех сервисов, обеспечивающих работу API.
+    Добавить в систему сервисы для сбора логов Vector + ElasticSearch + Kibana со всех сервисов, обеспечивающих работу API.
 
-### Результат выполнения: 
+    ### Результат выполнения: 
 
-docker compose файл, запустив который можно перейти по адресу http://localhost:8081, по которому доступна Kibana.
-Логин в Kibana должен быть admin, пароль qwerty123456.
+    docker compose файл, запустив который можно перейти по адресу http://localhost:8081, по которому доступна Kibana.
+    Логин в Kibana должен быть admin, пароль qwerty123456.
+
+---
+
+## Решение
+
+- [docker-compose.yaml](api-gateway/docker-compose.yaml) 
+- Добавил еще filebeat с отправкой логов через Vector в ELK. Логин в Kibana  admin/qwerty123456 задается через .env и создаются в elk-setup контейнере.
+
+    ![img](img/1.png)
+    ![img](img/3.png)
+
+#### Отладка Vector
+```
+$ docker exec -it filebeat filebeat test output
+logstash: vector:6000...
+  connection...
+    parse host... OK
+    dns lookup... OK
+    addresses: 172.18.0.2
+    dial up... OK
+  TLS... WARN secure connection disabled
+  talk to server... OK
+
+$ docker exec -it vector vector validate /etc/vector/vector.yaml
+√ Loaded ["/etc/vector/vector.yaml"]
+2025-10-19T11:21:32.696579Z  WARN sink{component_kind="sink" component_id=es_cluster component_type=elasticsearch}: vector_core::tls::settings: The `verify_certificate` option is DISABLED, this may lead to security vulnerabilities.
+√ Component configuration
+√ Health check "debug_console"
+√ Health check "es_cluster"
+------------------------------------
+                           Validated  
+```
+#### Oтладка ElasticSearch 
+```
+$ curl -u elastic:ElasticTest -k "https://localhost:9200/_cat/indices?v"
+health status index                                                              uuid                   pri rep docs.count docs.deleted store.size pri.store.size dataset.size
+green  open   .internal.alerts-transform.health.alerts-default-000001            x3wDCUVrRsqAvy_ALYc4bQ   1   0          0            0       249b           249b         249b
+yellow open   vector-2025-10-19                                                  NZcOD4FjRRKUPezkFSMLoQ   1   1      38874            0     30.1mb         30.1mb       30.1mb
+....
+```
+- Для удаления индекса с неудачным контентом
+curl -u elastic:ElasticTest -k -X DELETE "https://localhost:9200/vector-2025-10-19"
 
 
 ## Задача 5: Мониторинг * (необязательная)

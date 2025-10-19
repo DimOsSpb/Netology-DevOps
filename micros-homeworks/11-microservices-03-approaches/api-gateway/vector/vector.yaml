@@ -1,0 +1,49 @@
+sources:
+  filebeat:
+    type: "logstash"
+    address: "0.0.0.0:6000"
+
+
+transforms:
+  parse_message:
+    type: remap
+    inputs: [filebeat]
+    source: |
+      .parsed, err = parse_json(.message)
+      if err == null && is_object(.parsed) {
+        . = merge!(., .parsed)
+      }
+
+  add_metadata:
+    type: remap
+    inputs: [parse_message]
+    source: |
+      del(.host)
+      .environment = "production"
+
+
+
+
+sinks:
+  es_cluster:
+    type: elasticsearch
+    inputs: [add_metadata]
+    endpoints: ["https://es01:9200"]
+   
+    bulk:
+      index: "vector-%Y-%m-%d"
+      batch.max_events: 500
+      request.timeout_secs: 30
+    auth:
+      user: "elastic"
+      password: "ElasticTest"
+      strategy: "basic"
+    tls:
+      verify_certificate: false
+
+  # debug_console:
+  #   type: console
+  #   inputs: [add_metadata]
+  #   encoding:
+  #     codec: json
+  

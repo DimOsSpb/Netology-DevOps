@@ -1,1 +1,5 @@
 venv/
+api-gateway/filebeat/registry/
+esdata*/
+api-gateway/kibana/kibanadata
+api-gateway/prometheus/data

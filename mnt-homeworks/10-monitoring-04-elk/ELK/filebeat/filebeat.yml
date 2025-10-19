@@ -1,0 +1,38 @@
+filebeat.inputs:
+  - type: container
+    paths: 
+      - '/var/lib/docker/containers/*/*.log'
+    fields:
+      log_type: docker
+    fields_under_root: true
+
+    processors:
+      - add_docker_metadata:
+          host: "unix:///var/run/docker.sock"
+      - decode_json_fields:
+          fields: ["message"]
+          target: "json"
+          overwrite_keys: true
+
+
+  - type: log
+    enabled: true
+    fields:
+      log_type: host_xorg
+    paths:
+      - /var/log/Xorg.0.log
+    fields_under_root: true
+
+
+output.logstash:
+  hosts: ["logstash:5044"]
+
+#output.console:
+#  enabled: true
+#  pretty: true
+
+logging.json: true
+logging.metrics.enabled: false
+#logging.level: debug
+#logging.json: true
+

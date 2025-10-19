@@ -1,0 +1,29 @@
+filebeat.inputs:
+  - type: container
+    paths: 
+      - '/var/lib/docker/containers/*/*.log'
+    fields:
+      log_type: docker
+    fields_under_root: true
+
+    processors:
+      - add_docker_metadata:
+          host: "unix:///var/run/docker.sock"
+      - decode_json_fields:
+          fields: ["message"]
+          target: "json"
+          overwrite_keys: false
+
+# Отправка не в Elastic напрямую, а в Vector
+output.logstash:
+  hosts: ["vector:6000"]  # Vector слушает Logstash-протокол
+
+#output.console:
+#  enabled: true
+#  pretty: true
+
+logging.json: true
+logging.metrics.enabled: false
+#logging.level: debug
+#logging.json: true
+
