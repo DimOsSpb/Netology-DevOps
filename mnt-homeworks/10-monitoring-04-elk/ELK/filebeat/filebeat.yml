@@ -15,14 +15,6 @@ filebeat.inputs:
           overwrite_keys: true
 
 
-  - type: log
-    enabled: true
-    fields:
-      log_type: host_xorg
-    paths:
-      - /var/log/Xorg.0.log
-    fields_under_root: true
-
 
 output.logstash:
   hosts: ["logstash:5044"]

@@ -204,24 +204,33 @@ curl -u elastic:ElasticTest -k -X DELETE "https://localhost:9200/vector-2025-10-
 
 ## Задача 5: Мониторинг * (необязательная)
 
-Продолжить работу по задаче API Gateway: сервисы, используемые в задаче, предоставляют набор метрик в формате prometheus:
+    Продолжить работу по задаче API Gateway: сервисы, используемые в задаче, предоставляют набор метрик в формате prometheus:
 
-- сервис security по адресу /metrics,
-- сервис uploader по адресу /metrics,
-- сервис storage (minio) по адресу /minio/v2/metrics/cluster.
+    - сервис security по адресу /metrics,
+    - сервис uploader по адресу /metrics,
+    - сервис storage (minio) по адресу /minio/v2/metrics/cluster.
 
-Добавить в систему сервисы для сбора метрик (Prometheus и Grafana) со всех сервисов, обеспечивающих работу API.
-Построить в Graphana dashboard, показывающий распределение запросов по сервисам.
+    Добавить в систему сервисы для сбора метрик (Prometheus и Grafana) со всех сервисов, обеспечивающих работу API.
+    Построить в Graphana dashboard, показывающий распределение запросов по сервисам.
 
-### Результат выполнения: 
+    ### Результат выполнения: 
 
-docker compose файл, запустив который можно перейти по адресу http://localhost:8081, по которому доступна Grafana с настроенным Dashboard.
-Логин в Grafana должен быть admin, пароль qwerty123456.
-
----
-
-### Как оформить ДЗ?
-
-Выполненное домашнее задание пришлите ссылкой на .md-файл в вашем репозитории.
+    docker compose файл, запустив который можно перейти по адресу http://localhost:8081, по которому доступна Grafana с настроенным Dashboard.
+    Логин в Grafana должен быть admin, пароль qwerty123456.
 
 ---
+
+## Решение
+
+- [docker-compose.yaml](api-gateway/docker-compose.yaml)
+- http://localhost:8081 запустил на 8082 т.к. оставил весь стек в docker-compose где этот 8081 уже занят Kibana. admin/qwerty123456 задается через .env
+    
+    ![img](img/4.png)
+
+    ![img](img/5.png)
+
+    ![img](img/6.png)
+
+    ![img](img/7.png)    
+
+

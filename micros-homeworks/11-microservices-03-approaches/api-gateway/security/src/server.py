@@ -1,13 +1,14 @@
 from os import getenv
 from markupsafe import escape
 from flask import Flask, request, make_response, jsonify
-# from prometheus_flask_exporter import PrometheusMetrics, NO_PREFIX
+from prometheus_flask_exporter import PrometheusMetrics, NO_PREFIX
 from passlib.hash import pbkdf2_sha256
 import jwt
 
 server = Flask(__name__)
-# metrics = PrometheusMetrics(server, defaults_prefix=NO_PREFIX, buckets=[0.1, 0.5, 1, 1.5, 2], default_labels={"app_name": "security"})
-# metrics.info('app_info', 'Application info', version='1.0')
+metrics = PrometheusMetrics(server, defaults_prefix=NO_PREFIX, buckets=[0.1, 0.5, 1, 1.5, 2], default_labels={"app_name": "security"})
+metrics.info('app_info', 'Application info', version='1.0')
+
 
 jwt_key = 'secret'
 data = {

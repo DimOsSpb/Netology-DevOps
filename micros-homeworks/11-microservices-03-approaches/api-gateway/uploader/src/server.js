@@ -35,42 +35,6 @@ app.get("/status", (_, response) => {
   return response.status(200).json({ status: "OK" });
 });
 
-// app.post("/v1/upload", (request, response) => {
-//   var bufs = [];
-//   // console.log(`- In /v1/upload !!`);
-//   request.on("data", (d) => bufs.push(d));
-//   request.on("end", async () => {
-//     var buf = Buffer.concat(bufs);
-
-//     const fileType = await FileType.fromBuffer(buf);
-
-//     if (!fileType || !fileType.mime) {
-//       console.warn(`Failed to detect file mime type`);
-//       return response
-//         .status(400)
-//         .json({ error: "Failed to detect file mime type" });
-//     }
-//     console.log(`Detected file type: ${fileType.mime}`);
-
-//     if (!fileType.mime.startsWith("image/")) {
-//       console.warn(`Expected image, but got ${fileType.mime}`);
-//       return response.status(400).json({ error: "File expected to be image" });
-//     }
-
-//     const id = uuidv4();
-//     const filename = `${id}.${fileType.ext}`;
-
-//     client.putObject(S3_BUCKET, filename, buf, function (err, objInfo) {
-//       if (err) {
-//         console.error(`Failed to save file due to error ${err}`);
-//         return response.status(500).json({ error: err });
-//       }
-//       console.log(`Saved file: ${filename}`);
-//       return response.json({ filename });
-//     });
-//   });
-// });
-
 let totalBytesRead = 0;
 
 app.post("/v1/upload", (request, response) => {

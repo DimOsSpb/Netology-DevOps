@@ -7,8 +7,20 @@ scrape_configs:
       - targets: ["localhost:9090"]
         labels:
           instance_name: "prometheus"
-  - job_name: "host_node"
+
+  # -- API GATEWAY metrics endpoinds --
+
+  - job_name: "uploader"
     static_configs:
-      - targets: ["node-exporter:9100"]
-        labels:
-          instance_name: "main_host"
+      - targets: ['uploader:3000']  
+    metrics_path: "/metrics" 
+
+  - job_name: "security"
+    static_configs:
+      - targets: ["security:3000"]
+    metrics_path: "/metrics"
+
+  - job_name: "storage"
+    static_configs:
+      - targets: ["storage:9000"]
+    metrics_path: "/minio/v2/metrics/cluster"      
