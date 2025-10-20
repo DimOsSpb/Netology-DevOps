@@ -71,6 +71,11 @@
 
 - Такая конфигурация, как на картинке, подходит для разработки и тестирования,небольших проектов с умеренной нагрузкой, демонстрационных стендов. Для production лучше использовать 6 контейнеров, но конфигурация с 3 контейнерами и разнесенными репликами - это хороший компромисс
 
+- [docker-compose](redis-cluster/docker-compose.yamls)
+- [redis-master.conf](redis-cluster/redis-master.conf)
+- [redis-replica.conf](redis-cluster/redis-replica.conf)
+
+
 ```shell
 odv@matebook16s:~/projects/MY/DevOpsCourse/micros-homeworks/11-microservices-04-scaling/redis-cluster$ docker logs redis-setup
 >>> Performing hash slots allocation on 6 nodes...
