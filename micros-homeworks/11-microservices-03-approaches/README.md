@@ -164,7 +164,7 @@
 ## Решение
 
 - [docker-compose.yaml](api-gateway/docker-compose.yaml) 
-- Добавил еще [filebeat](api-gateway/filebeat/filebeat.yml) с отправкой логов через [Vector](api-gateway/vector/vector.yaml) в ELK. Логин в Kibana  admin/qwerty123456 задается через .env и создаются в elk-setup контейнере.
+- Добавил еще [filebeat](api-gateway/filebeat/filebeat.yml) с отправкой логов через [Vector](api-gateway/vector/vector.yaml) в ELK. Логин в Kibana  admin/qwerty123456 задается через [.env](api-gateway/.env) и создаются в elk-setup контейнере.
 
     ![img](img/1.png)
     ![img](img/3.png)
@@ -223,7 +223,7 @@ curl -u elastic:ElasticTest -k -X DELETE "https://localhost:9200/vector-2025-10-
 ## Решение
 
 - [docker-compose.yaml](api-gateway/docker-compose.yaml)
-- http://localhost:8081 запустил на 8082 т.к. оставил весь стек в docker-compose где этот 8081 уже занят Kibana. admin/qwerty123456 задается через .env
+- http://localhost:8081 запустил на 8082 т.к. оставил весь стек в docker-compose где этот 8081 уже занят Kibana. admin/qwerty123456 задается через [.env](api-gateway/.env)
 - [prometheus](api-gateway/prometheus/prometheus.yml)
     
     ![img](img/4.png)
