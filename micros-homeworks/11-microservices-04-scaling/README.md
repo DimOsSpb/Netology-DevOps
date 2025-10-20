@@ -56,17 +56,110 @@
 
 ## Задача 2: Распределённый кеш * (необязательная)
 
-Разработчикам вашей компании понадобился распределённый кеш для организации хранения временной информации по сессиям пользователей.
-Вам необходимо построить Redis Cluster, состоящий из трёх шард с тремя репликами.
+    Разработчикам вашей компании понадобился распределённый кеш для организации хранения временной информации по сессиям пользователей.
+    Вам необходимо построить Redis Cluster, состоящий из трёх шард с тремя репликами.
 
-### Схема:
+    ### Схема:
 
 ![11-04-01](img/task.png)
 
 ---
 
-### Как оформить ДЗ?
+## Решение
 
-Выполненное домашнее задание пришлите ссылкой на .md-файл в вашем репозитории.
+[Redis cluster specification](https://redis-doc.netlify.app/docs/reference/cluster-spec/)
 
----
+- Такая конфигурация, как на картинке, подходит для разработки и тестирования,небольших проектов с умеренной нагрузкой, демонстрационных стендов. Для production лучше использовать 6 контейнеров, но конфигурация с 3 контейнерами и разнесенными репликами - это хороший компромисс
+
+```shell
+odv@matebook16s:~/projects/MY/DevOpsCourse/micros-homeworks/11-microservices-04-scaling/redis-cluster$ docker logs redis-setup
+>>> Performing hash slots allocation on 6 nodes...
+Master[0] -> Slots 0 - 5460
+Master[1] -> Slots 5461 - 10922
+Master[2] -> Slots 10923 - 16383
+Adding replica node2:6380 to node1:6379
+Adding replica node3:6380 to node2:6379
+Adding replica node1:6380 to node3:6379
+M: 0796e1d825a4f3a70b5c785d096394a5247c5e83 node1:6379
+   slots:[0-5460] (5461 slots) master
+S: c597633c2e19a3243945a5c3def55e9e529da02f node1:6380
+   replicates a8379e06892d2d9247760b126e40272ade57ce4f
+M: 0acf19b41f46ac318c7e1b58d2e566c5fda84da9 node2:6379
+   slots:[5461-10922] (5462 slots) master
+S: 631dacfddddd3655e8f36ab14ff48f6d0460c2fd node2:6380
+   replicates 0796e1d825a4f3a70b5c785d096394a5247c5e83
+M: a8379e06892d2d9247760b126e40272ade57ce4f node3:6379
+   slots:[10923-16383] (5461 slots) master
+S: 6a8ae2d0228e50b9b5a31831ccb28ca716ab81e4 node3:6380
+   replicates 0acf19b41f46ac318c7e1b58d2e566c5fda84da9
+>>> Nodes configuration updated
+>>> Assign a different config epoch to each node
+>>> Sending CLUSTER MEET messages to join the cluster
+Waiting for the cluster to join
+
+>>> Performing Cluster Check (using node node1:6379)
+M: 0796e1d825a4f3a70b5c785d096394a5247c5e83 node1:6379
+   slots:[0-5460] (5461 slots) master
+   1 additional replica(s)
+S: 6a8ae2d0228e50b9b5a31831ccb28ca716ab81e4 172.18.0.4:6380
+   slots: (0 slots) slave
+   replicates 0acf19b41f46ac318c7e1b58d2e566c5fda84da9
+M: a8379e06892d2d9247760b126e40272ade57ce4f 172.18.0.4:6379
+   slots:[10923-16383] (5461 slots) master
+   1 additional replica(s)
+S: 631dacfddddd3655e8f36ab14ff48f6d0460c2fd 172.18.0.3:6380
+   slots: (0 slots) slave
+   replicates 0796e1d825a4f3a70b5c785d096394a5247c5e83
+S: c597633c2e19a3243945a5c3def55e9e529da02f 172.18.0.2:6380
+   slots: (0 slots) slave
+   replicates a8379e06892d2d9247760b126e40272ade57ce4f
+M: 0acf19b41f46ac318c7e1b58d2e566c5fda84da9 172.18.0.3:6379
+   slots:[5461-10922] (5462 slots) master
+   1 additional replica(s)
+[OK] All nodes agree about slots configuration.
+>>> Check for open slots...
+>>> Check slots coverage...
+[OK] All 16384 slots covered.
+odv@matebook16s:~/projects/MY/DevOpsCourse/micros-homeworks/11-microservices-04-scaling/redis-cluster$ 
+```
+
+```shell
+odv@matebook16s:~/projects/MY/DevOpsCourse/micros-homeworks/11-microservices-04-scaling/redis-cluster$ docker exec -it node1 redis-cli --cluster check node1:6379
+node1:6379 (0796e1d8...) -> 0 keys | 5461 slots | 1 slaves.
+172.18.0.4:6379 (a8379e06...) -> 0 keys | 5461 slots | 1 slaves.
+172.18.0.3:6379 (0acf19b4...) -> 0 keys | 5462 slots | 1 slaves.
+[OK] 0 keys in 3 masters.
+0.00 keys per slot on average.
+>>> Performing Cluster Check (using node node1:6379)
+M: 0796e1d825a4f3a70b5c785d096394a5247c5e83 node1:6379
+   slots:[0-5460] (5461 slots) master
+   1 additional replica(s)
+S: 6a8ae2d0228e50b9b5a31831ccb28ca716ab81e4 172.18.0.4:6380
+   slots: (0 slots) slave
+   replicates 0acf19b41f46ac318c7e1b58d2e566c5fda84da9
+M: a8379e06892d2d9247760b126e40272ade57ce4f 172.18.0.4:6379
+   slots:[10923-16383] (5461 slots) master
+   1 additional replica(s)
+S: 631dacfddddd3655e8f36ab14ff48f6d0460c2fd 172.18.0.3:6380
+   slots: (0 slots) slave
+   replicates 0796e1d825a4f3a70b5c785d096394a5247c5e83
+S: c597633c2e19a3243945a5c3def55e9e529da02f 172.18.0.2:6380
+   slots: (0 slots) slave
+   replicates a8379e06892d2d9247760b126e40272ade57ce4f
+M: 0acf19b41f46ac318c7e1b58d2e566c5fda84da9 172.18.0.3:6379
+   slots:[5461-10922] (5462 slots) master
+   1 additional replica(s)
+[OK] All nodes agree about slots configuration.
+>>> Check for open slots...
+>>> Check slots coverage...
+[OK] All 16384 slots covered.
+```
+```shell
+odv@matebook16s:~/projects/MY/DevOpsCourse/micros-homeworks/11-microservices-04-scaling/redis-cluster$ docker exec -it node1 redis-cli -c cluster nodes
+6a8ae2d0228e50b9b5a31831ccb28ca716ab81e4 172.18.0.4:6380@16380 slave 0acf19b41f46ac318c7e1b58d2e566c5fda84da9 0 1760982460604 3 connected
+a8379e06892d2d9247760b126e40272ade57ce4f 172.18.0.4:6379@16379 master - 0 1760982461613 5 connected 10923-16383
+631dacfddddd3655e8f36ab14ff48f6d0460c2fd 172.18.0.3:6380@16380 slave 0796e1d825a4f3a70b5c785d096394a5247c5e83 0 1760982461000 1 connected
+c597633c2e19a3243945a5c3def55e9e529da02f 172.18.0.2:6380@16380 slave a8379e06892d2d9247760b126e40272ade57ce4f 0 1760982461512 5 connected
+0acf19b41f46ac318c7e1b58d2e566c5fda84da9 172.18.0.3:6379@16379 master - 0 1760982461000 3 connected 5461-10922
+0796e1d825a4f3a70b5c785d096394a5247c5e83 172.18.0.2:6379@16379 myself,master - 0 0 1 connected 0-5460
+```

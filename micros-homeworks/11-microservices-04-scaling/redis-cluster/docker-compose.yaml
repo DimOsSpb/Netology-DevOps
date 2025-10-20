@@ -1,0 +1,60 @@
+services:
+  node1:
+    image: redis:7
+    container_name: node1
+    volumes:
+      - ./node-1:/data
+      - ./redis-master.conf:/usr/local/etc/redis/redis-master.conf
+      - ./redis-replica.conf:/usr/local/etc/redis/redis-replica.conf
+    ports:
+      - "7001:6379"  # Shard-1
+      - "7002:6380"  # Shard-2
+    command: >
+      sh -c "
+      redis-server /usr/local/etc/redis/redis-master.conf &
+      redis-server /usr/local/etc/redis/redis-replica.conf
+      "
+
+  node2:
+    image: redis:7
+    container_name: node2
+    volumes:
+      - ./node-2:/data    
+      - ./redis-master.conf:/usr/local/etc/redis/redis-master.conf
+      - ./redis-replica.conf:/usr/local/etc/redis/redis-replica.conf
+    ports:
+      - "7003:6379"  # Shard-2
+      - "7004:6380"  # Shard-3
+    command: >
+      sh -c "
+      redis-server /usr/local/etc/redis/redis-master.conf &
+      redis-server /usr/local/etc/redis/redis-replica.conf
+      "
+
+  node3:
+    image: redis:7
+    container_name: node3
+    volumes:
+      - ./node-3:/data    
+      - ./redis-master.conf:/usr/local/etc/redis/redis-master.conf
+      - ./redis-replica.conf:/usr/local/etc/redis/redis-replica.conf
+
+    ports:
+      - "7005:6379"  # Shard-3
+      - "7006:6380"  # Shard-1
+    command: >
+      sh -c "
+      redis-server /usr/local/etc/redis/redis-master.conf &
+      redis-server /usr/local/etc/redis/redis-replica.conf
+      "
+
+  redis_setup:
+    image: redis:7
+    container_name: redis-setup
+    depends_on:
+      - node1
+      - node2
+      - node3
+    command: >
+      redis-cli --cluster create node1:6379 node1:6380 node2:6379 node2:6380 node3:6379 node3:6380 --cluster-replicas 1 --cluster-yes
+
