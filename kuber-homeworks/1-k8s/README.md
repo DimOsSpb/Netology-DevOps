@@ -80,7 +80,7 @@ Starting to serve on 127.0.0.1:8001
 
 - Получим внешний ip хоста с microk8s, например через ```curl ifconfig.me``` для реального внешнего адреса, но в моем случае я буду использовать lan адрес хоста с microk8s, он тоже является внешним для сети m8s, так мне проще проверить работу с api и нет необходимости настройки firewall в моей сети...
 
-- Пропишем его в 
+- Пропишем его в файл /var/snap/microk8s/current/certs/csr.conf.template
 - обновиm сертификаты `sudo microk8s refresh-certs --cert server.crt` ! не - front-proxy-client.crt. Для доступа к ip согласно докам.
 - И что важно - нужно добавить строчки в /var/snap/microk8s/current/args/kube-apiserver, чтобы он слушал кроме 127.0.0.1, что по умолчанию!
 ```
