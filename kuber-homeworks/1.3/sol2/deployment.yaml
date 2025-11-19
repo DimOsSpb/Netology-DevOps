@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      initContainers:
+      - name: check-nginx-service
+        image: busybox
+        command: ['sh', '-c', 'until nslookup nginx-service.default.svc.cluster.local; do echo "waiting for service..."; sleep 3; done; echo "service ready"']
+      containers:
+      - name: nginx
+        image: nginx:1.29.3-alpine
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
