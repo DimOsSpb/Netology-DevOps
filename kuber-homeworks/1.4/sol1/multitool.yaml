@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: pod-multitool
+  name: pod-multitool
+  namespace: default
+spec:
+  containers:
+  - name: multitool
+    image: wbitt/network-multitool:alpine-minimal
+    ports:
+    - containerPort: 1180
+    env:
+    - name: HTTP_PORT
+      value: "1180"    
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "128Mi"
+        cpu: "100m"
