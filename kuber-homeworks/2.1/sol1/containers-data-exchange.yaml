@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-exchange
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-exchange
+  template:
+    metadata:
+      labels:
+        app: data-exchange
+    spec:
+      containers:
+      - name: multitool
+        image: wbitt/network-multitool:alpine-minimal
+        command: ["/bin/sh", "-c"] 
+        args: ["while true; do echo $(date) >> /data/in/datestamp.log; sleep 5; done"]
+        volumeMounts:
+        - name: data-exchange-vol
+          mountPath: /data/in
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"   
+      - name: busybox
+        image: busybox
+        command: ["/bin/sh", "-c"]
+        args: ["tail -f /data/out/datestamp.log"]
+        volumeMounts:
+        - name: data-exchange-vol
+          mountPath: /data/out
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"   
+      volumes:
+      - name: data-exchange-vol
+        emptyDir: {} 

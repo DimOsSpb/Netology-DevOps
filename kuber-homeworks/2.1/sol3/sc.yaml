@@ -1,0 +1,72 @@
+# --- 
+# В нашем случае используем в pvc storageClassName: microk8s-hostpath, этот SC не используем
+# SC microk8s-hostpath использует встроенный hostpath-provisioner
+#
+# apiVersion: storage.k8s.io/v1
+# kind: storageClass
+# metadata:
+#   name: sc-1
+# provisioner: kubernetes.io/no-provisioner
+# volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-1
+spec:
+  volumeName: pv-1
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: microk8s-hostpath #через встроенный hostpath-provisioner, создаст PV и свяжет с /var/snap/microk8s/common/default-storage/<random>/
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-exchange-pvc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-exchange-pvc
+  template:
+    metadata:
+      labels:
+        app: data-exchange-pvc
+    spec:
+      containers:
+      - name: multitool
+        image: wbitt/network-multitool:alpine-minimal
+        command: ["/bin/sh", "-c"] 
+        args: ["while true; do echo $(date) >> /data/in/datestamp.log; sleep 5; done"]
+        volumeMounts:
+        - name: data-exchange-vol
+          mountPath: /data/in
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"   
+      - name: busybox
+        image: busybox
+        command: ["/bin/sh", "-c"]
+        args: ["tail -f /data/out/datestamp.log"]
+        volumeMounts:
+        - name: data-exchange-vol
+          mountPath: /data/out
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m" 
+      volumes:
+      - name: data-exchange-vol
+        persistentVolumeClaim:
+          claimName: pvc-1
