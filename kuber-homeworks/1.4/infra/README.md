@@ -13,11 +13,15 @@
     sudo chown -f -R $USER ~/.kube
     newgrp microk8s
     microk8s status
-    ```
+```
 - Для задания надо добавить ingress
+  
 ```
-    microk8s enable ingress
+microk8s enable ingress
 ```
+
+## Для подключения к внешнему ip-адресу
+
 - Сгенерировать сертификат для подключения к внешнему ip-адресу.
 - Пропишем внешний ip хоста с microk8s в файл /var/snap/microk8s/current/certs/csr.conf.template
 - обновиm сертификаты `sudo microk8s refresh-certs --cert server.crt`
