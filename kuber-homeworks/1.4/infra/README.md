@@ -13,11 +13,13 @@
     sudo chown -f -R $USER ~/.kube
     newgrp microk8s
     microk8s status
-    ```
+```
 - Для задания надо добавить ingress
+  
 ```
-    microk8s enable ingress
+microk8s enable ingress
 ```
+
 ## Для подключения к внешнему ip-адресу
 
 - Сгенерировать сертификат для подключения к внешнему ip-адресу.
