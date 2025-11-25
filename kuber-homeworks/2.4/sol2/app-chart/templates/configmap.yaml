@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-vol
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Страница nginx</title>
+    </head>
+    <body>
+      <h1>Контент от {{ .Release.Name }}</h1>
+    </body>
+    </html>
