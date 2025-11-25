@@ -5,3 +5,4 @@
 - [1.4 Сетевое взаимодействие в Kubernetes](1.4/README.md)
 - [2.1 Хранение в K8s](2.1/README.md)
 - [2.3 Настройка приложений и управление доступом в Kubernetess](2.3/README.md)
+- [2.4 Helm](2.4/README.md)
