@@ -1,0 +1,16 @@
+# inventory/ha-test/group_vars/k8s_cluster/k8s-cluster.yml
+kube_apiserver_ip: "10.0.1.100"  # Внутренний VIP
+kube_apiserver_port: 6443
+kube_control_plane_ha: true
+kubeadm_init_timeout: 600
+
+loadbalancer_apiserver:
+  type: "haproxy"
+  address: "{{ kube_apiserver_ip }}"
+  port: "{{ kube_apiserver_port }}"
+  keepalived: true
+  keepalived_vip: "{{ kube_apiserver_ip }}"
+  keepalived_interface: "eth0"
+
+kube_network_plugin: calico
+calico_ipv4pool_cidr: "10.244.0.0/16"

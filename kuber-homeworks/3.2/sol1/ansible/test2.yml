@@ -1,0 +1,102 @@
+---
+- name: Чтение admin.conf и сохранение с новыми именами
+  hosts: control
+  connection: local
+  vars:
+    source_config: "{{ config_folder }}/{{ cluster_name }}.conf"
+    kubeconfig_path: "{{ '~/.kube/config' | expanduser }}"
+
+  tasks:
+
+    - name: Ensure kubeconfig exists
+      ansible.builtin.stat:
+        path: "{{ source_config }}"
+      register: kubeconfig
+
+    - name: Cluster is not initialized?
+      ansible.builtin.meta: end_play
+      when: not kubeconfig.stat.exists
+
+    - name: Get current cluster name
+      ansible.builtin.shell: |
+        kubectl --kubeconfig {{ source_config }} config view --raw -o jsonpath='{.clusters[0].name}'
+      register: new_cluster_name
+      changed_when: false
+
+    - name: Update server URL
+      ansible.builtin.command:
+        cmd: >
+          kubectl --kubeconfig {{ source_config }} config set-cluster {{ new_cluster_name.stdout }}
+          --server=https://{{ hostvars[groups['masters'][0]].external_ip }}:6443
+      register: update_result
+      changed_when: true
+
+    # Установить Calico CNI для сетевого взаимодействия нод (пока так в лоб и без выбора)
+    - name: CNI plugin
+      ansible.builtin.command:
+        cmd: >
+          kubectl --kubeconfig {{ source_config }} apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/calico.yaml
+      register: update_result
+      changed_when: false
+#     - block:
+#         - name: Прочитать исходный admin.conf
+#           ansible.builtin.set_fact:
+#             source_data: "{{ lookup('file', source_config) | from_yaml }}"
+
+#         - name: Создать переименованную конфигурацию
+#           ansible.builtin.set_fact:
+#             renamed_config:
+#               apiVersion: v1
+#               kind: Config
+#               clusters:
+#               - name: "{{ cluster_name }}"
+#                 cluster: >-
+#                   {{
+#                     source_data.clusters[0].cluster |
+#                     combine({'server': 'https://' + hostvars[groups['masters'][0]].external_ip + ':6443'})
+#                   }}
+#               users:
+#                 - name: "{{ cluster_name }}-admin"
+#                   user: "{{ source_data.users[0].user }}"
+#               contexts:
+#                 - name: "{{ cluster_name }}"
+#                   context:
+#                     cluster: "{{ cluster_name }}"
+#                     user: "{{ cluster_name }}-admin"
+#               current-context: "{{ cluster_name }}"
+
+#         - name: Save renamed_config to temp file
+#           ansible.builtin.tempfile:
+#             state: file
+#             suffix: .yaml
+#           register: temp_kubeconfig
+
+#         - name: Write config to temp file
+#           ansible.builtin.copy:
+#             content: "{{ renamed_config | to_nice_yaml }}"
+#             dest: "{{ temp_kubeconfig.path }}"
+#             mode: '0600'
+
+#         - name: Merge configurations
+#           ansible.builtin.shell: |
+#             set -e
+#             KUBECONFIG={{ kubeconfig_path }}:{{ temp_kubeconfig.path }} \
+#               kubectl config view --flatten > {{ kubeconfig_path }}.tmp
+#             mv {{ kubeconfig_path }}.tmp {{ kubeconfig_path }}
+#             chmod 600 {{ kubeconfig_path }}
+#           args:
+#             executable: /bin/bash
+#           changed_when: true
+
+#         - name: Cleanup
+#           ansible.builtin.file:
+#             path: "{{ temp_kubeconfig.path }}"
+#             state: absent
+
+#         - name: Set current context explicitly
+#           ansible.builtin.command:
+#             cmd: kubectl config use-context {{ cluster_name }}
+#           changed_when: false
+
+#       when: cluster_name is defined and cluster_name != ""
+      # KUBECONFIG=~/.kube/config:~/.kube/NetologyK8S-1_new.conf kubectl config view --flatten > ~/.kube/config.new && mv ~/.kube/config.new ~/.kube/config

@@ -1,4 +1,4 @@
-# Local .terraform directories and files
+kubespray/
 **/.terraform/*
 .terraform*
 
@@ -11,3 +11,7 @@
 # own secret vars store.
 personal.auto.tfvars
 
+
+terraform.tfvars
+
+tfplan

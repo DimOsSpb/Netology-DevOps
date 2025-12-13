@@ -1,0 +1,4 @@
+# Etcd должен слушать на внутренних IP
+etcd_listen_ip: "{{ ip }}"            # Внутренний IP
+etcd_advertise_client_urls: "https://{{ ip }}:2379"
+etcd_advertise_peer_urls: "https://{{ ip }}:2380"

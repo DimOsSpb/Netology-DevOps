@@ -1,0 +1,89 @@
+- name: Test
+  hosts: localhost
+  vars:
+
+    main_kubeconfig: "~/.kube/config"
+
+  tasks:
+
+    # - name: Update cluster fields
+    #   ansible.builtin.modify_yaml:
+    #     path: "{{ config_folder }}/{{ cluster_name }}.conf"
+    #     operations:
+    #       - path: "clusters[0].name"
+    #         value: "{{ cluster_name }}"
+    #       - path: "contexts[0].cluster"
+    #         value: "{{ cluster_name }}"
+
+    # - name: Изменить поле в YAML файле
+    #   community.general.yaml:
+    #     src: "{{ config_folder }}/{{ cluster_name }}.conf"
+    #     dest: "{{ config_folder }}/modified.yml"
+    #     key: "server.host"
+    #     value: "192.168.1.100"
+
+    # - name: Extract certificate-authority-data from new kubeconfig
+    #   ansible.builtin.shell: >
+    #     kubectl --kubeconfig {{ config_folder }}/{{ cluster_name }}.conf
+    #     config view -o jsonpath='{.clusters[0].cluster.certificate-authority-data}'
+    #   args:
+    #     executable: /bin/bash
+    #   register: conf_ca
+    #   changed_when: false
+
+    # - name: Extract user client-certificate-data
+    #   ansible.builtin.shell: >
+    #     kubectl --kubeconfig {{ config_folder }}/{{ cluster_name }}.conf
+    #     config view -o jsonpath='{.users[0].user.client-certificate-data}'
+    #   args:
+    #     executable: /bin/bash
+    #   register: conf_cert
+    #   changed_when: false
+
+    # - name: Extract user client-key-data
+    #   ansible.builtin.shell: >
+    #     kubectl --kubeconfig {{ config_folder }}/{{ cluster_name }}.conf
+    #     config view -o jsonpath='{.users[0].user.client-key-data}'
+    #   args:
+    #     executable: /bin/bash
+    #   register: conf_key
+    #   changed_when: false
+
+    # - name: Set cluster in main kubeconfig
+    #   ansible.builtin.shell: >
+    #     kubectl --kubeconfig {{ main_kubeconfig }}
+    #     config set-cluster {{ cluster_name }}
+    #     --server=https://{{ hostvars[groups['masters'][0]].external_ip }}:6443
+    #     --certificate-authority={{ conf_ca.stdout }}
+    #     --embed-certs=true
+    #   args:
+    #     executable: /bin/bash
+    #   changed_when: true
+
+    # - name: Set user in main kubeconfig
+    #   ansible.builtin.shell: >
+    #     kubectl --kubeconfig {{ main_kubeconfig }}
+    #     config set-credentials {{ admin_name }}
+    #     --client-certificate={{ conf_cert.stdout }}
+    #     --client-key={{ conf_key.stdout }}
+    #     --embed-certs=true
+    #   args:
+    #     executable: /bin/bash
+    #   changed_when: true
+
+    # - name: Set context in main kubeconfig
+    #   ansible.builtin.shell: >
+    #     kubectl --kubeconfig {{ main_kubeconfig }}
+    #     config set-context {{ cluster_name }}
+    #     --cluster={{ cluster_name }}
+    #     --user={{ admin_name }}
+    #   args:
+    #     executable: /bin/bash
+    #   changed_when: true
+
+    # - name: Switch current context
+    #   ansible.builtin.shell: >
+    #     kubectl --kubeconfig {{ main_kubeconfig }} config use-context {{ cluster_name }}
+    #   args:
+    #     executable: /bin/bash
+    #   changed_when: false

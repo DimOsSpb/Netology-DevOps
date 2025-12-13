@@ -1,0 +1,18 @@
+- name: Prepare node
+  ansible.builtin.include_role:
+    name: k8s_node
+
+# Установка нужных версий kubeadm/kubelet
+- name: Install Kubernetes packages
+  ansible.builtin.apt:
+    name:
+      - "kubelet={{ k8s_package_version }}"
+      - "kubeadm={{ k8s_package_version }}"
+    state: present
+    update_cache: true
+
+- name: Enable kubelet service
+  ansible.builtin.systemd:
+    name: kubelet
+    enabled: true
+    state: started

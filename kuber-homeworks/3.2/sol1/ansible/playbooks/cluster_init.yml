@@ -1,0 +1,90 @@
+---
+- name: Initialize cluster
+  hosts: masters[0]
+  become: true
+  serial: 1
+  tasks:
+
+    - name: Skip cluster initialization if disabled
+      ansible.builtin.meta: end_play
+      when: not (cluster_init | default(false))
+
+    - name: Init first master
+      ansible.builtin.command: >
+        kubeadm init
+        --apiserver-advertise-address={{ internal_ip }}
+        --pod-network-cidr={{ pod_cidr }}
+        --kubernetes-version={{ k8s_cluster_version }}
+        {% if groups['masters'] | length > 1 %}
+        --control-plane-endpoint={{ vip_ip | default(external_ip) }}
+        {% endif %}
+        --apiserver-cert-extra-sans={{ internal_ip }},{{ external_ip }}{% if vip_ip is defined %},{{ vip_ip }}{% endif %}
+        --upload-certs
+      args:
+        creates: /etc/kubernetes/admin.conf
+      register: kubeadm_init
+
+    # Получим конфиг администратора
+    - name: Check if kubeconfig exists
+      ansible.builtin.stat:
+        path: /etc/kubernetes/admin.conf
+      register: kubeconfig_stat
+
+    - name: Ensure local kubeconfigs directory exists
+      ansible.builtin.file:
+        path: "{{ config_folder }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ lookup('env', 'USER') }}"
+        group: "{{ lookup('env', 'USER') }}"
+      delegate_to: localhost
+
+    - name: Copy cluster kubeconfig from master to local host
+      ansible.builtin.fetch:
+        src: /etc/kubernetes/admin.conf
+        dest: "{{ config_folder }}/{{ cluster_name }}.conf"
+        flat: true
+      when: kubeconfig_stat.stat.exists
+
+    # Получим команду для воркеров
+    - name: Get join command for workers
+      ansible.builtin.command: kubeadm token create --print-join-command
+      register: worker_join
+      changed_when: false
+
+    - name: Get certificate key for control-plane join
+      ansible.builtin.command: kubeadm init phase upload-certs --upload-certs
+      register: cert_key
+      changed_when: false
+
+    - name: Set join facts globally
+      ansible.builtin.set_fact:
+        worker_join_cmd: "{{ worker_join.stdout }}"
+        master_join_cmd: >-
+          {{ worker_join.stdout }}
+          --control-plane
+          --certificate-key {{ cert_key.stdout_lines[-1] }}
+      delegate_to: localhost
+      delegate_facts: true
+
+- name: Join additional control-plane nodes
+  hosts: masters[1:]
+  become: true
+  serial: 1
+
+  tasks:
+    - name: Join master to control plane
+      ansible.builtin.command: "{{ hostvars['localhost'].master_join_cmd }}"
+      args:
+        creates: /etc/kubernetes/admin.conf
+
+- name: Join worker nodes
+  hosts: workers
+  become: true
+  serial: 5
+
+  tasks:
+    - name: Join worker to cluster
+      ansible.builtin.command: "{{ hostvars['localhost'].worker_join_cmd }}"
+      args:
+        creates: /etc/kubernetes/kubelet.conf

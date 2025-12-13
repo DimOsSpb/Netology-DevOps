@@ -1,0 +1,37 @@
+---
+# Ожидание SSH локально (без попытки подключения)
+- name: Wait for SSH ports to open
+  hosts: masters:workers
+  gather_facts: false
+  connection: local
+
+  tasks:
+    - name: Wait for SSH on all nodes
+      ansible.builtin.wait_for:
+        port: 22
+        host: "{{ ansible_host }}"
+        delay: 5
+        timeout: 300
+        state: started
+
+- name: Configure Kubernetes cluster
+  hosts: masters
+  become: true
+  roles:
+    - master
+
+- name: Configure Kubernetes workers
+  hosts: workers
+  become: true
+  roles:
+    - worker
+
+# Здесь создание кластера по конфигурации из переменных
+- name: Init Cluster
+  import_playbook: playbooks/cluster_init.yml
+
+- name: Configure control node
+  hosts: control
+  become: true
+  roles:
+    - control
