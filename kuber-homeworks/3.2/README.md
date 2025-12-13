@@ -230,14 +230,18 @@ workers_instances_info = [
 
 ![img](img/3.png)
 
-- Настройки kubespray для кластера [k8s-ha-cluster.yml](sol2/kubespray/inventory/ha-cluster/group_vars/k8s_cluster/k8s-ha-cluster.yml)
+- Настройки kubespray для кластера [k8s-ha-cluster.yml](sol2/k8s_cluster/k8s-ha-cluster.yml)
 - Команда установки кластера
 ```
 ansible-playbook -i inventory/ha-cluster/hosts.yaml --become cluster.yml -e "kube_control_plane_ha=true"
 ```
 
-Далее кластер не встал - жуткие задержки по скачиванию ...
-Просто не успеваю по времени - в следующий раз. 
+--
+--
+
+** Далее кластер не встал - жуткие задержки по скачиванию ...**   
+** Просто не успеваю по времени - в следующий раз.**  
+
 
 ---
 
