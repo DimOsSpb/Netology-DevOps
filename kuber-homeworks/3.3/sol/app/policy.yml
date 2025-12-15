@@ -34,7 +34,7 @@ spec:
       port: 53
 
 ---
-# 1. Разрешаем frontend to backend
+# Разрешаем frontend to backend
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -69,7 +69,7 @@ spec:
         matchLabels:
           app: backend
 ---
-# 3. Разрешаем backend to cache
+# Разрешаем backend to cache
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
