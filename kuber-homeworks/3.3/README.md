@@ -63,11 +63,8 @@ Context "kubernetes-admin@kubernetes" modified.
 ```bash
 odv@matebook16s:~/project/MY/Netology-DevOps/kuber-homeworks/3.3/sol/app$ kubectl apply -f app.yaml 
 deployment.apps/frontend created
-service/frontend created
 deployment.apps/backend created
-service/backend created
 deployment.apps/cache created
-service/cache created
 odv@matebook16s:~/project/MY/Netology-DevOps/kuber-homeworks/3.3/sol/app$ kubectl get all -n app
 NAME                            READY   STATUS    RESTARTS   AGE
 pod/backend-f898756c8-fnv4f     1/1     Running   0          20m
