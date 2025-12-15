@@ -1,0 +1,11 @@
+cluster_init: ${cluster_init}
+cluster_name: ${cluster_name}
+k8s_cluster_release: ${k8s_cluster_release}
+k8s_cluster_version: ${k8s_cluster_version}
+k8s_package_version: ${k8s_package_version}
+kubectl_version: ${kubectl_version}
+helm_version: ${helm_version}
+pod_cidr: ${pod_cidr}
+cri: ${cri}
+admin_host_user: ${admin_host_user}
+config_folder: ${config_folder}
