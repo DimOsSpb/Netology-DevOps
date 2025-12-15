@@ -90,13 +90,6 @@ replicaset.apps/frontend-66877c74c4   2         2         2       20m
 ```
 - Проверим что все доступно до применения политик
 ```bash
-odv@matebook16s:~/project/MY/Netology-DevOps/kuber-homeworks/3.3/sol/app$ kubectl apply -f app.yaml 
-deployment.apps/frontend unchanged
-service/frontend unchanged
-deployment.apps/backend unchanged
-service/backend unchanged
-deployment.apps/cache configured
-service/cache unchanged
 odv@matebook16s:~/project/MY/Netology-DevOps/kuber-homeworks/3.3/sol/app$ kubectl exec deploy/frontend -n app -- curl -s http://cache.app.svc.cluster.local
 WBITT Network MultiTool (with NGINX) - cache-5bcc4769b8-j6x9m - 10.244.204.68 - HTTP: 8080 , HTTPS: 443 . (Formerly praqma/network-multitool)
 odv@matebook16s:~/project/MY/Netology-DevOps/kuber-homeworks/3.3/sol/app$ kubectl exec deploy/backend -n app -- curl -s http://backend.app.svc.cluster.local
