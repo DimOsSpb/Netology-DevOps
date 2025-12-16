@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config-vol1
+  namespace: app
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Страница APP ver 1.1</title>
+    </head>
+    <body>
+      <h1>Прмер, как реализуется канареечный деплоймент</h1>
+      <h2>Это стабильная версия приложения</h2>      
+    </body>
+    </html>

@@ -9,3 +9,4 @@
 - [3.1 Компоненты Kubernetes](3.1/README.md)
 - [3.2 Установка Kubernetes](3.2/README.md)
 - [3.3 Как работает сеть в K8s](3.3/README.md)
+- [3.4 Обновление приложений](3.4/README.md)

@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-canary
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+
+    # Маршрутизация по критериям:
+    # Фпуте = Curl
+    #nginx.ingress.kubernetes.io/canary-by-header: "User-Agent"
+    #nginx.ingress.kubernetes.io/canary-by-header-pattern: "^curl.*"
+    # %
+    nginx.ingress.kubernetes.io/canary-weight: "30"
+ 
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ngx-new
+            port:
+              number: 80
+
