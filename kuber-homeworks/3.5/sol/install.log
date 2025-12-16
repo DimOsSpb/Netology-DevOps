@@ -1,0 +1,439 @@
+odv@matebook16s:~/project/MY/Netology-DevOps/kuber-homeworks/3.2/sol1/terraform$ terraform apply
+local_file.ansible_vars_all: Refreshing state... [id=0c90e67ce19e1e5f76e3c75f54cfd6107cb9780c]
+data.yandex_compute_image.ubuntu: Reading...
+yandex_vpc_network.k8s_network: Refreshing state... [id=enpp6q1gnn8mvgm2v80f]
+data.yandex_compute_image.ubuntu: Read complete after 0s [id=fd8uhrvvlehn8lrmn6ig]
+yandex_vpc_subnet.k8s_subnet: Refreshing state... [id=e9bp25f1mjhu9c3ek8k2]
+yandex_compute_instance.k8s_worker[3]: Refreshing state... [id=fhm0ppuf6tp7rk377pru]
+yandex_compute_instance.k8s_worker[2]: Refreshing state... [id=fhm240br7itlt991c4m3]
+yandex_compute_instance.k8s_worker[1]: Refreshing state... [id=fhmsn9t23a78r4s3vgd8]
+yandex_compute_instance.k8s_worker[0]: Refreshing state... [id=fhmbqfm6pqnn8rovajjv]
+yandex_compute_instance.k8s_master[0]: Refreshing state... [id=fhmus8d7akk2i6clldhb]
+local_file.ansible_inventory_yaml: Refreshing state... [id=31a9736421064e9c7318e7588e0ab33b1116a907]
+null_resource.ansible_provision: Refreshing state... [id=2230660188624982740]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+-/+ destroy and then create replacement
+
+Terraform will perform the following actions:
+
+  # null_resource.ansible_provision is tainted, so must be replaced
+-/+ resource "null_resource" "ansible_provision" {
+      ~ id       = "2230660188624982740" -> (known after apply)
+      ~ triggers = {
+          ~ "always_run" = "2025-12-13T13:25:24Z" -> (known after apply)
+        }
+    }
+
+Plan: 1 to add, 0 to change, 1 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+null_resource.ansible_provision: Destroying... [id=2230660188624982740]
+null_resource.ansible_provision: Destruction complete after 0s
+null_resource.ansible_provision: Creating...
+null_resource.ansible_provision: Provisioning with 'local-exec'...
+null_resource.ansible_provision (local-exec): Executing: ["/bin/sh" "-c" "ansible-playbook -i ../ansible/inventory.yml ../ansible/site.yml -K"]
+BECOME password: 
+
+null_resource.ansible_provision (local-exec): PLAY [Wait for SSH ports to open] **********************************************
+
+null_resource.ansible_provision (local-exec): TASK [Wait for SSH on all nodes] ***********************************************
+null_resource.ansible_provision: Still creating... [00m10s elapsed]
+null_resource.ansible_provision (local-exec): ok: [worker2]
+null_resource.ansible_provision (local-exec): ok: [worker0]
+null_resource.ansible_provision (local-exec): ok: [worker1]
+null_resource.ansible_provision (local-exec): ok: [worker3]
+null_resource.ansible_provision (local-exec): ok: [master0]
+
+null_resource.ansible_provision (local-exec): PLAY [Configure Kubernetes cluster] ********************************************
+
+null_resource.ansible_provision (local-exec): TASK [Gathering Facts] *********************************************************
+null_resource.ansible_provision (local-exec): ok: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [Prepare node] ************************************************************
+null_resource.ansible_provision (local-exec): included: k8s_node for master0
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Install packages needed to use the Kubernetes apt repository] ***
+null_resource.ansible_provision: Still creating... [00m20s elapsed]
+null_resource.ansible_provision: Still creating... [00m30s elapsed]
+null_resource.ansible_provision (local-exec): ok: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Ensure /etc/apt/keyrings exists] ******************************
+null_resource.ansible_provision (local-exec): ok: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Download Kubernetes Release key (ASCII)] **********************
+null_resource.ansible_provision: Still creating... [00m40s elapsed]
+null_resource.ansible_provision (local-exec): changed: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Convert key to binary (dearmor)] ******************************
+null_resource.ansible_provision (local-exec): changed: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Set permissions for keyring] **********************************
+null_resource.ansible_provision (local-exec): ok: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Add Kubernetes APT repository] ********************************
+null_resource.ansible_provision (local-exec): changed: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Update apt cache] *********************************************
+null_resource.ansible_provision: Still creating... [00m50s elapsed]
+null_resource.ansible_provision (local-exec): changed: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Set hostname] *************************************************
+null_resource.ansible_provision (local-exec): changed: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Update /etc/hosts] ********************************************
+null_resource.ansible_provision (local-exec): changed: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Gather all active swap devices] *******************************
+null_resource.ansible_provision (local-exec): ok: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Disable all swap devices/files] *******************************
+null_resource.ansible_provision (local-exec): skipping: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Remove swap entries from fstab] *******************************
+null_resource.ansible_provision (local-exec): skipping: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Ensure br_netfilter is enabled] *******************************
+null_resource.ansible_provision (local-exec): changed: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Enable kernel parameters for Kubernetes] **********************
+null_resource.ansible_provision (local-exec): changed: [master0] => (item={'name': 'net.bridge.bridge-nf-call-iptables', 'value': 1})
+null_resource.ansible_provision (local-exec): changed: [master0] => (item={'name': 'net.bridge.bridge-nf-call-ip6tables', 'value': 1})
+null_resource.ansible_provision (local-exec): changed: [master0] => (item={'name': 'net.ipv4.ip_forward', 'value': 1})
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Install containerd] *******************************************
+null_resource.ansible_provision: Still creating... [01m00s elapsed]
+null_resource.ansible_provision: Still creating... [01m10s elapsed]
+null_resource.ansible_provision (local-exec): changed: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Ensure /etc/containerd exists] ********************************
+null_resource.ansible_provision (local-exec): changed: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Create containerd config] *************************************
+null_resource.ansible_provision (local-exec): changed: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Enable SystemdCgroup] *****************************************
+null_resource.ansible_provision (local-exec): changed: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Restart containerd] *******************************************
+null_resource.ansible_provision (local-exec): changed: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Install CRI-O] ************************************************
+null_resource.ansible_provision (local-exec): skipping: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Enable and start CRI-O] ***************************************
+null_resource.ansible_provision (local-exec): skipping: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [master : Install Kubernetes packages] ************************************
+null_resource.ansible_provision: Still creating... [01m20s elapsed]
+null_resource.ansible_provision: Still creating... [01m30s elapsed]
+null_resource.ansible_provision (local-exec): changed: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [master : Enable kubelet service] *****************************************
+null_resource.ansible_provision (local-exec): changed: [master0]
+
+null_resource.ansible_provision (local-exec): PLAY [Configure Kubernetes workers] ********************************************
+
+null_resource.ansible_provision (local-exec): TASK [Gathering Facts] *********************************************************
+null_resource.ansible_provision (local-exec): ok: [worker2]
+null_resource.ansible_provision (local-exec): ok: [worker3]
+null_resource.ansible_provision (local-exec): ok: [worker0]
+null_resource.ansible_provision (local-exec): ok: [worker1]
+
+null_resource.ansible_provision (local-exec): TASK [Prepare node] ************************************************************
+null_resource.ansible_provision (local-exec): included: k8s_node for worker0, worker1, worker2, worker3
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Install packages needed to use the Kubernetes apt repository] ***
+null_resource.ansible_provision: Still creating... [01m40s elapsed]
+null_resource.ansible_provision: Still creating... [01m50s elapsed]
+null_resource.ansible_provision: Still creating... [02m00s elapsed]
+null_resource.ansible_provision (local-exec): ok: [worker3]
+null_resource.ansible_provision (local-exec): ok: [worker2]
+null_resource.ansible_provision (local-exec): ok: [worker0]
+null_resource.ansible_provision (local-exec): ok: [worker1]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Ensure /etc/apt/keyrings exists] ******************************
+null_resource.ansible_provision (local-exec): ok: [worker0]
+null_resource.ansible_provision (local-exec): ok: [worker1]
+null_resource.ansible_provision (local-exec): ok: [worker2]
+null_resource.ansible_provision (local-exec): ok: [worker3]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Download Kubernetes Release key (ASCII)] **********************
+null_resource.ansible_provision (local-exec): changed: [worker0]
+null_resource.ansible_provision (local-exec): changed: [worker2]
+null_resource.ansible_provision (local-exec): changed: [worker3]
+null_resource.ansible_provision (local-exec): changed: [worker1]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Convert key to binary (dearmor)] ******************************
+null_resource.ansible_provision (local-exec): changed: [worker0]
+null_resource.ansible_provision (local-exec): changed: [worker2]
+null_resource.ansible_provision (local-exec): changed: [worker1]
+null_resource.ansible_provision (local-exec): changed: [worker3]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Set permissions for keyring] **********************************
+null_resource.ansible_provision (local-exec): ok: [worker0]
+null_resource.ansible_provision (local-exec): ok: [worker1]
+null_resource.ansible_provision (local-exec): ok: [worker3]
+null_resource.ansible_provision (local-exec): ok: [worker2]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Add Kubernetes APT repository] ********************************
+null_resource.ansible_provision (local-exec): changed: [worker0]
+null_resource.ansible_provision (local-exec): changed: [worker1]
+null_resource.ansible_provision (local-exec): changed: [worker2]
+null_resource.ansible_provision (local-exec): changed: [worker3]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Update apt cache] *********************************************
+null_resource.ansible_provision: Still creating... [02m10s elapsed]
+null_resource.ansible_provision (local-exec): changed: [worker2]
+null_resource.ansible_provision (local-exec): changed: [worker0]
+null_resource.ansible_provision (local-exec): changed: [worker1]
+null_resource.ansible_provision (local-exec): changed: [worker3]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Set hostname] *************************************************
+null_resource.ansible_provision (local-exec): changed: [worker0]
+null_resource.ansible_provision (local-exec): changed: [worker1]
+null_resource.ansible_provision (local-exec): changed: [worker2]
+null_resource.ansible_provision (local-exec): changed: [worker3]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Update /etc/hosts] ********************************************
+null_resource.ansible_provision (local-exec): changed: [worker0]
+null_resource.ansible_provision (local-exec): changed: [worker1]
+null_resource.ansible_provision (local-exec): changed: [worker3]
+null_resource.ansible_provision (local-exec): changed: [worker2]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Gather all active swap devices] *******************************
+null_resource.ansible_provision (local-exec): ok: [worker0]
+null_resource.ansible_provision (local-exec): ok: [worker2]
+null_resource.ansible_provision (local-exec): ok: [worker1]
+null_resource.ansible_provision (local-exec): ok: [worker3]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Disable all swap devices/files] *******************************
+null_resource.ansible_provision (local-exec): skipping: [worker0]
+null_resource.ansible_provision (local-exec): skipping: [worker1]
+null_resource.ansible_provision (local-exec): skipping: [worker2]
+null_resource.ansible_provision (local-exec): skipping: [worker3]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Remove swap entries from fstab] *******************************
+null_resource.ansible_provision (local-exec): skipping: [worker0]
+null_resource.ansible_provision (local-exec): skipping: [worker1]
+null_resource.ansible_provision (local-exec): skipping: [worker2]
+null_resource.ansible_provision (local-exec): skipping: [worker3]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Ensure br_netfilter is enabled] *******************************
+null_resource.ansible_provision (local-exec): changed: [worker0]
+null_resource.ansible_provision (local-exec): changed: [worker1]
+null_resource.ansible_provision (local-exec): changed: [worker2]
+null_resource.ansible_provision (local-exec): changed: [worker3]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Enable kernel parameters for Kubernetes] **********************
+null_resource.ansible_provision: Still creating... [02m20s elapsed]
+null_resource.ansible_provision (local-exec): changed: [worker0] => (item={'name': 'net.bridge.bridge-nf-call-iptables', 'value': 1})
+null_resource.ansible_provision (local-exec): changed: [worker2] => (item={'name': 'net.bridge.bridge-nf-call-iptables', 'value': 1})
+null_resource.ansible_provision (local-exec): changed: [worker3] => (item={'name': 'net.bridge.bridge-nf-call-iptables', 'value': 1})
+null_resource.ansible_provision (local-exec): changed: [worker1] => (item={'name': 'net.bridge.bridge-nf-call-iptables', 'value': 1})
+null_resource.ansible_provision (local-exec): changed: [worker0] => (item={'name': 'net.bridge.bridge-nf-call-ip6tables', 'value': 1})
+null_resource.ansible_provision (local-exec): changed: [worker3] => (item={'name': 'net.bridge.bridge-nf-call-ip6tables', 'value': 1})
+null_resource.ansible_provision (local-exec): changed: [worker1] => (item={'name': 'net.bridge.bridge-nf-call-ip6tables', 'value': 1})
+null_resource.ansible_provision (local-exec): changed: [worker0] => (item={'name': 'net.ipv4.ip_forward', 'value': 1})
+null_resource.ansible_provision (local-exec): changed: [worker1] => (item={'name': 'net.ipv4.ip_forward', 'value': 1})
+null_resource.ansible_provision (local-exec): changed: [worker3] => (item={'name': 'net.ipv4.ip_forward', 'value': 1})
+null_resource.ansible_provision (local-exec): changed: [worker2] => (item={'name': 'net.bridge.bridge-nf-call-ip6tables', 'value': 1})
+null_resource.ansible_provision (local-exec): changed: [worker2] => (item={'name': 'net.ipv4.ip_forward', 'value': 1})
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Install containerd] *******************************************
+null_resource.ansible_provision: Still creating... [02m30s elapsed]
+null_resource.ansible_provision (local-exec): changed: [worker3]
+null_resource.ansible_provision (local-exec): changed: [worker2]
+null_resource.ansible_provision (local-exec): changed: [worker0]
+null_resource.ansible_provision (local-exec): changed: [worker1]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Ensure /etc/containerd exists] ********************************
+null_resource.ansible_provision (local-exec): changed: [worker0]
+null_resource.ansible_provision (local-exec): changed: [worker1]
+null_resource.ansible_provision (local-exec): changed: [worker2]
+null_resource.ansible_provision (local-exec): changed: [worker3]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Create containerd config] *************************************
+null_resource.ansible_provision (local-exec): changed: [worker0]
+null_resource.ansible_provision (local-exec): changed: [worker1]
+null_resource.ansible_provision (local-exec): changed: [worker2]
+null_resource.ansible_provision (local-exec): changed: [worker3]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Enable SystemdCgroup] *****************************************
+null_resource.ansible_provision (local-exec): changed: [worker0]
+null_resource.ansible_provision (local-exec): changed: [worker1]
+null_resource.ansible_provision (local-exec): changed: [worker3]
+null_resource.ansible_provision (local-exec): changed: [worker2]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Restart containerd] *******************************************
+null_resource.ansible_provision: Still creating... [02m40s elapsed]
+null_resource.ansible_provision (local-exec): changed: [worker0]
+null_resource.ansible_provision (local-exec): changed: [worker3]
+null_resource.ansible_provision (local-exec): changed: [worker1]
+null_resource.ansible_provision (local-exec): changed: [worker2]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Install CRI-O] ************************************************
+null_resource.ansible_provision (local-exec): skipping: [worker0]
+null_resource.ansible_provision (local-exec): skipping: [worker1]
+null_resource.ansible_provision (local-exec): skipping: [worker2]
+null_resource.ansible_provision (local-exec): skipping: [worker3]
+
+null_resource.ansible_provision (local-exec): TASK [k8s_node : Enable and start CRI-O] ***************************************
+null_resource.ansible_provision (local-exec): skipping: [worker0]
+null_resource.ansible_provision (local-exec): skipping: [worker1]
+null_resource.ansible_provision (local-exec): skipping: [worker2]
+null_resource.ansible_provision (local-exec): skipping: [worker3]
+
+null_resource.ansible_provision (local-exec): TASK [worker : Install Kubernetes packages] ************************************
+null_resource.ansible_provision: Still creating... [02m50s elapsed]
+null_resource.ansible_provision (local-exec): changed: [worker0]
+null_resource.ansible_provision (local-exec): changed: [worker3]
+null_resource.ansible_provision (local-exec): changed: [worker1]
+null_resource.ansible_provision (local-exec): changed: [worker2]
+
+null_resource.ansible_provision (local-exec): TASK [worker : Enable kubelet service] *****************************************
+null_resource.ansible_provision (local-exec): changed: [worker0]
+null_resource.ansible_provision (local-exec): changed: [worker1]
+null_resource.ansible_provision (local-exec): changed: [worker3]
+null_resource.ansible_provision (local-exec): changed: [worker2]
+
+null_resource.ansible_provision (local-exec): PLAY [Initialize cluster] ******************************************************
+
+null_resource.ansible_provision (local-exec): TASK [Gathering Facts] *********************************************************
+null_resource.ansible_provision: Still creating... [03m00s elapsed]
+null_resource.ansible_provision (local-exec): ok: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [Skip cluster initialization if disabled] *********************************
+null_resource.ansible_provision (local-exec): skipping: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [Init first master] *******************************************************
+null_resource.ansible_provision: Still creating... [03m10s elapsed]
+null_resource.ansible_provision: Still creating... [03m20s elapsed]
+null_resource.ansible_provision: Still creating... [03m30s elapsed]
+null_resource.ansible_provision: Still creating... [03m40s elapsed]
+null_resource.ansible_provision (local-exec): changed: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [Check if kubeconfig exists] **********************************************
+null_resource.ansible_provision (local-exec): ok: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [Ensure local kubeconfigs directory exists] *******************************
+null_resource.ansible_provision (local-exec): ok: [master0 -> localhost]
+
+null_resource.ansible_provision (local-exec): TASK [Copy cluster kubeconfig from master to local host] ***********************
+null_resource.ansible_provision (local-exec): changed: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [Get join command for workers] ********************************************
+null_resource.ansible_provision (local-exec): ok: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [Get certificate key for control-plane join] ******************************
+null_resource.ansible_provision (local-exec): ok: [master0]
+
+null_resource.ansible_provision (local-exec): TASK [Set join facts globally] *************************************************
+null_resource.ansible_provision (local-exec): ok: [master0 -> localhost]
+
+null_resource.ansible_provision (local-exec): PLAY [Join additional control-plane nodes] *************************************
+null_resource.ansible_provision (local-exec): skipping: no hosts matched
+
+null_resource.ansible_provision (local-exec): PLAY [Join worker nodes] *******************************************************
+
+null_resource.ansible_provision (local-exec): TASK [Gathering Facts] *********************************************************
+null_resource.ansible_provision (local-exec): ok: [worker0]
+null_resource.ansible_provision (local-exec): ok: [worker1]
+null_resource.ansible_provision (local-exec): ok: [worker2]
+null_resource.ansible_provision (local-exec): ok: [worker3]
+
+null_resource.ansible_provision (local-exec): TASK [Join worker to cluster] **************************************************
+null_resource.ansible_provision (local-exec): changed: [worker0]
+null_resource.ansible_provision (local-exec): changed: [worker3]
+null_resource.ansible_provision (local-exec): changed: [worker2]
+null_resource.ansible_provision (local-exec): changed: [worker1]
+
+null_resource.ansible_provision (local-exec): PLAY [Configure control node] **************************************************
+
+null_resource.ansible_provision (local-exec): TASK [Gathering Facts] *********************************************************
+null_resource.ansible_provision (local-exec): ok: [localhost]
+
+null_resource.ansible_provision (local-exec): TASK [control : Install kubectl] ***********************************************
+null_resource.ansible_provision: Still creating... [03m50s elapsed]
+null_resource.ansible_provision (local-exec): ok: [localhost]
+
+null_resource.ansible_provision (local-exec): TASK [control : Download Helm archive] *****************************************
+null_resource.ansible_provision (local-exec): ok: [localhost]
+
+null_resource.ansible_provision (local-exec): TASK [control : Extract Helm] **************************************************
+null_resource.ansible_provision (local-exec): skipping: [localhost]
+
+null_resource.ansible_provision (local-exec): TASK [control : Move Helm binary to /usr/local/bin] ****************************
+null_resource.ansible_provision (local-exec): ok: [localhost]
+
+null_resource.ansible_provision (local-exec): TASK [control : Ensure kubeconfig exists] **************************************
+null_resource.ansible_provision (local-exec): ok: [localhost]
+
+null_resource.ansible_provision (local-exec): TASK [control : Cluster is not initialized] ************************************
+null_resource.ansible_provision (local-exec): skipping: [localhost]
+
+null_resource.ansible_provision (local-exec): TASK [control : Get current cluster name] **************************************
+null_resource.ansible_provision (local-exec): ok: [localhost]
+
+null_resource.ansible_provision (local-exec): TASK [control : Update server URL] *********************************************
+null_resource.ansible_provision (local-exec): changed: [localhost]
+
+null_resource.ansible_provision (local-exec): TASK [control : CNI plugin] ****************************************************
+null_resource.ansible_provision (local-exec): ok: [localhost]
+
+null_resource.ansible_provision (local-exec): PLAY RECAP *********************************************************************
+null_resource.ansible_provision (local-exec): localhost                  : ok=8    changed=1    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+null_resource.ansible_provision (local-exec): master0                    : ok=30   changed=17   unreachable=0    failed=0    skipped=4    rescued=0    ignored=0
+null_resource.ansible_provision (local-exec): worker0                    : ok=24   changed=16   unreachable=0    failed=0    skipped=4    rescued=0    ignored=0
+null_resource.ansible_provision (local-exec): worker1                    : ok=24   changed=16   unreachable=0    failed=0    skipped=4    rescued=0    ignored=0
+null_resource.ansible_provision (local-exec): worker2                    : ok=24   changed=16   unreachable=0    failed=0    skipped=4    rescued=0    ignored=0
+null_resource.ansible_provision (local-exec): worker3                    : ok=24   changed=16   unreachable=0    failed=0    skipped=4    rescued=0    ignored=0
+
+null_resource.ansible_provision: Creation complete after 3m58s [id=1137523959337071879]
+
+Apply complete! Resources: 1 added, 0 changed, 1 destroyed.
+
+Outputs:
+
+master_instances_info = [
+  {
+    "external_ip" = "51.250.64.52"
+    "fqdn" = "fhmus8d7akk2i6clldhb.auto.internal"
+    "instance_name" = "master-1"
+  },
+]
+workers_instances_info = [
+  {
+    "external_ip" = "84.201.158.126"
+    "fqdn" = "fhmbqfm6pqnn8rovajjv.auto.internal"
+    "instance_name" = "worker-1"
+  },
+  {
+    "external_ip" = "89.169.159.18"
+    "fqdn" = "fhmsn9t23a78r4s3vgd8.auto.internal"
+    "instance_name" = "worker-2"
+  },
+  {
+    "external_ip" = "178.154.221.116"
+    "fqdn" = "fhm240br7itlt991c4m3.auto.internal"
+    "instance_name" = "worker-3"
+  },
+  {
+    "external_ip" = "158.160.49.140"
+    "fqdn" = "fhm0ppuf6tp7rk377pru.auto.internal"
+    "instance_name" = "worker-4"
+  },
+]
+
+odv@matebook16s:~/project/MY/Netology-DevOps/kuber-homeworks/3.2/sol1/terraform$ kubectl --kubeconfig ~/.kube/NetologyK8S-1.conf get nodes
+NAME      STATUS   ROLES           AGE   VERSION
+master0   Ready    control-plane   53s   v1.34.2
+worker0   Ready    <none>          42s   v1.34.2
+worker1   Ready    <none>          42s   v1.34.2
+worker2   Ready    <none>          42s   v1.34.2
+worker3   Ready    <none>          42s   v1.34.2

@@ -1,0 +1,148 @@
+# https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#before-you-begin
+
+# Install needed packages and k8s repo
+
+# - ansible.builtin.debug:
+#     msg: "Starting k8s_node role"
+
+- name: Install packages needed to use the Kubernetes apt repository
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gpg
+    state: present
+    update_cache: true
+
+# Add Kubernetes repository
+
+- name: Ensure /etc/apt/keyrings exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Download Kubernetes Release key (ASCII)
+  ansible.builtin.get_url:
+    url: https://pkgs.k8s.io/core:/stable:/v{{ k8s_cluster_release }}/deb/Release.key
+    dest: /tmp/kubernetes.asc
+    mode: '0644'
+
+- name: Convert key to binary (dearmor)
+  ansible.builtin.command: >
+    gpg --dearmor --yes --output /etc/apt/keyrings/kubernetes-apt-keyring.gpg /tmp/kubernetes.asc
+  args:
+    creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+- name: Set permissions for keyring
+  ansible.builtin.file:
+    path: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    mode: '0644'
+
+- name: Add Kubernetes APT repository
+  ansible.builtin.copy:
+    content: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v{{ k8s_cluster_release }}/deb/ /"
+    dest: /etc/apt/sources.list.d/kubernetes.list
+    mode: '0644'
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Update /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "127.0.0.1 {{ inventory_hostname }}"
+    regexp: "^127\\.0\\.0\\.1.*{{ inventory_hostname }}"
+    state: present
+
+# Disable swap
+- name: Gather all active swap devices
+  ansible.builtin.command: swapon --noheadings --raw
+  register: swap_devices
+  changed_when: false
+
+- name: Disable all swap devices/files
+  ansible.builtin.command: "swapoff {{ item }}"
+  loop: "{{ swap_devices.stdout_lines }}"
+  when: swap_devices.stdout_lines | length > 0
+  changed_when: false
+
+
+- name: Remove swap entries from fstab
+  ansible.posix.mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  loop: "{{ swap_devices.stdout_lines }}"
+  when: swap_devices.stdout_lines | length > 0
+
+# Kernel modules
+
+- name: Ensure br_netfilter is enabled
+  community.general.modprobe:
+    name: br_netfilter
+    state: present
+
+- name: Enable kernel parameters for Kubernetes
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: true
+  loop:
+    - { name: 'net.bridge.bridge-nf-call-iptables', value: 1 }
+    - { name: 'net.bridge.bridge-nf-call-ip6tables', value: 1 }
+    - { name: 'net.ipv4.ip_forward', value: 1 }
+
+- name: Install container runtime (containerd)
+  when: cri == "containerd"
+  block:
+    - name: Install containerd
+      ansible.builtin.apt:
+        name: containerd
+        state: present
+        update_cache: true
+
+    - name: Ensure /etc/containerd exists
+      ansible.builtin.file:
+        path: /etc/containerd
+        state: directory
+        mode: '0755'
+
+    - name: Create containerd config
+      ansible.builtin.shell: "containerd config default > /etc/containerd/config.toml"
+      args:
+        creates: /etc/containerd/config.toml
+
+    - name: Enable SystemdCgroup
+      ansible.builtin.replace:
+        path: /etc/containerd/config.toml
+        regexp: 'SystemdCgroup = false'
+        replace: 'SystemdCgroup = true'
+
+    - name: Restart containerd
+      ansible.builtin.service:
+        name: containerd
+        state: restarted
+        enabled: true
+
+- name: Install container runtime (CRI-O)
+  when: cri == "crio"
+  block:
+    - name: Install CRI-O
+      ansible.builtin.apt:
+        name: cri-o
+        state: present
+        update_cache: true
+
+    - name: Enable and start CRI-O
+      ansible.builtin.service:
+        name: cri-o
+        state: restarted
+        enabled: true

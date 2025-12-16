@@ -1,0 +1,137 @@
+---
+# kubectl
+
+- name: Install kubectl
+  ansible.builtin.get_url:
+    url: "https://dl.k8s.io/release/v{{ kubectl_version }}/bin/linux/amd64/kubectl"
+    dest: /usr/local/bin/kubectl
+    mode: '0755'
+
+# Helm
+
+- name: Download Helm archive
+  ansible.builtin.get_url:
+    url: "https://get.helm.sh/helm-v{{ helm_version }}-linux-amd64.tar.gz"
+    dest: "/tmp/helm-v{{ helm_version }}.tar.gz"
+    mode: '0644'
+
+- name: Extract Helm
+  ansible.builtin.unarchive:
+    src: "/tmp/helm-v{{ helm_version }}.tar.gz"
+    dest: /tmp
+    remote_src: true
+    creates: "/tmp/linux-amd64/helm"
+
+- name: Move Helm binary to /usr/local/bin
+  ansible.builtin.copy:
+    src: /tmp/linux-amd64/helm
+    dest: /usr/local/bin/helm
+    mode: '0755'
+
+
+- name: Configure kubectl context for cluster
+  vars:
+    source_config: "{{ config_folder  | expanduser }}/{{ cluster_name }}.conf"
+    kubeconfig_path: "{{ '~/.kube/config' | expanduser }}"
+  when: cluster_name is defined and cluster_name != ""
+  block:
+
+    - name: Ensure kubeconfig exists
+      ansible.builtin.stat:
+        path: "{{ source_config }}"
+      register: kubeconfig
+
+    - name: Cluster is not initialized
+      ansible.builtin.fail:
+        msg: "Cluster kubeconfig {{ source_config }} not found. Cluster not initialized."
+      when: not kubeconfig.stat.exists
+
+    - name: Get current cluster name
+      ansible.builtin.shell: |
+        kubectl --kubeconfig {{ source_config }} config view --raw -o jsonpath='{.clusters[0].name}'
+      register: new_cluster_name
+      changed_when: false
+
+    - name: Update server URL
+      ansible.builtin.command:
+        cmd: >
+          kubectl --kubeconfig {{ source_config }} config set-cluster {{ new_cluster_name.stdout }}
+          --server=https://{{ hostvars[groups['masters'][0]].external_ip }}:6443
+      register: update_result
+      changed_when: true
+
+    # Установить Calico CNI для сетевого взаимодействия нод (пока так в лоб и без выбора)
+    - name: CNI plugin
+      ansible.builtin.command:
+        cmd: >
+          kubectl --kubeconfig {{ source_config }} apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/calico.yaml
+      register: update_result
+      changed_when: false
+
+    # Установить Ingress controller
+    - name: Ingress plugin
+      ansible.builtin.command:
+        cmd: >
+          kubectl --kubeconfig {{ source_config }}
+          apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.13.0/deploy/static/provider/cloud/deploy.yaml
+      register: update_result
+      changed_when: false
+
+#     - name: Прочитать исходный admin.conf
+#       ansible.builtin.set_fact:
+#         source_data: "{{ lookup('file', source_config) | from_yaml }}"
+
+#     - name: Создать переименованную конфигурацию
+#       ansible.builtin.set_fact:
+#         renamed_config:
+#           apiVersion: v1
+#           kind: Config
+#           clusters:
+#             - name: "{{ cluster_name }}"
+#               cluster: >-
+#                 {{
+#                   source_data.clusters[0].cluster |
+#                   combine({'server': 'https://' + hostvars[groups['masters'][0]].external_ip + ':6443'})
+#                 }}
+#           users:
+#             - name: "{{ cluster_name }}-admin"
+#               user: "{{ source_data.users[0].user }}"
+#           contexts:
+#             - name: "{{ cluster_name }}"
+#               context:
+#                 cluster: "{{ cluster_name }}"
+#                 user: "{{ cluster_name }}-admin"
+
+#     - name: Save renamed_config to temp file
+#       ansible.builtin.tempfile:
+#         state: file
+#         suffix: .yaml
+#       register: temp_kubeconfig
+
+#     - name: Write config to temp file
+#       ansible.builtin.copy:
+#         content: "{{ renamed_config | to_nice_yaml }}"
+#         dest: "{{ temp_kubeconfig.path }}"
+#         mode: '0600'
+
+#     - name: Merge configurations
+#       ansible.builtin.shell: |
+#         set -e
+#         KUBECONFIG={{ kubeconfig_path }}:{{ temp_kubeconfig.path }} \
+#           kubectl config view --flatten > {{ kubeconfig_path }}.tmp
+#         mv {{ kubeconfig_path }}.tmp {{ kubeconfig_path }}
+#         chmod 600 {{ kubeconfig_path }}
+#         chown {{ lookup('env', 'USER') }}:{{ lookup('env', ' USER') }} {{ kubeconfig_path }}
+#       args:
+#         executable: /bin/bash
+#       changed_when: true
+
+#     - name: Cleanup
+#       ansible.builtin.file:
+#         path: "{{ temp_kubeconfig.path }}"
+#         state: absent
+
+#     - name: Set current context explicitly
+#       ansible.builtin.command:
+#         cmd: kubectl config use-context {{ cluster_name }}
+#       changed_when: false
