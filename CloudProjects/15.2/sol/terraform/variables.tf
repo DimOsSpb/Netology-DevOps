@@ -59,9 +59,44 @@ variable "infra" {
       is_public  = bool
     }))
 
-    # Hosts
+    # Instance group
 
-    hosts = map(object({
+    IG = object({
+      name = string
+      sa = string
+      scale_policy = number
+      allocation_policy = list(string)
+      deploy_policy = object({
+        max_unavailable = number
+        max_creating    = number
+        max_expansion   = number
+        max_deleting    = number 
+        startup_duration = number       
+      })
+      health_check = object({
+        interval = number
+        timeout  = number
+        healthy_threshold   = number
+        unhealthy_threshold = number
+
+        http_options = object ({
+          port = string
+          path = string
+        })
+      })
+      lb_health_check = object({
+        interval = number
+        timeout  = number
+        healthy_threshold   = number
+        unhealthy_threshold = number
+
+        http_options = object ({
+          port = string
+          target_port = string
+          path = string
+        })
+      })
+      host_name = string
       platform_id   = optional(string, "standard-v3")
       cores         = optional(number, 2)
       memory        = optional(number, 2) #Gb
@@ -79,7 +114,12 @@ variable "infra" {
         type   = optional(string, "network-hdd")
       })
       metadata = map(string)
-    }))
+    })
+
+    # Backets
+    buckets = map(object({
+      max_size = number
+    }))    
   })
 
   default = {
@@ -102,42 +142,60 @@ variable "infra" {
     }
 
     # - Host instances
-    hosts = {
-      "nat-gateway" = {
-        subnet = "public-a"
-        internal_ip = "192.168.10.254"
-        disk = {
-          image_id = "fd80mrhj8fl2oe87o4e1"  # NAT
-          site = 5
+
+    IG = {
+      name = "inst-gr1"
+      sa = "sa-terraform"
+      subnet = "public-a"
+      host_name = "lamp"
+      disk = {
+        image_id = "fd827b91d99psvq5fjit"  # LAMP
+        size = 10
+      }
+      metadata = {
+        "serial-port-enable" = "1"
+        "ssh-keys"           = ""
+      }
+      allocation_policy = ["ru-central1-a"]
+      scale_policy = 3
+      deploy_policy = {
+        max_unavailable = 2
+        max_creating    = 2
+        max_expansion   = 2
+        max_deleting    = 2
+        startup_duration = 60       
+      }  
+      health_check = {
+        interval = 4
+        timeout  = 3
+        healthy_threshold   = 3
+        unhealthy_threshold = 3
+
+        http_options = {
+          port = 80
+          path = "/"
         }
-        metadata = {
-          "serial-port-enable" = "1"
-          "ssh-keys"           = ""
+      }  
+      lb_health_check = {
+        interval = 4
+        timeout  = 3
+        healthy_threshold   = 3
+        unhealthy_threshold = 3
+
+        http_options = {
+          port = 80
+          target_port = 80
+          path = "/"
         }
-      },
-      "vm-pub1" = {
-        subnet = "public-a"        
-        disk = {
-          image_id = "fd8umfn3mighedglnjue"  # Ubuntu 24.04 LTS         
-        }
-        metadata = {
-          "serial-port-enable" = "1"
-          "ssh-keys"           = ""
-        }
-      },
-      "vm-priv1" = {
-        subnet = "private-a"
-        nat_enabled = true       
-        disk = {
-          image_id = "fd8umfn3mighedglnjue"  # Ubuntu 24.04 LTS         
-        }
-        metadata = {
-          "serial-port-enable" = "1"
-          "ssh-keys"           = ""
-        }
-      }         
+      }              
     }
 
+
+    buckets = {
+      "netology-hw15" = {
+        max_size = 1073741824 #1Gib - max for free
+      }
+    }
 
   }
 }

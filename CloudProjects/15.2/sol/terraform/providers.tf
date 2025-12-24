@@ -12,3 +12,4 @@ provider "yandex" {
   folder_id                = var.folder_id
   service_account_key_file = file(var.yc_sa_file)
 }
+

@@ -53,63 +53,229 @@ resource "yandex_vpc_security_group" "private_sg" {
   }
 }
 
-# Static route to NAT instance for private subnet
-
-resource "yandex_vpc_route_table" "nat-instance-route" {
-  name       = "nat-instance-route"
-  network_id = yandex_vpc_network.main.id
-  static_route {
-    destination_prefix = "0.0.0.0/0"
-    next_hop_address   = var.infra.hosts["nat-gateway"].internal_ip
-  }
-}
 
 locals {
   ssh_key = "${var.host_user}:${file(var.ssh_key_file)}"
+  image_url = "https://storage.yandexcloud.net/${yandex_storage_bucket.b15["netology-hw15"].bucket}/${yandex_storage_object.file.key}"
+
 }
 
-# Instances
 
-resource "yandex_compute_instance" "hosts" {
-  for_each = var.infra.hosts
-  
-  name        = each.key
-  platform_id = each.value.platform_id
-  zone = yandex_vpc_subnet.subnets[each.value.subnet].zone
+resource "yandex_storage_bucket" "b15" {
+  for_each = var.infra.buckets
+  bucket = each.key
+  max_size = each.value.max_size
+  anonymous_access_flags {
+    read = true
+    list = false
+  }
+}
 
-  allow_stopping_for_update = true
+resource "yandex_storage_object" "file" {
+  bucket = yandex_storage_bucket.b15["netology-hw15"].bucket
+  key    = "jp1.jpg"
+  source = "../files/2.jpg"
+  content_type = "image/jpeg"
+}
 
-  resources {
-    cores         = each.value.cores
-    memory        = each.value.memory
-    core_fraction = each.value.core_fraction
+
+# Create Compute Instance Group
+data "yandex_iam_service_account" "sa" {
+  name = var.infra.IG.sa
+}
+
+resource "yandex_compute_instance_group" "group1" {
+  name                = var.infra.IG.name
+  service_account_id  = data.yandex_iam_service_account.sa.id
+  deletion_protection = false
+  instance_template {
+    hostname = "${var.infra.IG.host_name}-{instance.index}"
+    platform_id = var.infra.IG.platform_id
+    resources {
+      memory = var.infra.IG.memory
+      cores  = var.infra.IG.cores
+      core_fraction = var.infra.IG.core_fraction
+    }
+    boot_disk {
+      mode = "READ_WRITE"
+      initialize_params {
+        image_id = var.infra.IG.disk.image_id
+        size     = var.infra.IG.disk.size
+      }
+    }
+    network_interface {
+
+      subnet_ids = [yandex_vpc_subnet.subnets[var.infra.IG.subnet].id]
+    }
+    scheduling_policy {
+      preemptible = var.infra.IG.preemptible
+    }    
+
+    metadata = merge(
+      var.infra.IG.metadata,
+      { "ssh-keys" = local.ssh_key },
+      { "user-data" = templatefile(
+          "../files/cloud-init.yml.tpl",
+          {
+            image_url = local.image_url
+            ig_name = var.infra.IG.name
+            host_name = "${var.infra.IG.host_name}-{instance.index}"
+          }
+        )      
+    })
   }
 
-  scheduling_policy {
-    preemptible = each.value.preemptible
-  }
-
-  boot_disk {
-    initialize_params {
-      image_id = each.value.disk.image_id
-      size = each.value.disk.size
-      type = each.value.disk.type
+  scale_policy {
+    fixed_scale {
+      size = var.infra.IG.scale_policy
     }
   }
 
-  network_interface {
-    subnet_id = yandex_vpc_subnet.subnets[each.value.subnet].id
-    nat       = each.value.nat_enabled
-    ip_address = try(each.value.internal_ip, null)
-    security_group_ids = var.infra.subnets[each.value.subnet].is_public == true ? [yandex_vpc_security_group.public_sg.id] : [yandex_vpc_security_group.private_sg.id]
+  allocation_policy {
+    zones = var.infra.IG.allocation_policy
   }
 
-  metadata = merge(
-    each.value.metadata,
-    { "ssh-keys" = local.ssh_key }
-  )
+  deploy_policy {
+    max_unavailable = var.infra.IG.deploy_policy.max_unavailable
+    max_creating    = var.infra.IG.deploy_policy.max_creating
+    max_expansion   = var.infra.IG.deploy_policy.max_expansion
+    max_deleting    = var.infra.IG.deploy_policy.max_deleting
+    startup_duration = var.infra.IG.deploy_policy.startup_duration
+  }
+
+  # --- Only one LB ( NLB or ALB ) may be used -------------!!!
+
+  # load_balancer {
+  #   target_group_name = "${var.infra.IG.name}-nlb-tg"
+  # }
+
+  application_load_balancer {
+    target_group_name = "${var.infra.IG.name}-alb-tg"
+  }
+ 
+  health_check {
+    interval = var.infra.IG.health_check.interval
+    timeout  = var.infra.IG.health_check.timeout
+    healthy_threshold   = var.infra.IG.health_check.healthy_threshold
+    unhealthy_threshold = var.infra.IG.health_check.unhealthy_threshold
+    http_options {
+      port = var.infra.IG.health_check.http_options.port
+      path = var.infra.IG.health_check.http_options.path
+    }
+  }
 }
 
+# --- NLB -------------------------------------------
+
+# resource "yandex_lb_network_load_balancer" "lb" {
+#   name = "${var.infra.IG.name}-nlb"
+
+#   listener {
+#     name        = "http"
+#     port        = var.infra.IG.health_check.http_options.port
+
+#     external_address_spec {
+#       ip_version = "ipv4"
+#     }
+#   }
+
+#   attached_target_group {
+#     target_group_id = yandex_compute_instance_group.group1.load_balancer[0].target_group_id
+
+#     healthcheck {
+#       name = "http-check"
+
+#       http_options {
+#         port = var.infra.IG.health_check.http_options.port
+#         path = var.infra.IG.health_check.http_options.path
+       
+#       }
+#       interval            = var.infra.IG.lb_health_check.interval
+#       timeout             = var.infra.IG.lb_health_check.timeout
+#       healthy_threshold   = var.infra.IG.lb_health_check.healthy_threshold
+#       unhealthy_threshold = var.infra.IG.lb_health_check.unhealthy_threshold      
+#     }
+#   }
+# }
 
 
+# --- ALB -----------------------------------------------
+
+# ALB Backend Group
+
+resource "yandex_alb_backend_group" "abg" {
+  name      = "abg-1"
+  http_backend {
+    name = "http"
+    port = var.infra.IG.health_check.http_options.port
+    target_group_ids = [yandex_compute_instance_group.group1.application_load_balancer[0].target_group_id]
+    load_balancing_config {
+      #panic_threshold = 50
+      mode = "ROUND_ROBIN"
+    }
+    healthcheck {
+      healthcheck_port = var.infra.IG.health_check.http_options.port
+      interval = "${var.infra.IG.health_check.interval}s"
+      timeout  = "${var.infra.IG.health_check.timeout}s"
+      healthy_threshold   = var.infra.IG.lb_health_check.healthy_threshold
+      unhealthy_threshold = var.infra.IG.lb_health_check.unhealthy_threshold        
+      http_healthcheck {
+        path = "/"
+      }
+    }    
+  }
+}
+
+# Router
+resource "yandex_alb_http_router" "main" {
+  name = "${var.infra.IG.name}-alb-router"
+}
+
+# Virtual Host
+resource "yandex_alb_virtual_host" "api_host" {
+  name           = "api-host"
+  http_router_id = yandex_alb_http_router.main.id
+  #authority      = ["api.example.com"]
+  
+  route {
+    name = "rh1"
+    http_route {
+      http_match {
+        path { exact = "/" }
+      }
+      http_route_action {
+        backend_group_id = yandex_alb_backend_group.abg.id
+      }
+    }
+  }
+}
+
+# ALB
+resource "yandex_alb_load_balancer" "alb" {
+  name = "${var.infra.IG.name}-alb"
+  network_id = yandex_vpc_network.main.id
+
+  allocation_policy {
+    location {
+      zone_id   = yandex_vpc_subnet.subnets[var.infra.IG.subnet].zone
+      subnet_id = yandex_vpc_subnet.subnets[var.infra.IG.subnet].id
+    }
+  }
+
+  listener {
+    name = "http-listener"
+    endpoint {
+      address {
+        external_ipv4_address {
+        }
+      }      
+      ports = [var.infra.IG.lb_health_check.http_options.port]
+    }
+    http {
+      handler {
+        http_router_id = yandex_alb_http_router.main.id
+      }
+    }
+  }
+}
 
