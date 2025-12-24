@@ -126,9 +126,9 @@ odv@matebook16s:~/project/MY/Netology-DevOps/CloudProjects/15.2/sol/terraform$ c
 - Target Group заполняет Compute Instance Group
 
 Т.о. нам нужно создать:
-1. Target Group и зарегистрировать ее в ALB в Compute Instance Group.
+1. Target Group - зарегистрировать ее в ALB блоке в Compute Instance Group, она ее создаст сама и заполнит инстансами.
 2. Backend Group настроить и связать ее с Target Group 
-3. Создаем сам HTTP Router (контейнер для Virtual Host)
+3. Создаем сам HTTP Router
 4. Создаем Virtual Host внутри роутера
 5. ALB, В Load Balancer указываем роутер из п.3
 
