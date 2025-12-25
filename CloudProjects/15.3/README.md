@@ -18,7 +18,7 @@
 ---
 # Решение
 
-1. Создадим Ключ и Зашифруем файл в бакете через [terraform](sol/terraform/main.tf)
+## 1. Создадим Ключ и Зашифруем файл в бакете через [terraform](sol/terraform/main.tf)
 ```bash
 odv@matebook16s:~/project/MY/Netology-DevOps/CloudProjects/15.3/sol/terraform$ terraform apply
 yandex_vpc_network.main: Refreshing state... [id=enpa07k7bffpunshgjri]
@@ -112,7 +112,7 @@ Apply complete! Resources: 3 added, 0 changed, 0 destroyed.
 
 ---
 
-2. (*) Создадим статический сайт в этом бакет c собственным публичным адресом и настроим доступ по HTTPS 
+## 2. (*) Создадим статический сайт в этом бакет c собственным публичным адресом и настроим доступ по HTTPS 
 
 - Загрузим в новый бакет с именем osipovdv.ru [index.html, отключив шифрование, объект не должен быть зашифрован](sol/files/index.html)
 - Настроим в бакет веб-сайт хостинг на эту страницу
