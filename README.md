@@ -9,5 +9,3 @@
 - [Kubernetes](kuber-homeworks/README.md)
 - [Организация проекта при помощи облачных провайдеров](CloudProjects/README.md)
 ---
----
-- [Вопросы и комментарии по курсу](Questions&Comments/README.md)
