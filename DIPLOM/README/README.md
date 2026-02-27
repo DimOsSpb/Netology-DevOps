@@ -83,10 +83,40 @@
     }
     ```
 
-    - [infra/ansible - Ansible раздел с playbook & roles для развертывания k8s кластера на подготавленой ранее инфраструктуре](https://gitlab.com/devops-course1935303/diplom/infra/-/tree/main/ansible?ref_type=heads) где
+2. [infra/ansible - Ansible раздел с playbook & roles для развертывания k8s кластера на подготавленой ранее инфраструктуре](https://gitlab.com/devops-course1935303/diplom/infra/-/tree/main/ansible?ref_type=heads) где
+      - infra/ansible/inventory/group_vars - переменные для настройки версий и параметров.
       - Роль control - настраивает хост управления для работы с инфраструктурой (kubectl, helm..)
       - Роль k8s_core - производит все требуемые настройки и установки необходимые для всех k8s nodes (masters, workers)
-
+      - Плейбук playbooks/cluster_init.yml - инициализирует k8s кластер
+      - Плейбук playbooks/cni_install.yml - после установки кластера, требуется настроить CNI (flanel, calico, cilium...). В данном проекте я настрою работу CNI через Cilium plugin. В отличие от традиционных плагинов CNI, которые используют iptables для фильтрации и маршрутизации пакетов, Cilium использует программы eBPF (расширенный фильтр пакетов Беркли), которые работают непосредственно в ядре Linux, обеспечивая значительно лучшую производительность, безопасность и возможности наблюдения. Используем Helm — рекомендуемый метод развертывания и сопровождения Cilium в производственных средах.
+      
+    - После применения ansible/k8s.yaml
+    ```bash
+    odv@matebook16s:~/project/MY/Netology-DevOps/DIPLOM/infra/terraform$ kubectl -n kube-system get pods
+    NAME                                   READY   STATUS    RESTARTS   AGE
+    cilium-2cv5t                           1/1     Running   0          26s
+    cilium-9kllh                           1/1     Running   0          15s
+    cilium-envoy-29d4q                     1/1     Running   0          7m41s
+    cilium-envoy-2w4db                     1/1     Running   0          7m41s
+    cilium-envoy-fx8p7                     1/1     Running   0          7m41s
+    cilium-operator-cc656d658-8tbbd        1/1     Running   0          7m41s
+    cilium-operator-cc656d658-948sm        1/1     Running   0          7m41s
+    cilium-rhnws                           1/1     Running   0          23s
+    coredns-674b8bbfcf-2rl5z               1/1     Running   0          17m
+    coredns-674b8bbfcf-t47xq               1/1     Running   0          17m
+    etcd-k8s-master-1                      1/1     Running   0          17m
+    kube-apiserver-k8s-master-1            1/1     Running   0          17m
+    kube-controller-manager-k8s-master-1   1/1     Running   0          17m
+    kube-proxy-4drbk                       1/1     Running   0          17m
+    kube-proxy-c6fh8                       1/1     Running   0          17m
+    kube-proxy-rrn2f                       1/1     Running   0          17m
+    kube-scheduler-k8s-master-1            1/1     Running   0          17m
+    odv@matebook16s:~/project/MY/Netology-DevOps/DIPLOM/infra/terraform$ kubectl get nodes
+    NAME           STATUS   ROLES           AGE   VERSION
+    k8s-master-1   Ready    control-plane   18m   v1.33.0
+    k8s-worker-1   Ready    <none>          17m   v1.33.0
+    k8s-worker-2   Ready    <none>          17m   v1.33.0
+    ```
 
 
 ### Тестовое приложение
@@ -107,3 +137,5 @@
 - [Helm](https://helm.sh/)
 - [k8s](https://kubernetes.io/)
 - [Cilium](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/)
+- [How to Deploy Cilium CNI for eBPF-Powered Kubernetes Networking](https://oneuptime.com/blog/post/2026-01-07-ebpf-cilium-kubernetes-networking/view?utm_source=chatgpt.com)
+- [Understanding Cilium’s Network Routing Modes — Native Routing and Encapsulation](https://sigridjin.medium.com/understanding-ciliums-network-routing-modes-native-routing-and-encapsulation-caecb731ca2c)
